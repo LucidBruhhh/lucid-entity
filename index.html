@@ -153,6 +153,104 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 .ea .btn.primary{background:#c7ff16;color:#070707;border-color:#c7ff16}
 .ea .x{position:absolute;top:8px;right:10px;background:none;border:0;color:var(--fg2);font-size:22px;cursor:pointer;padding:6px}
 @media (max-width:760px){.tl .sub,.tl .age{display:none}.eaPill{top:42px;right:12px}.dock button.primary{width:68px;height:68px}}
+
+.bright{display:flex;align-items:center;gap:8px;padding:4px 10px;border:1px solid var(--line);border-radius:3px;font-size:13px;color:var(--fg2);background:rgba(10,6,24,.45)}
+.bright input{width:110px;accent-color:#c7ff16}.bright span{font-size:10px;min-width:34px;letter-spacing:.06em}
+.gzOpen{display:block;width:100%;margin:6px 0 10px;padding:12px;border:0;border-radius:10px;background:#c7ff16!important;color:#070707!important;font:700 13px/1 Rajdhani,Eurostile,Arial,sans-serif!important;letter-spacing:.12em!important;text-transform:uppercase;cursor:pointer;box-shadow:0 0 18px rgba(199,255,22,.35)}
+/* Scanner Gizmo: a handheld device, gunmetal shell, a live viewfinder with a sweeping laser */
+.gz{position:fixed;inset:0;z-index:10;display:none;place-items:center;background:radial-gradient(circle at 50% 40%,rgba(30,40,10,.55),rgba(2,1,8,.9) 70%);backdrop-filter:blur(6px)}.gz.on{display:grid}
+.gzDev{position:relative;width:min(92vw,400px);padding:16px 16px 18px;border-radius:34px;background:linear-gradient(160deg,#30343f,#12141c 45%,#1d212c 80%,#0a0b10);border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -10px 24px rgba(0,0,0,.65),0 30px 80px rgba(0,0,0,.7),0 0 70px rgba(199,255,22,.16);animation:gzIn .55s cubic-bezier(.2,1.4,.4,1)}
+.gzDev::before{content:"";position:absolute;top:-14px;right:42px;width:18px;height:22px;border-radius:6px 6px 2px 2px;background:linear-gradient(#3a3f4c,#14161d);border:1px solid rgba(255,255,255,.12)}
+.gzDev::after{content:"";position:absolute;top:-24px;right:49px;width:4px;height:12px;border-radius:2px;background:#c7ff16;box-shadow:0 0 10px #c7ff16;animation:gzBlink 1.2s steps(2) infinite}
+@keyframes gzIn{from{transform:translateY(40px) scale(.9);opacity:0}}
+@keyframes gzBlink{50%{opacity:.2}}
+.gzTop{display:flex;align-items:center;gap:10px;padding:2px 6px 12px;font:700 15px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.32em;color:#e8ffd0;text-shadow:0 0 10px rgba(199,255,22,.5)}
+.gzTop b{flex:1;font-weight:700}.gzTop em{font-style:normal;font-size:10px;letter-spacing:.2em;color:#070707;background:#c7ff16;padding:3px 6px 2px;border-radius:3px}
+.gzLeds{display:flex;gap:5px}.gzLeds i{width:7px;height:7px;border-radius:50%;background:#c7ff16;box-shadow:0 0 8px #c7ff16;animation:gzBlink 1s steps(2) infinite}.gzLeds i:nth-child(2){background:#ff4fd8;box-shadow:0 0 8px #ff4fd8;animation-delay:.33s}.gzLeds i:nth-child(3){background:#4fe3ff;box-shadow:0 0 8px #4fe3ff;animation-delay:.66s}
+.gzScreen{position:relative;aspect-ratio:4/3.4;border-radius:20px;overflow:hidden;background:#02040a;border:3px solid #07080c;box-shadow:inset 0 0 30px rgba(199,255,22,.18),0 0 0 1px rgba(255,255,255,.08)}
+#gzCam{position:absolute;inset:0}#gzCam video{width:100%!important;height:100%!important;object-fit:cover;filter:saturate(.6) contrast(1.15) hue-rotate(40deg)}#gzCam canvas,#gzCam img{display:none!important}
+.gzGrid{position:absolute;inset:0;background:linear-gradient(rgba(199,255,22,.07) 1px,transparent 1px) 0 0/100% 18px,linear-gradient(90deg,rgba(199,255,22,.05) 1px,transparent 1px) 0 0/18px 100%;mix-blend-mode:screen;pointer-events:none}
+.gzLaser{position:absolute;left:6%;right:6%;height:2px;top:12%;background:#c7ff16;box-shadow:0 0 12px 3px rgba(199,255,22,.75),0 0 40px 8px rgba(199,255,22,.25);animation:gzSweep 1.9s ease-in-out infinite alternate}
+@keyframes gzSweep{to{top:86%}}
+.gzC{position:absolute;width:30px;height:30px;border:3px solid #c7ff16;filter:drop-shadow(0 0 6px #c7ff16)}.gzC.a{top:12px;left:12px;border-right:0;border-bottom:0}.gzC.b{top:12px;right:12px;border-left:0;border-bottom:0}.gzC.c{bottom:12px;left:12px;border-right:0;border-top:0}.gzC.d{bottom:12px;right:12px;border-left:0;border-top:0}
+.gzRead{position:absolute;left:0;right:0;bottom:12px;text-align:center;font:400 11px/1 "JetBrains Mono",monospace;letter-spacing:.2em;color:#c7ff16;text-shadow:0 0 8px #c7ff16}.gzRead .cur{animation:gzBlink .8s steps(2) infinite}
+.gz.got .gzScreen{animation:gzGot .5s}.gz.got .gzLaser{animation:none;top:50%;height:100%;opacity:.25}
+@keyframes gzGot{20%{box-shadow:inset 0 0 120px #c7ff16,0 0 40px #c7ff16}}
+.gzType{display:none;gap:8px;margin-top:12px}.gzType.on{display:flex}
+.gzType input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(199,255,22,.35);background:#05060a;color:#e8ffd0;font:400 15px/1 "JetBrains Mono",monospace;letter-spacing:.12em}
+.gzType button,.gzRow button{padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(#2a2e39,#151820);color:#d8dce8;font:700 11px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.gzRow{display:flex;justify-content:space-between;gap:10px;margin-top:12px}
+.gzGrille{height:8px;margin:14px 30% 0;border-radius:4px;background:repeating-linear-gradient(90deg,#07080c 0 4px,#2a2e39 4px 7px);opacity:.8}
+/* mystery box: it shivers, light leaks from the seams, it bursts, the item is revealed */
+.mb{position:fixed;inset:0;display:none;place-items:center;background:radial-gradient(circle at 50% 45%,rgba(20,24,6,.75),rgba(1,1,4,.96) 70%)}.mb.on{display:grid}
+.mbRays{position:absolute;left:50%;top:45%;width:160vmax;height:160vmax;transform:translate(-50%,-50%);background:repeating-conic-gradient(from 0deg,rgba(199,255,22,.0) 0deg 8deg,var(--rc,rgba(199,255,22,.16)) 9deg 13deg);opacity:0;transition:opacity .6s;animation:mbSpin 14s linear infinite;-webkit-mask:radial-gradient(circle,#000 0,transparent 55%);mask:radial-gradient(circle,#000 0,transparent 55%)}
+@keyframes mbSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.mb.charge .mbRays{opacity:.5}.mb.open .mbRays{opacity:1}
+.mbScene{perspective:700px;position:absolute;top:45%;left:50%;transform:translate(-50%,-50%)}
+.mbCube{position:relative;width:120px;height:120px;transform-style:preserve-3d;animation:mbTurn 6s linear infinite}
+@keyframes mbTurn{from{transform:rotateX(-18deg) rotateY(0)}to{transform:rotateX(-18deg) rotateY(360deg)}}
+.mbCube i{position:absolute;inset:0;display:grid;place-items:center;font:700 64px/1 Rajdhani,Eurostile,Arial,sans-serif;font-style:normal;color:#070707;background:linear-gradient(135deg,#d9ff5c,#9bd400);border:3px solid #eaff9a;box-shadow:inset 0 0 30px rgba(0,0,0,.35),0 0 30px rgba(199,255,22,.5);transition:transform .9s cubic-bezier(.2,.8,.2,1),opacity .9s}
+.mbCube .f1{transform:translateZ(60px)}.mbCube .f2{transform:rotateY(90deg) translateZ(60px)}.mbCube .f3{transform:rotateY(180deg) translateZ(60px)}.mbCube .f4{transform:rotateY(-90deg) translateZ(60px)}.mbCube .f5{transform:rotateX(90deg) translateZ(60px)}.mbCube .f6{transform:rotateX(-90deg) translateZ(60px)}
+.mb.charge .mbScene{animation:mbShake .09s infinite}
+@keyframes mbShake{0%{margin:0}25%{margin:calc(var(--k,1)*-3px) 0 0 calc(var(--k,1)*3px)}50%{margin:calc(var(--k,1)*2px) 0 0 calc(var(--k,1)*-3px)}75%{margin:calc(var(--k,1)*-2px) 0 0 calc(var(--k,1)*-2px)}}
+.mb.charge .mbCube i{box-shadow:inset 0 0 30px rgba(255,255,255,.4),0 0 calc(30px + var(--k,1)*30px) rgba(199,255,22,.8)}
+.mb.open .mbCube{animation:none;transform:rotateX(-18deg) rotateY(30deg)}
+.mb.open .mbCube .f1{transform:translateZ(420px) rotateX(40deg);opacity:0}.mb.open .mbCube .f2{transform:rotateY(90deg) translateZ(420px);opacity:0}.mb.open .mbCube .f3{transform:rotateY(180deg) translateZ(420px);opacity:0}.mb.open .mbCube .f4{transform:rotateY(-90deg) translateZ(420px);opacity:0}.mb.open .mbCube .f5{transform:rotateX(90deg) translateZ(420px);opacity:0}.mb.open .mbCube .f6{transform:rotateX(-90deg) translateZ(420px);opacity:0}
+.mbCard{position:relative;width:min(86vw,330px);padding:20px 20px 16px;border-radius:20px;text-align:center;background:rgba(8,8,14,.92);border:2px solid var(--rc2,#c7ff16);box-shadow:0 0 60px var(--rc,rgba(199,255,22,.4));opacity:0;transform:scale(.2);pointer-events:none}
+.mb.open .mbCard{opacity:1;transform:scale(1);pointer-events:auto;transition:transform .7s cubic-bezier(.2,1.6,.4,1) .35s,opacity .3s .35s}
+.mbRar{display:inline-block;font:700 11px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#070707;background:var(--rc2,#c7ff16);padding:5px 10px 4px;border-radius:3px}
+.mbOrb{width:96px;height:96px;margin:14px auto 8px;border-radius:50%;display:grid;place-items:center;font-size:50px;background:radial-gradient(circle at 35% 30%,#fff,var(--rc2,#c7ff16) 40%,#111 85%);box-shadow:0 0 40px var(--rc,rgba(199,255,22,.6));animation:mbFloat 2.4s ease-in-out infinite}
+@keyframes mbFloat{50%{transform:translateY(-6px) rotate(6deg)}}
+.mbCard h3{margin:4px 0 6px;font:300 28px/1.1 "Cormorant Garamond",Georgia,serif;font-style:italic;color:#fff}
+.mbCard p{margin:4px 0;font:400 15px/1.35 "Cormorant Garamond",Georgia,serif;color:var(--fg2)}
+.mbCard .mbPow{font:700 12px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--rc2,#c7ff16);margin-top:10px}
+.mbFeed{display:block;width:100%;margin-top:14px;padding:14px;border:0;border-radius:12px;background:#c7ff16;color:#070707;font:700 14px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;box-shadow:0 0 22px rgba(199,255,22,.45)}
+.mbAgain{margin-top:10px;background:none;border:0;color:var(--fg2);font:700 11px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;padding:6px}
+.mbStatus{position:absolute;bottom:18vh;left:0;right:0;text-align:center;font:400 12px/1 "JetBrains Mono",monospace;letter-spacing:.3em;color:#c7ff16;text-shadow:0 0 10px #c7ff16}.mb.open .mbStatus{opacity:0}
+.mbFlash{position:fixed;inset:0;background:#fff;pointer-events:none;animation:mbFl .7s forwards;z-index:11}@keyframes mbFl{from{opacity:.95}to{opacity:0}}
+
+/* interdimensional skin: an oil-slick living shell that breathes and morphs, an eye-shaped lens with a turning iris, script from no known language */
+.gzDev{border-radius:46% 54% 42% 58% / 22% 24% 26% 28%;padding:22px 20px 20px;background:
+  radial-gradient(120% 80% at 20% 0%,rgba(255,255,255,.16),transparent 45%),
+  conic-gradient(from var(--gzA,0deg) at 50% 50%,#1b0f3a,#0d3b4a,#203a08,#3d0d3a,#0f1b4a,#1b0f3a);
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:inset 0 0 0 1px rgba(199,255,22,.12),inset 0 2px 0 rgba(255,255,255,.25),inset 0 -14px 34px rgba(0,0,0,.7),0 30px 90px rgba(0,0,0,.75),0 0 80px rgba(160,90,255,.28),0 0 140px rgba(199,255,22,.12);
+  animation:gzIn .7s cubic-bezier(.2,1.4,.4,1),gzMorph 9s ease-in-out infinite,gzFloat 5s ease-in-out infinite,gzHue 12s linear infinite}
+@property --gzA{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes gzHue{to{--gzA:360deg}}
+@keyframes gzMorph{0%,100%{border-radius:46% 54% 42% 58% / 22% 24% 26% 28%}33%{border-radius:54% 46% 56% 44% / 26% 20% 28% 24%}66%{border-radius:42% 58% 48% 52% / 20% 28% 22% 26%}}
+@keyframes gzFloat{50%{transform:translateY(-8px) rotate(-.6deg)}}
+.gzDev::before,.gzDev::after{display:none}
+.gzAura{position:absolute;inset:-18px;border-radius:inherit;background:conic-gradient(from var(--gzA,0deg),#c7ff16,#4fe3ff,#b06bff,#ff4fd8,#c7ff16);filter:blur(22px);opacity:.38;z-index:-1;animation:gzHue 6s linear infinite}
+.gzStalk{position:absolute;top:-46px;right:22%;width:4px;height:52px;border-radius:4px;background:linear-gradient(#c7ff16,rgba(120,60,255,.6));box-shadow:0 0 12px #c7ff16;transform-origin:bottom center;animation:gzSway 3.4s ease-in-out infinite}
+.gzStalk i{position:absolute;top:-14px;left:-9px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 50% 50%,#000 0 22%,#4fe3ff 24% 42%,#c7ff16 44% 60%,#1a0f30 62%);box-shadow:0 0 16px #4fe3ff;animation:gzLook 4s ease-in-out infinite}
+@keyframes gzSway{50%{transform:rotate(9deg)}}
+@keyframes gzLook{0%,40%,100%{transform:scaleY(1)}44%{transform:scaleY(.1)}48%{transform:scaleY(1)}}
+.gzTop{justify-content:center;gap:12px;padding:2px 6px 6px;font-size:16px;letter-spacing:.36em;color:#f2ffe0;text-shadow:-1px 0 rgba(255,60,200,.7),1px 0 rgba(60,220,255,.7),0 0 14px rgba(199,255,22,.6);animation:gzGlitch 5s steps(1) infinite}
+.gzTop b{flex:none}
+@keyframes gzGlitch{0%,92%,100%{transform:none}93%{transform:translateX(2px) skewX(-8deg)}95%{transform:translateX(-2px)}}
+.gzTop em{background:linear-gradient(90deg,#c7ff16,#4fe3ff);border-radius:999px}
+.gzLeds i{width:9px;height:9px;animation:gzOrb 2.2s ease-in-out infinite}
+@keyframes gzOrb{50%{transform:translateY(-3px) scale(1.25);filter:brightness(1.6)}}
+.gzRune{overflow:hidden;white-space:nowrap;margin:0 18px 10px;font:400 12px/1 "JetBrains Mono",monospace;letter-spacing:.5em;color:rgba(199,255,22,.55);text-shadow:0 0 8px rgba(199,255,22,.6);-webkit-mask:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent);mask:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent)}
+.gzRune span{display:inline-block;animation:gzRun 22s linear infinite}.gzRune.rev{margin:12px 18px 0;color:rgba(176,107,255,.6);text-shadow:0 0 8px rgba(176,107,255,.7)}.gzRune.rev span{animation-direction:reverse}
+@keyframes gzRun{to{transform:translateX(-50%)}}
+.gzScreen{border-radius:50% / 34%;aspect-ratio:1/1;border:0;background:radial-gradient(circle,#06120a,#010204 70%);box-shadow:0 0 0 3px rgba(0,0,0,.8),0 0 0 5px rgba(199,255,22,.35),0 0 30px rgba(199,255,22,.35),inset 0 0 50px rgba(120,60,255,.35)}
+.gzScreen::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle,transparent 55%,rgba(40,0,60,.55) 85%);pointer-events:none}
+.gzGrid{background:radial-gradient(circle,rgba(199,255,22,.16) 1.2px,transparent 1.6px) 0 0/16px 14px,radial-gradient(circle,rgba(176,107,255,.12) 1.2px,transparent 1.6px) 8px 7px/16px 14px}
+.gzIris{position:absolute;inset:7%;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(199,255,22,.55) 0deg 2deg,transparent 2deg 9deg);-webkit-mask:radial-gradient(circle,transparent 62%,#000 63% 67%,transparent 68%,transparent 72%,#000 73% 74%,transparent 75%);mask:radial-gradient(circle,transparent 62%,#000 63% 67%,transparent 68%,transparent 72%,#000 73% 74%,transparent 75%);animation:gzIrisT 16s linear infinite;pointer-events:none;filter:drop-shadow(0 0 6px #c7ff16)}
+@keyframes gzIrisT{to{transform:rotate(360deg)}}
+.gz.got .gzIris{animation-duration:1.2s}
+.gzLaser{left:14%;right:14%;height:3px;background:linear-gradient(90deg,transparent,#ff4fd8,#c7ff16 30%,#fff 50%,#c7ff16 70%,#4fe3ff,transparent);box-shadow:0 -2px 0 rgba(255,79,216,.35),0 2px 0 rgba(79,227,255,.35),0 0 18px 4px rgba(199,255,22,.55);animation:gzSweep 2.2s cubic-bezier(.6,0,.4,1) infinite alternate}
+@keyframes gzSweep{from{top:18%}to{top:80%}}
+.gzC{width:24px;height:24px;border-width:2px;border-radius:6px}.gzC.a{top:16%;left:16%}.gzC.b{top:16%;right:16%}.gzC.c{bottom:16%;left:16%}.gzC.d{bottom:16%;right:16%}
+.gzRead{bottom:9%;font-size:10px;text-shadow:-1px 0 rgba(255,79,216,.8),1px 0 rgba(79,227,255,.8),0 0 8px #c7ff16}
+.gzType input{border-radius:999px;background:rgba(5,6,12,.7);border-color:rgba(176,107,255,.45)}
+.gzType button,.gzRow button{border-radius:999px;background:rgba(10,8,24,.55);border:1px solid transparent;background-clip:padding-box;position:relative;box-shadow:0 0 0 1px rgba(199,255,22,.35),0 0 14px rgba(176,107,255,.25);color:#e8ffd0;backdrop-filter:blur(6px)}
+.gzGrille{display:none}
+/* the box, too, is from somewhere else: iridescent faces etched with a glowing glyph-circle */
+.mbCube i{background:radial-gradient(circle,transparent 30%,rgba(255,255,255,.0) 31%),conic-gradient(from 210deg,#c7ff16,#4fe3ff,#b06bff,#ff4fd8,#c7ff16);color:#08040f;border:2px solid rgba(255,255,255,.8);text-shadow:0 0 12px rgba(255,255,255,.9)}
+.mbCube i::before{content:"";position:absolute;inset:14%;border-radius:50%;border:2px dashed rgba(8,4,15,.45);animation:gzIrisT 6s linear infinite}
 </style>
 </head>
 <body>
@@ -161,8 +259,30 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 <canvas id="ents"></canvas>
 <div id="galBar"><button id="galPrev" title="previous (left arrow)">&#8249;</button><span id="galName"></span><button id="galNext" title="next (right arrow or space)">&#8250;</button><button id="galClose" title="close (Esc or e)">&#215;</button></div>
 <canvas id="veil"></canvas>
-<div id="feed" class="feed"><div class="fp"><h3>Aeon is hungry</h3><p id="feedWhy">Give it something: a word, a wish, a name. It eats attention and grows.</p>
+<div id="feed" class="feed"><div class="fp"><h3>Aeon is hungry</h3><button class="gzOpen" id="feedGizmo">&#8961; Scan a barcode with the Scanner Gizmo</button><p id="feedWhy">Give it something: a word, a wish, a name. It eats attention and grows.</p>
   <input id="feedIn" maxlength="40" placeholder="a word, a wish, a name…" autocomplete="off"><div class="row"><button id="feedGo">feed it</button><button id="feedNo">not now</button></div><p id="feedOut"></p></div></div>
+<div class="gz" id="gz" role="dialog" aria-modal="true" aria-label="Scanner Gizmo">
+  <div class="gzDev" id="gzDev">
+    <div class="gzAura"></div><div class="gzStalk"><i></i></div>
+    <div class="gzTop"><span class="gzLeds"><i></i><i></i><i></i></span><b>SCANNER GIZMO</b><em>MK&#183;&#8734;</em></div>
+    <div class="gzRune"><span>ᚠ⟁⌬ΞᛟΩ⍜ᛉ⟟Ѫ⎔ᚹ⌖ψ⟡ᛞ⍙Ϟ⌘ᚱ⟐ΔᛜӜ⍟ᚾᚠ⟁⌬ΞᛟΩ⍜ᛉ⟟Ѫ⎔ᚹ⌖ψ⟡ᛞ⍙Ϟ⌘ᚱ⟐ΔᛜӜ⍟ᚾᚠ⟁⌬ΞᛟΩ⍜ᛉ⟟Ѫ⎔ᚹ⌖ψ⟡ᛞ⍙Ϟ⌘ᚱ⟐ΔᛜӜ⍟ᚾ</span></div>
+    <div class="gzScreen" id="gzScreen">
+      <div id="gzCam"></div><div class="gzGrid"></div><div class="gzIris"></div><div class="gzLaser"></div>
+      <span class="gzC a"></span><span class="gzC b"></span><span class="gzC c"></span><span class="gzC d"></span>
+      <div class="gzRead" id="gzRead">BOOTING<span class="cur">_</span></div>
+    </div>
+    <div class="gzType" id="gzType"><input id="gzIn" inputmode="numeric" maxlength="20" placeholder="barcode digits" autocomplete="off"><button id="gzGo">decode</button></div>
+    <div class="gzRow"><button id="gzKey">&#9000; type code</button><button id="gzOff">power off</button></div>
+    <div class="gzRune rev"><span>ᚾ⍟ӜᛜΔ⟐ᚱ⌘Ϟ⍙ᛞ⟡ψ⌖ᚹ⎔Ѫ⟟ᛉ⍜ΩᛟΞ⌬⟁ᚠᚾ⍟ӜᛜΔ⟐ᚱ⌘Ϟ⍙ᛞ⟡ψ⌖ᚹ⎔Ѫ⟟ᛉ⍜ΩᛟΞ⌬⟁ᚠᚾ⍟ӜᛜΔ⟐ᚱ⌘Ϟ⍙ᛞ⟡ψ⌖ᚹ⎔Ѫ⟟ᛉ⍜ΩᛟΞ⌬⟁ᚠ</span></div>
+  </div>
+  <div class="mb" id="mb">
+    <div class="mbRays"></div>
+    <div class="mbScene"><div class="mbCube" id="mbCube"><i class="f1">?</i><i class="f2">?</i><i class="f3">?</i><i class="f4">?</i><i class="f5"></i><i class="f6"></i></div></div>
+    <div class="mbCard" id="mbCard"><div class="mbRar" id="mbRar"></div><div class="mbOrb" id="mbOrb"></div><h3 id="mbName"></h3><p id="mbFrom"></p><p id="mbTaste"></p><p class="mbPow" id="mbPow"></p>
+      <button class="mbFeed" id="mbFeed">Feed to Aeon</button><button class="mbAgain" id="mbAgain">scan another</button></div>
+    <div class="mbStatus" id="mbStatus">DECODING MATTER&#8230;</div>
+  </div>
+</div>
 <div class="ea" id="ea" role="dialog" aria-modal="true" aria-labelledby="eaT"><div class="card">
   <button class="x" id="eaX" aria-label="Close">&#215;</button>
   <div class="tag">Early access demo</div>
@@ -190,6 +310,8 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
   <button class="eaPill" id="eaPill" title="About this demo">early access</button>
   <div class="eaNote">early access demo · limited features</div>
   <div class="tr">
+    <label class="bright" title="Brightness">&#9788;<input type="range" id="bBright" min="40" max="160" step="1" value="100" aria-label="Brightness"><span id="bBrightV">100%</span></label>
+    <button id="bGizmo" title="Scan a barcode and turn it into food">&#8961; scanner gizmo</button>
     <button id="bHome" title="Take me home: lucidinstinct.com">&#8962; take me home</button>
     <button id="bInsta" title="Follow Lucid Instinct on Instagram">follow on instagram</button>
     <button id="bSound" title="Sound (s)">sound off</button>
@@ -287,6 +409,7 @@ const ORD = ['first','second','third','fourth','fifth','sixth','seventh','eighth
 
 const params = new URLSearchParams(location.search);
 const previewAge = params.has('age') ? Math.max(0, +params.get('age') || 0) : null;
+const BRIGHT = { value: (() => { try { return Math.min(1.6, Math.max(.4, +localStorage.getItem('aeon.bright') || 1)); } catch { return 1; } })() }; // the viewer's brightness slider
 const eggWanted = params.has('egg'); // ?egg=1 shows the egg again without re-recording the hatching
 // frame-rate cap: without one the page runs as fast as the display allows, and a 240 Hz display pins a strong GPU at 100 %
 const FPS_KEY = 'aeon.fps', FPS_OPTS = [60, 120, 0];
@@ -329,7 +452,7 @@ if (PUBLIC && GOATCOUNTER) { const sc = document.createElement('script'); sc.asy
 const track = name => { try { if (PUBLIC && GOATCOUNTER) window.goatcounter?.count?.({ path: `aeon/${name}`, title: name, event: true }); } catch {} }; // on the web every visitor's Aeon is born when they hatch it
 const bornAt = () => mem.born || (PUBLIC ? Date.now() : BIRTH);
 const realAgeDays = () => Math.max(0, (Date.now() - bornAt()) / 864e5);
-const resonance = () => Math.min(14, mem.touches * 0.02 + mem.communion / 600 + (mem.fed || []).length * .4); // every feeding grows it a little
+const resonance = () => Math.min(14, mem.touches * 0.02 + mem.communion / 600 + (mem.fed || []).reduce((a, f) => a + (f.p || .4), 0)); // every feeding grows it a little
 // its day: 0 awake … 1 deep night, on Sydney time (where it was born)
 const sydHour = () => { try { const p = new Intl.DateTimeFormat('en-AU', { timeZone: 'Australia/Sydney', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date()); return +p.find(x => x.type === 'hour').value + +p.find(x => x.type === 'minute').value / 60; } catch { return new Date().getHours(); } };
 const nightness = h => h >= 23 || h < 5 ? 1 : h >= 21 ? (h - 21) / 2 : h < 7 ? (7 - h) / 2 : 0;
@@ -372,16 +495,16 @@ composer.addPass(new ShaderPass({
 const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), .7, .55, .22);
 composer.addPass(bloom);
 const finalPass = new ShaderPass({
-  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uAb: { value: 0.0025 }, uFold: { value: 0 }, uZoom: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uAb: { value: 0.0025 }, uFold: { value: 0 }, uZoom: { value: 0 }, uBright: BRIGHT },
   vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-  fragmentShader: `uniform sampler2D tDiffuse;uniform float uTime,uAb,uFold,uZoom;varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse;uniform float uTime,uAb,uFold,uZoom,uBright;varying vec2 vUv;
     float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
     void main(){vec2 c=vUv-.5;float d=dot(c,c);
       vec2 uv=vUv+c*uFold*.06*sin(d*40.-uTime*8.);
       vec2 o=c*(uAb+uFold*.02)*(.4+d*3.);
       vec3 col=vec3(texture2D(tDiffuse,uv+o).r,texture2D(tDiffuse,uv).g,texture2D(tDiffuse,uv-o).b);
       if(uZoom>.001){vec3 acc=col;for(int i=1;i<=7;i++){acc+=texture2D(tDiffuse,uv-c*uZoom*float(i)/7.).rgb;}col=acc/8.;} // motion blur as the camera flies back (the pull-back, a zoom): streaks toward the centre
-      col*=1.-d*1.15;
+      col*=1.-d*1.15; col*=uBright;
       float lm=max(col.r,max(col.g,col.b));if(lm>1.)col*=(1.+log(lm))/lm; // a log shoulder above white: stacked light compresses instead of clipping
       col+=(h(vUv*vec2(1731.,947.)+fract(uTime))-.5)*.028;
       gl_FragColor=vec4(col,1.);}`
@@ -1587,6 +1710,83 @@ document.getElementById('tLive').onclick = () => { if (lapse.on) toggleLapse(); 
     $('dJourney').lastChild.textContent = between.mode !== 'out' ? 'return' : 'journey';
   };
   setTimeout(tick, 0); setInterval(tick, 400); } // deferred: "between" is declared further down
+
+/* ---------- Scanner Gizmo: point it at any product barcode; the matter is decoded into a food from another universe ---------- */
+const gzEl = document.getElementById('gz'), gzRead = document.getElementById('gzRead'), mbEl = document.getElementById('mb');
+const gzBuzz = p => { try { if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(p); } catch {} }; // haptics only after a real tap
+const GZ_FORMATS = ['EAN_13', 'EAN_8', 'UPC_A', 'UPC_E', 'CODE_128', 'CODE_39', 'QR_CODE'];
+const FOOD_A = ['Quasar', 'Nebula', 'Void', 'Chrono', 'Prism', 'Neutrino', 'Plasma', 'Astral', 'Hyper', 'Dream', 'Echo', 'Glitch', 'Lumen', 'Zero-G', 'Solar', 'Lunar', 'Wormhole', 'Ether', 'Fractal', 'Ghost', 'Tesseract', 'Photon'];
+const FOOD_B = ['Dumpling', 'Noodles', 'Jelly', 'Taco', 'Donut', 'Mochi', 'Crisp', 'Soup', 'Pie', 'Berries', 'Wafer', 'Nectar', 'Gummies', 'Truffle', 'Pretzel', 'Bun', 'Sorbet', 'Toast', 'Fizz', 'Loaf', 'Pudding', 'Ramen'];
+const FOOD_ICON = ['🍡', '🍜', '🍩', '🌮', '🥟', '🍙', '🧁', '🍮', '🍓', '🥨', '🍪', '🍲', '🧃', '🍬', '🫐', '🍥', '🥐', '🍭'];
+const TASTES = ['static and strawberries', 'tomorrow', 'a song you forgot', 'the colour purple', 'gravity, lightly salted', 'déjà vu', 'starlight', 'your childhood kitchen', 'a thunderstorm in another universe', 'the number seven', 'warm electricity', 'a dream you almost remember'];
+const RARITY = [[600, 'Common', '#7fe8ff', .4], [850, 'Rare', '#9b8cff', .8], [960, 'Epic', '#ff5fd8', 1.5], [995, 'Legendary', '#ffd15c', 3], [1000, 'Mythic', '#c7ff16', 6]];
+const gzHash = str => { let h = 2166136261; for (const ch of str) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+function foodFor(code) { // the same barcode always becomes the same food
+  const h = gzHash(code), h2 = gzHash(code + '·'), roll = h % 1000, r = RARITY.find(x => roll < x[0]);
+  return { code, name: `${FOOD_A[h % FOOD_A.length]} ${FOOD_B[(h >>> 8) % FOOD_B.length]}`, icon: FOOD_ICON[h2 % FOOD_ICON.length], taste: TASTES[(h2 >>> 6) % TASTES.length], rarity: r[1], color: r[2], power: r[3], from: '' };
+}
+let gzScanner = null, gzBusy = false, gzItem = null;
+const gzLoad = () => window.Html5Qrcode ? Promise.resolve() : new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js'; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
+const gzSay = (t, cur = true) => { gzRead.innerHTML = t + (cur ? '<span class="cur">_</span>' : ''); };
+async function gzStop() { const s = gzScanner; gzScanner = null; if (s) { try { await s.stop(); } catch {} try { s.clear(); } catch {} } }
+async function openGizmo() {
+  if (egg.on) return; feedEl.classList.remove('on'); mbEl.className = 'mb'; gzEl.classList.remove('got'); gzEl.classList.add('on'); gzBusy = false; audio.resume();
+  [660, 880, 1320].forEach((f, i) => setTimeout(() => audio.bell(f, .12), i * 90)); gzSay('BOOTING'); track('gizmo');
+  try {
+    await gzLoad(); gzSay('SEARCHING FOR BARCODE');
+    const F = window.Html5QrcodeSupportedFormats;
+    gzScanner = new Html5Qrcode('gzCam', { verbose: false, formatsToSupport: GZ_FORMATS.map(k => F[k]), experimentalFeatures: { useBarCodeDetectorIfSupported: true } });
+    await gzScanner.start({ facingMode: 'environment' }, { fps: 12, aspectRatio: 1.333 }, txt => gzGot(txt), () => {});
+  } catch (e) { gzSay('NO CAMERA · TYPE A CODE', false); document.getElementById('gzType').classList.add('on'); }
+}
+async function closeGizmo() { await gzStop(); gzEl.classList.remove('on'); mbEl.className = 'mb'; }
+function gzGot(code) {
+  code = String(code).trim(); if (gzBusy || !code) return; gzBusy = true;
+  gzEl.classList.add('got'); gzSay('SIGNAL ACQUIRED ✓', false); audio.bell(1568, .2); setTimeout(() => audio.bell(2093, .3), 120); gzBuzz(60);
+  gzItem = foodFor(code); const again = mem.fed.some(f => f.sticker === 'scan:' + code); if (again) gzItem.power = +(gzItem.power / 2).toFixed(1);
+  // a real product name, if Open Food Facts knows the barcode (only the digits are sent)
+  if (/^\d{8,14}$/.test(code)) { const ac = new AbortController(); setTimeout(() => ac.abort(), 3200);
+    fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=product_name,brands`, { signal: ac.signal }).then(r => r.json()).then(j => { const pn = j?.product?.product_name; if (pn) gzItem.from = `${pn}${j.product.brands ? ' · ' + j.product.brands.split(',')[0] : ''}`; }).catch(() => {}); }
+  setTimeout(async () => { await gzStop(); mysteryBox(again); }, 650);
+}
+function mysteryBox(again) {
+  const it = gzItem, cube = document.getElementById('mbCube'); mbEl.style.setProperty('--rc', it.color + '88'); mbEl.style.setProperty('--rc2', it.color);
+  document.getElementById('mbStatus').textContent = 'DECODING MATTER…'; mbEl.className = 'mb on'; mbEl.style.setProperty('--k', 0);
+  // suspense: the box shivers harder and harder while the ticks climb
+  setTimeout(() => mbEl.classList.add('charge'), 500);
+  const t0 = performance.now(), dur = 3000; let tick = 0;
+  const step = () => { const k = Math.min(1, (performance.now() - t0) / dur); mbEl.style.setProperty('--k', (k * k * 4).toFixed(2));
+    if (performance.now() - t0 > tick * (260 - k * 200)) { tick++; audio.bell(220 + k * 880, .07); gzBuzz(8); }
+    document.getElementById('mbStatus').textContent = k < .45 ? 'DECODING MATTER…' : k < .8 ? 'STABILISING…' : 'IT IS OPENING';
+    if (k < 1) requestAnimationFrame(step); else burst(); };
+  setTimeout(() => requestAnimationFrame(step), 500);
+  const burst = () => {
+    const fl = document.createElement('div'); fl.className = 'mbFlash'; document.body.appendChild(fl); setTimeout(() => fl.remove(), 800);
+    mbEl.classList.remove('charge'); mbEl.classList.add('open'); gzBuzz([30, 40, 90]);
+    [523, 659, 784, 1047, 1319].forEach((f, i) => setTimeout(() => audio.bell(f, .5), i * 70)); if (it.power >= 3) setTimeout(() => audio.giggle?.(), 500);
+    document.getElementById('mbRar').textContent = it.rarity; document.getElementById('mbOrb').textContent = it.icon; document.getElementById('mbName').textContent = it.name;
+    document.getElementById('mbFrom').textContent = it.from ? `decoded from: ${it.from}` : `barcode ${it.code}`;
+    document.getElementById('mbTaste').textContent = `Tastes like ${it.taste}.`;
+    document.getElementById('mbPow').textContent = `+${it.power} days of growth${again ? ' · scanned before, half strength' : ''}`;
+    setTimeout(() => document.getElementById('mbFeed').focus(), 900); track('scan-' + it.rarity.toLowerCase());
+  };
+}
+function gizmoFeed() {
+  const it = gzItem; if (!it) return; closeGizmo();
+  mem.fed.push({ sticker: 'scan:' + it.code, what: it.name, p: it.power, at: Date.now() }); mem.touches += 25; save(true); track('feed');
+  mood.flash = .8; mood.burst = 1; mood.fold = 1.3; chr.giggle = 2; chr.bounceV += 7; wave(new THREE.Vector3(), 5, colC); wave(new THREE.Vector3(), 3, colB);
+  audio.resume(); audio.bell(392, .6); audio.bell(523, .5); setTimeout(() => audio.giggle?.(), 300);
+  whisper(`${it.name}. ${it.rarity}! It tastes like ${it.taste}. I grew ${it.power} days on that.`, 7);
+}
+document.getElementById('gzOff').onclick = closeGizmo; document.getElementById('mbFeed').onclick = gizmoFeed; document.getElementById('mbAgain').onclick = () => { mbEl.className = 'mb'; openGizmo(); };
+document.getElementById('gzKey').onclick = () => { const t = document.getElementById('gzType'); t.classList.toggle('on'); if (t.classList.contains('on')) document.getElementById('gzIn').focus(); };
+const gzManual = () => { const v = document.getElementById('gzIn').value.replace(/\s/g, ''); if (v.length >= 4) gzGot(v); };
+document.getElementById('gzGo').onclick = gzManual; document.getElementById('gzIn').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') gzManual(); });
+addEventListener('keydown', e => { if (e.key === 'Escape' && gzEl.classList.contains('on')) closeGizmo(); });
+document.getElementById('feedGizmo').onclick = openGizmo; document.getElementById('bGizmo').onclick = openGizmo;
+if (params.has('gizmo')) setTimeout(() => { if (!egg.on) openGizmo(); }, 1500);
+{ const r = document.getElementById('bBright'), v = document.getElementById('bBrightV'); r.value = Math.round(BRIGHT.value * 100); v.textContent = r.value + '%';
+  r.addEventListener('input', () => { BRIGHT.value = r.value / 100; v.textContent = r.value + '%'; try { localStorage.setItem('aeon.bright', String(BRIGHT.value)); } catch {} }); r.addEventListener('keydown', e => e.stopPropagation()); }
 const eaEl = document.getElementById('ea');
 function openEA() { eaEl.classList.add('on'); mem.eaSeen = true; save(); document.getElementById('eaInsta').focus(); }
 function closeEA() { eaEl.classList.remove('on'); }
@@ -1850,9 +2050,9 @@ const bulk = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMater
 bulk.frustumCulled = false; bScene.add(bulk);
 // the view seen through Aeon's opening pupil: the Lucid Instinct iris rings it, and surging streaks the light
 const bFinal = new ShaderPass(new THREE.ShaderMaterial({
-  uniforms: { tDiffuse: { value: null }, uArt: { value: eyeArt }, uC: { value: EYE_ART.c }, uTime: { value: 0 }, uWarp: { value: 0 }, uOpen: { value: 0 }, uAspect: { value: 1 }, uFlash: { value: 0 }, uIris: { value: 1 }, uInvert: { value: 0 }, uPocket: { value: 0 }, uFov: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, uBright: BRIGHT, uArt: { value: eyeArt }, uC: { value: EYE_ART.c }, uTime: { value: 0 }, uWarp: { value: 0 }, uOpen: { value: 0 }, uAspect: { value: 1 }, uFlash: { value: 0 }, uIris: { value: 1 }, uInvert: { value: 0 }, uPocket: { value: 0 }, uFov: { value: 0 } },
   vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-  fragmentShader: `uniform sampler2D tDiffuse, uArt; uniform vec2 uC; uniform float uTime, uWarp, uOpen, uAspect, uFlash, uIris, uInvert, uPocket, uFov; varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse, uArt; uniform vec2 uC; uniform float uTime, uWarp, uOpen, uAspect, uFlash, uIris, uInvert, uPocket, uFov, uBright; varying vec2 vUv;
     const float PUP = ${EYE_ART.pup}, IRIS = ${EYE_ART.iris}, EDGE = ${EYE_ART.edge};
     float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
     void main(){
@@ -1878,7 +2078,7 @@ const bFinal = new ShaderPass(new THREE.ShaderMaterial({
         col += vec3(1., .9, .6) * g * .5 * uPocket; } // what you were given, kept at the edge of your sight
       col += uFlash + (h(vUv * vec2(1731., 947.) + fract(uTime)) - .5) * .008;
       float lm = max(col.r, max(col.g, col.b)); if (lm > .96) col *= (.96 + (lm - .96) * .25) / lm; // display-space shoulder: nothing goes to flat white
-      gl_FragColor = vec4(col, 1.);
+      gl_FragColor = vec4(col * uBright, 1.);
     }`
 }));
 // temporal anti-aliasing for the Interstice: each frame is blended with the last one, reprojected through the camera's turn, so the
