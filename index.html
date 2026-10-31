@@ -353,8 +353,8 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 <canvas id="veil"></canvas>
 <div id="feed" class="feed"><div class="fp"><h3>Aeon is hungry</h3><button class="gzOpen" id="feedGizmo">&#8961; Scan a barcode with the Scanner Gizmo</button><p id="feedWhy">Give it something: a word, a wish, a name. It eats attention and grows.</p>
   <input id="feedIn" maxlength="40" placeholder="a word, a wish, a name…" autocomplete="off"><div class="row"><button id="feedGo">feed it</button><button id="feedNo">not now</button></div><p id="feedOut"></p></div></div>
-<div class="gz c1" id="gz" role="dialog" aria-modal="true" aria-label="Scanner Gizmo">
-  <div class="gzConcept"><button id="gzCPrev" aria-label="Previous concept">&#8249;</button><span id="gzCName">I · Oracle Lens</span><button id="gzCNext" aria-label="Next concept">&#8250;</button></div>
+<div class="gz c3" id="gz" role="dialog" aria-modal="true" aria-label="Scanner Gizmo">
+  <div class="gzConcept"><button id="gzCPrev" aria-label="Previous concept">&#8249;</button><span id="gzCName">III · Prism Tesseract</span><button id="gzCNext" aria-label="Next concept">&#8250;</button></div>
   <div class="gzDev" id="gzDev">
     <div class="gzVeins"></div><div class="gzSheen"></div><div class="gzTendril l"></div><div class="gzTendril r"></div>
     <div class="gzAura"></div><div class="gzStalk"><i></i></div>
@@ -1857,7 +1857,7 @@ const gzCam = document.getElementById('gzCam');
 setTimeout(() => { if (!document.hidden) gzLoad().catch(() => {}); }, 6000); // fetch the decoder early, so the first scan opens fast
 // three concepts of the same instrument; the choice is remembered
 const GZ_CONCEPTS = ['I · Oracle Lens', 'II · Biomech Relic', 'III · Prism Tesseract'];
-let gzConcept = (() => { const q = +params.get('gizmo'); if (q >= 1 && q <= 3) return q; try { return +localStorage.getItem('aeon.gizmo') || 1; } catch { return 1; } })();
+let gzConcept = (() => { const q = +params.get('gizmo'); if (q >= 1 && q <= 3) return q; try { return +localStorage.getItem('aeon.gizmo') || 3; } catch { return 3; } })(); // Prism Tesseract is the default (user's choice, 31 Oct 2026)
 function gzSetConcept(c) { gzConcept = (c + 2) % 3 + 1; gzEl.classList.remove('c1', 'c2', 'c3'); gzEl.classList.add('c' + gzConcept); document.getElementById('gzCName').textContent = GZ_CONCEPTS[gzConcept - 1]; try { localStorage.setItem('aeon.gizmo', gzConcept); } catch {} audio.bell([523, 392, 659][gzConcept - 1], .25); }
 document.getElementById('gzCPrev').onclick = () => gzSetConcept(gzConcept - 1); document.getElementById('gzCNext').onclick = () => gzSetConcept(gzConcept + 1);
 { // Metatron's cube for the prism lens: 13 circles' centres, every pair joined
