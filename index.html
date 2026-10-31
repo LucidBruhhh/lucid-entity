@@ -372,7 +372,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     </div>
     </div>
     <div class="gzType" id="gzType"><input id="gzIn" inputmode="numeric" maxlength="20" placeholder="barcode digits" autocomplete="off"><button id="gzGo">decode</button></div>
-    <div class="gzRow"><button id="gzKey">&#9000; code</button><button id="gzTorch" hidden>&#9788; light</button><button id="gzWord">&#9998; word</button><button id="gzOff">&#9211; off</button></div>
+    <div class="gzRow"><button id="gzKey">&#9000; code</button><button id="gzZoom" hidden>&#8853; 1&#215;</button><button id="gzTorch" hidden>&#9788; light</button><button id="gzWord">&#9998; word</button><button id="gzOff">&#9211; off</button></div>
     <div class="gzRune rev"><span>ᚾ⍟ӜᛜΔ⟐ᚱ⌘Ϟ⍙ᛞ⟡ψ⌖ᚹ⎔Ѫ⟟ᛉ⍜ΩᛟΞ⌬⟁ᚠᚾ⍟ӜᛜΔ⟐ᚱ⌘Ϟ⍙ᛞ⟡ψ⌖ᚹ⎔Ѫ⟟ᛉ⍜ΩᛟΞ⌬⟁ᚠᚾ⍟ӜᛜΔ⟐ᚱ⌘Ϟ⍙ᛞ⟡ψ⌖ᚹ⎔Ѫ⟟ᛉ⍜ΩᛟΞ⌬⟁ᚠ</span></div>
   </div>
   <div class="mb" id="mb">
@@ -1841,18 +1841,24 @@ async function gzStartCam() {
     await gzLoad(); await gzStop(); gzSay('OPENING THE EYE');
     const F = window.Html5QrcodeSupportedFormats;
     gzScanner = new Html5Qrcode('gzCam', { verbose: false, formatsToSupport: GZ_FORMATS.map(k => F[k]), experimentalFeatures: { useBarCodeDetectorIfSupported: true } });
-    await gzScanner.start({ facingMode: 'environment' }, { fps: 15, aspectRatio: 1 }, txt => gzGot(txt), () => {});
+    await gzScanner.start({ facingMode: 'environment' }, { fps: 24, disableFlip: true, videoConstraints: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 }, advanced: [{ focusMode: 'continuous' }] } }, txt => gzGot(txt), () => {});
+    try { await gzScanner.applyVideoConstraints({ advanced: [{ focusMode: 'continuous' }] }); } catch {}
     gzCam.querySelector('video')?.setAttribute('playsinline', ''); // iPhone: play inside the lens, never full screen
     gzEl.classList.add('live'); gzSay('SEARCHING FOR BARCODE'); audio.bell(98, 1.2);
-    try { if (gzScanner.getRunningTrackCapabilities?.().torch) torch.hidden = false; } catch {}
+    try { const cap = gzScanner.getRunningTrackCapabilities?.() || {}; if (cap.torch) torch.hidden = false;
+      const zb = document.getElementById('gzZoom'); gzZoomMax = cap.zoom?.max || 1; gzZoomMin = cap.zoom?.min || 1; gzZoomI = 0; zb.hidden = gzZoomMax < 1.5; zb.textContent = '⊕ 1×'; } catch {}
   } catch (e) {
     const denied = /NotAllowed|Permission|denied/i.test(String(e && (e.name || e)));
     gzDenied += denied ? 1 : 0; gzSay(!denied ? 'NO CAMERA · TYPE A CODE' : gzDenied > 1 ? 'SETTINGS › SAFARI › CAMERA' : 'CAMERA BLOCKED', false); allow.hidden = !denied; document.getElementById('gzType').classList.add('on');
   }
 }
+let gzZoomMax = 1, gzZoomMin = 1, gzZoomI = 0; const GZ_ZOOMS = [1, 2, 3];
 let gzTorchOn = false, gzDenied = 0; // a second refusal means the phone remembers it: point to Settings
 document.getElementById('gzTorch').onclick = async () => { gzTorchOn = !gzTorchOn; try { await gzScanner?.applyVideoConstraints({ advanced: [{ torch: gzTorchOn }] }); } catch {} document.getElementById('gzTorch').classList.toggle('on', gzTorchOn); };
 document.getElementById('gzAllow').onclick = () => gzStartCam();
+document.getElementById('gzZoom').onclick = async () => { // reach: zoom in on barcodes further away
+  const zs = GZ_ZOOMS.filter(z => z <= gzZoomMax); gzZoomI = (gzZoomI + 1) % zs.length; const z = Math.max(gzZoomMin, zs[gzZoomI]);
+  try { await gzScanner?.applyVideoConstraints({ advanced: [{ zoom: z }] }); } catch {} const b = document.getElementById('gzZoom'); b.textContent = `⊕ ${zs[gzZoomI]}×`; b.classList.toggle('on', gzZoomI > 0); audio.bell(660 + gzZoomI * 220, .1); };
 const gzCam = document.getElementById('gzCam');
 setTimeout(() => { if (!document.hidden) gzLoad().catch(() => {}); }, 6000); // fetch the decoder early, so the first scan opens fast
 // three concepts of the same instrument; the choice is remembered
