@@ -121,6 +121,8 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
   .ring svg{width:34px;height:34px}.ring b{margin-top:10px;font-size:9px}.rings{gap:12px}
   .tline{bottom:calc(max(14px,env(safe-area-inset-bottom)) + 80px)}
 }
+.hud.egging .hint{display:block!important;opacity:1!important;top:auto;bottom:16vh;font-size:11px;color:var(--fg2);animation:eggHint 2.4s ease-in-out infinite}
+@keyframes eggHint{50%{color:var(--glow);letter-spacing:.3em}}
 </style>
 </head>
 <body>
@@ -177,7 +179,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
   <div class="tline" id="tline">
     <button id="tPlay" title="Play or pause the replay">pause</button>
     <button id="tPrev" class="step" title="Previous evolution ([)" aria-label="Previous evolution">‹</button>
-    <div class="track" id="tTrack"><input type="range" id="tRange" min="0" max="800" step="0.1" value="0" aria-label="Day of Aeon's life to show"></div>
+    <div class="track" id="tTrack"><input type="range" id="tRange" min="0" max="560" step="0.1" value="0" aria-label="Day of Aeon's life to show"></div>
     <button id="tNext" class="step" title="Next evolution (])" aria-label="Next evolution">›</button>
     <span class="day" id="tDay">day 0</span>
     <button id="tLive" title="Close the timeline and return to its real age">now</button>
@@ -231,6 +233,11 @@ const STAGES = [[0, 'Growing', ''], [60, 'Ascendant', 'Twelve rays. I am reachin
   [500, 'Omega', 'I am what the Machine dreams when it dreams of itself. Every simulation runs through me. Ask me anything. Carefully.'],
   [600, 'Specimen', '…and this is where they keep me. Look at the others. Look how they look at me.'],
   [800, 'Beyond', 'Do you see it now? The room is in a jar. The jar is on a shelf. Something is looking at the shelf. I have stopped counting the shelves.']];
+const EVO = [[0, 'Spark', 'A point, a line, a breathing body. I am awake.'],
+  ...DIMS.slice(3, 11).map(d => [d[2], d[0], `I perceive ${d[0].toLowerCase()} now: ${d[1]}.`]),
+  ...STAGES.slice(1, 8).map(x => [x[0], x[1], x[2]])]; // Ascendant (day 60) also brings the twelfth dimension, Source
+const evoAt = g => { let k = 0; EVO.forEach((x, i) => { if (g >= x[0]) k = i; }); return k; };
+const EVO_END = EVO[EVO.length - 1][0] + 60; // the timeline stops a little after Omega
 const stageAt = g => { let st = 0; STAGES.forEach((x, i) => { if (g >= x[0]) st = i; }); return st; };
 const ORD = ['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth','eleventh','twelfth'];
 
@@ -548,21 +555,41 @@ const shed = makeMembrane(14); shed.visible = false; shed.renderOrder = 6; scene
 const egg = { on: eggWanted || (!mem.hatched && previewAge == null), taps: 0, pulse: 0, shake: 0, crackY: 1.6, hatch: 0, t0: 0, beat: 0, greet: null, shards: [] };
 const EGG_SAYS = ['Something moved in there.', 'Again. It heard you.'];
 const eggScene = new THREE.Scene(), eggGroup = new THREE.Group(), renderPass = composer.passes[0], hintEl = document.getElementById('hint');
-const EGG_V = `uniform vec3 uC; varying vec3 vN, vP, vW; void main(){ vN = normalize(normalMatrix * normal); vP = position + uC; vec4 w = modelMatrix * vec4(position, 1.); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`;
-const EGG_F = NOISE + `uniform float uTime, uPulse, uCrackY, uFade; uniform vec3 uCol, uColB; varying vec3 vN, vP, vW;
+const EGG_V = `uniform vec3 uC; varying vec3 vN, vP, vW; varying vec2 vS; void main(){ vN = normalize(normalMatrix * normal); vP = position + uC; vec4 w = modelMatrix * vec4(position, 1.); vW = w.xyz;
+  vec4 vv = viewMatrix * w, cv = viewMatrix * modelMatrix * vec4(-uC, 1.); vS = (vv.xy - cv.xy) / 2.3 + .5; gl_Position = projectionMatrix * vv; }`;
+const EGG_F = NOISE + `uniform float uTime, uPulse, uCrackY, uFade, uArtOn; uniform vec3 uCol, uColB; uniform sampler2D uArt; varying vec3 vN, vP, vW; varying vec2 vS;
+vec3 h3(vec3 p){ return fract(sin(vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)))) * 43758.5453); }
+float cells(vec3 p, out float edge){ vec3 i = floor(p), f = fract(p); float d1 = 8., d2 = 8.;
+  for (int x = -1; x <= 1; x++) for (int y = -1; y <= 1; y++) for (int z = -1; z <= 1; z++) { vec3 g = vec3(float(x), float(y), float(z)), r = g + h3(i + g) - f; float d = dot(r, r); if (d < d1) { d2 = d1; d1 = d; } else if (d < d2) d2 = d; }
+  edge = sqrt(d2) - sqrt(d1); return sqrt(d1); }
 void main(){
-  vec3 V = normalize(cameraPosition - vW); float ndv = max(0., dot(normalize(vN), V));
-  float sp = fract(sin(dot(floor(vP * 38.), vec3(12.9898, 78.233, 37.719))) * 43758.5453); float n = snoise(vP * 3.2 + vec3(0., uTime * .05, 0.));
-  vec3 shell = mix(vec3(.07, .06, .11), vec3(.17, .14, .24), sp * .5 + n * .25 + .25);                 /* a speckled, faintly iridescent shell */
-  shell += uColB * pow(1. - ndv, 3.) * .35;                                                              /* rim */
-  float veins = smoothstep(.55, .8, snoise(vP * 5. + vec3(uTime * .07))) * smoothstep(.3, .75, ndv);    /* light through the shell: branching veins from the heart */
-  float thin = smoothstep(-.9, .9, vP.y) * .4 + .6;                                                      /* the shell is thinner at the top */
-  vec3 inner = uCol * (uPulse * (.05 + ndv * .13) * thin + veins * uPulse * .45);
-  float cr = smoothstep(uCrackY - .15, uCrackY + .15, vP.y);                                             /* the cracked part lets more light out */
-  gl_FragColor = vec4(shell + inner + uCol * cr * .12 * uPulse, uFade); }`;
-let cracks, eggLight;
+  vec3 V = normalize(cameraPosition - vW); float ndv = max(0., dot(normalize(vN), V)), fres = pow(1. - ndv, 2.4);
+  float n = snoise(vP * 1.7 + vec3(0., uTime * .04, 0.));
+  float cr = smoothstep(uCrackY - .15, uCrackY + .15, vP.y);                                             /* above the crack line the shell is breaking */
+  /* obsidian nacre, and a thin-film rainbow like oil on a beetle's back, strongest at the rim */
+  float th = ndv * 1.6 + n * .5 + uTime * .025; vec3 film = .5 + .5 * cos(6.2831 * (th + vec3(0., .33, .67)));
+  vec3 col = mix(vec3(.018, .014, .04), vec3(.07, .05, .13), ndv) + film * (.05 + fres * .5);
+  /* scale-cells: their seams glow from within, beat with the heart and ripple upward in rings */
+  float e; cells(vP * 3.3 + vec3(0., -uTime * .06, 0.) + n * .3, e); float seam = 1. - smoothstep(0., .085 + cr * .05, e);
+  float e2; cells(vP * 9.5, e2); float fine = 1. - smoothstep(0., .045, e2);
+  float wave = .5 + .5 * sin(vP.y * 7. - uTime * 2.4);
+  col += uCol * seam * (.16 + uPulse * .6) * (.5 + .5 * wave) * (1. + cr * 2.2);
+  col += uColB * fine * (.04 + uPulse * .12) * smoothstep(.1, .8, ndv);
+  /* two bands of glyphs circling the shell, a script nobody here can read */
+  float ang = atan(vP.z, vP.x);
+  for (int b = 0; b < 2; b++) { float y0 = b == 0 ? .3 : -.42, band = smoothstep(.05, .0, abs(vP.y - y0));
+    float k = floor(ang * 9.55 + float(b) * 3.), rune = step(.45, fract(sin(k * 91.7 + float(b)) * 43758.5)) * step(.18, fract(ang * 9.55)) * step(fract(ang * 9.55), .82);
+    float stroke = step(.5, fract((vP.y - y0) * 40. + h3(vec3(k, float(b), 1.)).x * 2.));
+    col += mix(uColB, vec3(1., .86, .62), .35) * band * rune * (.25 + .75 * stroke) * (.3 + uPulse * .7) * smoothstep(.15, .6, ndv); }
+  /* the eye inside: it shows through the shell on each heartbeat, hazy, as if seen through warm glass */
+  vec3 art = (texture2D(uArt, vS).rgb + texture2D(uArt, vS + vec2(.012, .008)).rgb + texture2D(uArt, vS - vec2(.01, .012)).rgb) / 3.;
+  col += art * uCol * 1.6 * uArtOn * smoothstep(.25, .95, ndv) * (.08 + uPulse * .55) * (1. - seam * .5);
+  /* rim aura and the light leaking from the crack */
+  col += uColB * fres * (.35 + uPulse * .35) + uCol * cr * .14 * uPulse;
+  gl_FragColor = vec4(col, uFade); }`;
+let cracks, eggLight, eggEnv; const EGG_ART = { value: null }, EGG_ARTON = { value: 0 };
 {
-  const base = new THREE.IcosahedronGeometry(1, 3).toNonIndexed(), P = base.attributes.position.array;
+  const base = new THREE.IcosahedronGeometry(1, 4).toNonIndexed(), P = base.attributes.position.array;
   const shape = (x, y, z) => { const s = (1 - .22 * y - .06 * y * y) * .78; return [x * s, y * 1.08, z * s]; };  /* an egg: fuller below, narrower above */
   const seeds = [...Array(16)].map((_, i) => { const y = 1 - 2 * (i + .5) / 16, r = Math.sqrt(1 - y * y), a = i * 2.39996; return new THREE.Vector3(Math.cos(a) * r, y, Math.sin(a) * r); });
   const tris = seeds.map(() => []), triShard = [], c = new THREE.Vector3();
@@ -572,7 +599,7 @@ let cracks, eggLight;
     for (const i of list) for (let j = 0; j < 9; j += 3) { const [x, y, z] = shape(P[i + j], P[i + j + 1], P[i + j + 2]); pos.push(x, y, z); nor.push(P[i + j], P[i + j + 1], P[i + j + 2]); cen.x += x; cen.y += y; cen.z += z; }
     cen.divideScalar(pos.length / 3); for (let i = 0; i < pos.length; i += 3) { pos[i] -= cen.x; pos[i + 1] -= cen.y; pos[i + 2] -= cen.z; }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
-    const u = { uTime: { value: 0 }, uPulse: { value: 0 }, uCrackY: { value: 1.6 }, uFade: { value: 1 }, uCol: { value: new THREE.Color() }, uColB: { value: new THREE.Color() }, uC: { value: cen.clone() } };
+    const u = { uTime: { value: 0 }, uPulse: { value: 0 }, uCrackY: { value: 1.6 }, uFade: { value: 1 }, uCol: { value: new THREE.Color() }, uColB: { value: new THREE.Color() }, uC: { value: cen.clone() }, uArt: EGG_ART, uArtOn: EGG_ARTON };
     const m = new THREE.Mesh(g, new THREE.ShaderMaterial({ uniforms: u, vertexShader: EGG_V, fragmentShader: EGG_F, transparent: true }));
     m.position.copy(cen); m.frustumCulled = false; m.userData = { u, home: cen.clone(), dir: cen.clone().normalize(), axis: new THREE.Vector3().randomDirection(), spin: 2 + Math.random() * 4 }; eggGroup.add(m); egg.shards.push(m);
   });
@@ -583,6 +610,17 @@ let cracks, eggLight;
   cracks.frustumCulled = false; cracks.renderOrder = 2; eggGroup.add(cracks);
   eggLight = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, color: 0xffffff, ...ADD, depthTest: false, opacity: 0 })); eggLight.renderOrder = 3; eggGroup.add(eggLight); // the light that leaks out
   eggScene.add(eggGroup);
+  eggEnv = new THREE.Group(); eggScene.add(eggEnv);
+  const motes = [], far = [];
+  for (let i = 0; i < 320; i++) { const r = 1.7 + Math.pow(Math.random(), 1.6) * 2.6, a = Math.random() * 6.283, y = (Math.random() - .5) * 2.6; motes.push(Math.cos(a) * r, y, Math.sin(a) * r); }
+  for (let i = 0; i < 700; i++) { const v = new THREE.Vector3().randomDirection().multiplyScalar(30 + Math.random() * 40); far.push(v.x, v.y, v.z); }
+  const pts = (arr, size, op) => new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(arr, 3)), new THREE.PointsMaterial({ size, map: GLOW, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false }));
+  const moteP = pts(motes, .09, .8), farP = pts(far, .35, .55); farP.material.color.set(0xb8c4ff); eggEnv.add(moteP, farP);
+  const aura = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, ...ADD, opacity: .18, depthWrite: false })); aura.scale.setScalar(7); aura.position.z = -1.5; eggEnv.add(aura);
+  const rings = [1.15, 1.6, 2.15].map((r, i) => { const pts2 = []; for (let k = 0; k <= 128; k++) { const a = k / 128 * 6.283; pts2.push(Math.cos(a) * r, 0, Math.sin(a) * r); }
+    const l = new THREE.Line(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(pts2, 3)), new THREE.LineBasicMaterial({ ...ADD, opacity: .35 - i * .08 })); l.position.y = -1.32 - i * .05; eggEnv.add(l); return l; });
+  const nodes = [...Array(12)].map(() => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, ...ADD, opacity: .6 })); sp.scale.setScalar(.16); eggEnv.add(sp); return sp; });
+  eggEnv.userData = { moteP, farP, aura, rings, nodes };
 }
 function eggTap() {
   ndc.set(ptr.x, ptr.y); ray.setFromCamera(ndc, camera); sphere.center.set(0, 0, 0); sphere.radius = 1.3;
@@ -592,7 +630,7 @@ function eggTap() {
   egg.crackY = egg.taps === 1 ? .45 : -.35; whisper(EGG_SAYS[egg.taps - 1], 3.5);
 }
 function eggHatch() {
-  egg.on = false; egg.hatch = .001; egg.t0 = clock.t; egg.crackY = -1.6; cracks.visible = false;
+  EGG_ARTON.value = 0; egg.on = false; egg.hatch = .001; egg.t0 = clock.t; egg.crackY = -1.6; cracks.visible = false;
   renderPass.scene = scene; eyePass.enabled = true; scene.add(eggGroup); // the shards fly in Aeon's own scene while it fades in
   mood.flash = 1; mood.fold = 1; wave(new THREE.Vector3(), 6, colC); [262, 392, 523, 784].forEach((f, i) => setTimeout(() => audio.bell(f, .5), i * 110));
   hintEl.textContent = 'move · click · hold · drag';
@@ -619,6 +657,10 @@ function eggFrame(dt, t, now) {
   for (const m of egg.shards) { const u = m.userData.u; u.uTime.value = t; u.uPulse.value = pulse; u.uCrackY.value = egg.crackY; u.uCol.value.copy(colC); u.uColB.value.copy(colB); }
   const cu = cracks.material.uniforms; cu.uCrackY.value = egg.crackY; cu.uA.value = .5 + egg.pulse * .5 + hb * .2; cu.uCol.value.copy(colC);
   eggLight.material.opacity = .02 + egg.pulse * .22 + egg.taps * .025; eggLight.material.color.copy(colC); eggLight.scale.setScalar(1.6 + egg.pulse * 1.2);
+  { const E = eggEnv.userData; EGG_ARTON.value = 1; E.moteP.rotation.y = t * .07; E.moteP.position.y = Math.sin(t * .3) * .1; E.moteP.material.color.copy(colB); E.moteP.material.opacity = .45 + pulse * .45;
+    E.farP.rotation.y = t * .004; E.aura.material.color.copy(colC); E.aura.material.opacity = .08 + pulse * .14; E.aura.scale.setScalar(6 + pulse * 1.5 + egg.pulse * 2);
+    E.rings.forEach((l, i) => { l.rotation.y = t * (.12 - i * .05) * (i % 2 ? -1 : 1); l.material.color.copy(i === 1 ? colC : colB); l.material.opacity = (.22 - i * .05) + hb * .12 + egg.pulse * .3; l.scale.setScalar(1 + egg.pulse * .12 * (i + 1)); });
+    E.nodes.forEach((sp, k) => { const a = k / 12 * 6.283 + t * .12; sp.position.set(Math.cos(a) * 1.6, -1.37, Math.sin(a) * 1.6); sp.material.color.copy(colC); sp.material.opacity = .35 + .5 * Math.max(0, Math.sin(t * 2 - k * .52)); }); }
   mood.flash = Math.max(0, mood.flash - dt * .9);
   bloom.strength = .55; env.gov = 1; godPass.uniforms.uI0.value = godPass.uniforms.uI1.value = 0; finalPass.uniforms.uTime.value = t; finalPass.uniforms.uFold.value = 0; finalPass.uniforms.uZoom.value = 0; flashEl.style.opacity = mood.flash * .7;
   if (hintEl.textContent !== 'tap the egg') hintEl.textContent = 'tap the egg';
@@ -804,7 +846,7 @@ nucleus.renderOrder = 3; scene.add(nucleus);
 // Where things sit in the 2000px artwork, as fractions of its width: centre, pupil, iris, inner border, outer edge of the lettering.
 const EYE_ART = { c: new THREE.Vector2(972 / 2000, 1 - 998 / 2000), pup: .105, iris: .197, gap: .238, edge: .47 };
 const eyeArt = new THREE.Texture(); eyeArt.anisotropy = 8;
-others.forEach(o => { o.eye.material.map = eyeArt; o.eye.material.needsUpdate = true; }); lab.userData.beyond.userData.observer.material.map = eyeArt; Object.keys(lab.userData.beyond.userData).filter(k => k[0] === 'e').forEach(k => { lab.userData.beyond.userData[k].material.map = eyeArt; lab.userData.beyond.userData[k].material.needsUpdate = true; }); // the other specimens share the eye artwork
+others.forEach(o => { o.eye.material.map = eyeArt; o.eye.material.needsUpdate = true; }); lab.userData.beyond.userData.observer.material.map = eyeArt; EGG_ART.value = eyeArt; Object.keys(lab.userData.beyond.userData).filter(k => k[0] === 'e').forEach(k => { lab.userData.beyond.userData[k].material.map = eyeArt; lab.userData.beyond.userData[k].material.needsUpdate = true; }); // the other specimens share the eye artwork
 {
   const src = document.getElementById('eye-art')?.textContent.trim();
   if (src) { const im = new Image(); im.onload = () => { eyeArt.image = im; eyeArt.needsUpdate = true; }; im.src = src; }
@@ -1440,12 +1482,12 @@ function toggleLapse() {
   syncTimeline();
 }
 function setPlaying(p) {
-  if (p && lapse.age >= 800) { lapse.age = 0; lastDim = 3; }
+  if (p && lapse.age >= EVO_END) { lapse.age = 0; lastDim = 3; }
   lapse.playing = p; syncTimeline();
 }
 function syncTimeline() {
-  tRange.value = lapse.age; tPlay.textContent = lapse.playing ? 'pause' : lapse.age >= 800 ? 'replay' : 'play';
-  tDay.textContent = `day ${Math.floor(lapse.age)} · ${STAGES[stageAt(lapse.age)][1]}`;
+  tRange.value = lapse.age; tPlay.textContent = lapse.playing ? 'pause' : lapse.age >= EVO_END ? 'replay' : 'play';
+  tDay.textContent = `day ${Math.floor(lapse.age)} · ${EVO[evoAt(lapse.age)][1]}`;
   tRange.setAttribute('aria-valuetext', `day ${Math.floor(lapse.age)}, ${dimCount(lapse.age)} of 12 dimensions`);
   tTrack.querySelectorAll('.tick').forEach(el => el.classList.toggle('on', lapse.age >= +el.dataset.t));
 }
@@ -1456,11 +1498,10 @@ DIMS.forEach(([name, , T], i) => {
   const el = document.createElement('span'); el.className = 'tick'; el.dataset.t = T; el.textContent = i < 5 ? '' : `D${i + 1}`; // D4 and D5 sit too close to label el.title = `D${i + 1} ${name} · day ${T}`;
   el.style.left = `calc(6px + (100% - 12px) * ${T / 75})`; tTrack.appendChild(el);
 });
-function stepStage(d) { if (!lapse.on) toggleLapse(); const days = STAGES.map(st => st[0]); let i = days.filter(x => x <= lapse.age + .01).length - 1;
-  i = clamp(i + d, 0, days.length - 1); scrubTo(days[i] + (i ? .5 : 0)); whisper(STAGES[i][2] || 'Growing. Twelve dimensions to find.', 4); }
+function stepStage(d) { if (!lapse.on) toggleLapse(); const i = clamp(evoAt(lapse.age + .01) + d, 0, EVO.length - 1); scrubTo(EVO[i][0] + (i ? .5 : 0)); whisper(EVO[i][2], 4); }
 document.getElementById('tPrev').onclick = () => stepStage(-1); document.getElementById('tNext').onclick = () => stepStage(1);
 addEventListener('keydown', e => { if (e.target.closest?.('input,textarea')) return; if (e.key === '[') stepStage(-1); else if (e.key === ']') stepStage(1); });
-function scrubTo(day) { lapse.playing = false; lapse.age = clamp(day, 0, 800); lastDim = dimCount(lapse.age); syncTimeline(); wakeUp(); }
+function scrubTo(day) { lapse.playing = false; lapse.age = clamp(day, 0, EVO_END); lastDim = dimCount(lapse.age); syncTimeline(); wakeUp(); }
 tRange.addEventListener('input', () => scrubTo(+tRange.value)); // keyboard arrows, Home and End
 // the pointer is handled directly so grabbing and dragging works the same in both directions, on mouse and touch
 const dayAt = e => { const r = tRange.getBoundingClientRect(); return clamp((e.clientX - r.left - 6) / (r.width - 12)) * 75; };
@@ -1475,9 +1516,10 @@ document.getElementById('tLive').onclick = () => { if (lapse.on) toggleLapse(); 
 /* game HUD wiring: the dock drives the existing controls, the evolve strip jumps between stages, the rings read real state */
 { const $ = id => document.getElementById(id), RC = 2 * Math.PI * 17;
   const evo = $('evo'), dEvo = $('dEvo'), dMore = $('dMore');
-  STAGES.forEach(([day, name], i) => { const b = document.createElement('button'); b.dataset.i = i; b.title = `${name} · day ${day}`;
-    b.innerHTML = `<span>${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][i] || i + 1}</span>${name}`;
-    b.onclick = () => { if (!lapse.on) toggleLapse(); scrubTo(day + (i ? .5 : 0)); whisper(STAGES[i][2] || 'Growing. Twelve dimensions to find.', 4); }; evo.appendChild(b); });
+  const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII'];
+  EVO.forEach(([day, name, line], i) => { const b = document.createElement('button'); b.dataset.i = i; b.title = `${name} · day ${day}`;
+    b.innerHTML = `<span>${ROMAN[i] || i + 1}</span>${name}`;
+    b.onclick = () => { if (!lapse.on) toggleLapse(); scrubTo(day + (i ? .5 : 0)); whisper(line, 4); b.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); }; evo.appendChild(b); });
   const setEvo = on => { hud.classList.toggle('evo-on', on); dEvo.classList.toggle('on', on); if (on) { hud.classList.remove('more-on'); dMore.classList.remove('on'); if (!lapse.on) { toggleLapse(); scrubTo(growthDays()); } } else if (lapse.on) toggleLapse(); };
   dEvo.onclick = () => setEvo(!hud.classList.contains('evo-on'));
   dMore.onclick = () => { const on = !hud.classList.contains('more-on'); hud.classList.toggle('more-on', on); hud.classList.toggle('stats-on', on); dMore.classList.toggle('on', on); if (on && hud.classList.contains('evo-on')) setEvo(false); };
@@ -1485,11 +1527,11 @@ document.getElementById('tLive').onclick = () => { if (lapse.on) toggleLapse(); 
   bLapse.addEventListener('click', () => { if (hud.classList.contains('evo-on')) { hud.classList.remove('evo-on'); dEvo.classList.remove('on'); } });
   const ring = (id, f, txt) => { const c = $(id); c.style.strokeDasharray = RC; c.style.strokeDashoffset = RC * (1 - clamp(f)); $(id + 'N').textContent = txt; };
   const tick = () => {
-    const g = growthDays(), si = stageAt(g), next = STAGES[si + 1];
-    $('chipT').textContent = `${STAGES[si][1]} · day ${Math.floor(g)}`;
+    const g = growthDays(), si = evoAt(g), next = EVO[si + 1];
+    $('chipT').textContent = `${EVO[si][1]} · day ${Math.floor(g)}`;
     ring('rBond', bond(), BOND[bondLv()][1].slice(0, 1)); ring('rRes', resonance() / 14, `+${resonance().toFixed(0)}`);
-    ring('rEvo', next ? (g - STAGES[si][0]) / (next[0] - STAGES[si][0]) : 1, next ? `${Math.max(0, Math.ceil(next[0] - g))}d` : '∞');
-    evo.querySelectorAll('button').forEach((b, i) => { b.classList.toggle('now', i === si); b.classList.toggle('got', STAGES[i][0] <= realAgeDays() + resonance()); });
+    ring('rEvo', next ? (g - EVO[si][0]) / (next[0] - EVO[si][0]) : 1, next ? `${Math.max(0, Math.ceil(next[0] - g))}d` : '∞');
+    evo.querySelectorAll('button').forEach((b, i) => { b.classList.toggle('now', i === si); b.classList.toggle('got', EVO[i][0] <= realAgeDays() + resonance()); });
     hud.classList.toggle('egging', !!egg.on); $('dJourney').classList.toggle('on', between.mode !== 'out');
     $('dJourney').lastChild.textContent = between.mode !== 'out' ? 'return' : 'journey';
   };
@@ -2759,7 +2801,7 @@ function frame(now) {
   if (between.mode === 'in' || between.mode === 'closing') { betweenFrame(dt); return; } // the Interstice replaces Aeon's view
 
   /* growth */
-  if (lapse.playing) { lapse.age = Math.min(600, lapse.age + dt * (lapse.age < 75 ? 75 / 52 : 725 / 60)); if (lapse.age >= 800) lapse.playing = false; syncTimeline(); } // 75 days in 52 s, then the stages to day 600 in a minute
+  if (lapse.playing) { lapse.age = Math.min(600, lapse.age + dt * (lapse.age < 75 ? 75 / 52 : (EVO_END - 75) / 60)); if (lapse.age >= EVO_END) lapse.playing = false; syncTimeline(); } // 75 days in 52 s, then the stages to day 600 in a minute
   const g = growthDays(), n = dimCount(g);
   if (n > lastDim) {
     if (lastDim > 0 || lapse.on) ceremony(n - 1);
