@@ -244,13 +244,105 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 .gzLaser{left:14%;right:14%;height:3px;background:linear-gradient(90deg,transparent,#ff4fd8,#c7ff16 30%,#fff 50%,#c7ff16 70%,#4fe3ff,transparent);box-shadow:0 -2px 0 rgba(255,79,216,.35),0 2px 0 rgba(79,227,255,.35),0 0 18px 4px rgba(199,255,22,.55);animation:gzSweep 2.2s cubic-bezier(.6,0,.4,1) infinite alternate}
 @keyframes gzSweep{from{top:18%}to{top:80%}}
 .gzC{width:24px;height:24px;border-width:2px;border-radius:6px}.gzC.a{top:16%;left:16%}.gzC.b{top:16%;right:16%}.gzC.c{bottom:16%;left:16%}.gzC.d{bottom:16%;right:16%}
-.gzRead{bottom:9%;font-size:10px;text-shadow:-1px 0 rgba(255,79,216,.8),1px 0 rgba(79,227,255,.8),0 0 8px #c7ff16}
+.gzRead{bottom:9%;left:14%;right:14%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;text-shadow:-1px 0 rgba(255,79,216,.8),1px 0 rgba(79,227,255,.8),0 0 8px #c7ff16}
 .gzType input{border-radius:999px;background:rgba(5,6,12,.7);border-color:rgba(176,107,255,.45)}
 .gzType button,.gzRow button{border-radius:999px;background:rgba(10,8,24,.55);border:1px solid transparent;background-clip:padding-box;position:relative;box-shadow:0 0 0 1px rgba(199,255,22,.35),0 0 14px rgba(176,107,255,.25);color:#e8ffd0;backdrop-filter:blur(6px)}
 .gzGrille{display:none}
 /* the box, too, is from somewhere else: iridescent faces etched with a glowing glyph-circle */
 .mbCube i{background:radial-gradient(circle,transparent 30%,rgba(255,255,255,.0) 31%),conic-gradient(from 210deg,#c7ff16,#4fe3ff,#b06bff,#ff4fd8,#c7ff16);color:#08040f;border:2px solid rgba(255,255,255,.8);text-shadow:0 0 12px rgba(255,255,255,.9)}
 .mbCube i::before{content:"";position:absolute;inset:14%;border-radius:50%;border:2px dashed rgba(8,4,15,.45);animation:gzIrisT 6s linear infinite}
+
+/* ===== Scanner Gizmo, phone-first: one device filling an iPhone screen, safe areas respected ===== */
+.gz{padding:max(54px,calc(env(safe-area-inset-top) + 44px)) 0 max(16px,env(safe-area-inset-bottom));overflow:hidden}
+.gzDev{display:flex;flex-direction:column;width:min(94vw,420px);max-height:calc(100dvh - 74px)}
+.gzLensWrap{position:relative;width:min(100%,50dvh);margin:0 auto;aspect-ratio:1/1}
+.gzLensWrap .gzScreen{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto}
+.gzConcept{position:absolute;top:max(10px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:5px 6px;border-radius:999px;background:rgba(8,6,20,.7);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);font:700 11px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#e8ffd0;white-space:nowrap;z-index:2}
+.gzConcept button{width:30px;height:30px;border-radius:50%;border:1px solid rgba(199,255,22,.4);background:none;color:#c7ff16;font-size:18px;line-height:1;cursor:pointer}
+.gzRow button{min-height:44px}.gzRow button.on{color:#070707;background:#c7ff16}
+.gzAllow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;padding:14px 20px;border:0;border-radius:999px;background:#c7ff16;color:#070707;font:700 13px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;box-shadow:0 0 30px rgba(199,255,22,.6);cursor:pointer}
+.gzVeins,.gzSheen,.gzTendril,.gzOrbits,.gzHud,.gzMeta,.gzLid,.gzPulse{display:none}
+.gz.live .gzGrid{opacity:.35}
+@media (max-height:700px){.gzRune{display:none}.gzTop{padding-bottom:10px}.gzLensWrap{width:min(100%,46dvh)}}
+
+/* ===== concept II · BIOMECH RELIC: a living thing grown, not built. Chitin ribs, pulsing veins, a slit-pupil eye that opens to see ===== */
+.gz.c2{background:radial-gradient(circle at 50% 45%,rgba(60,6,16,.6),rgba(2,0,2,.94) 70%)}
+.gz.c2 .gzDev{border-radius:44% 44% 50% 50% / 16% 16% 26% 26%;background:
+  radial-gradient(90% 40% at 50% 0%,rgba(255,220,200,.12),transparent 60%),
+  repeating-linear-gradient(180deg,rgba(0,0,0,.0) 0 14px,rgba(0,0,0,.55) 14px 16px,rgba(255,180,160,.06) 16px 17px),
+  radial-gradient(120% 90% at 50% 60%,#2b1216,#120709 60%,#060203);
+  border:1px solid rgba(255,140,120,.18);box-shadow:inset 0 0 40px rgba(0,0,0,.9),inset 0 2px 0 rgba(255,210,190,.18),0 0 60px rgba(255,40,80,.25),0 0 140px rgba(0,255,200,.08);animation:gzIn .7s cubic-bezier(.2,1.4,.4,1),gzBreathe 3.6s ease-in-out infinite}
+@keyframes gzBreathe{50%{transform:scale(1.012,.992);box-shadow:inset 0 0 40px rgba(0,0,0,.9),inset 0 2px 0 rgba(255,210,190,.18),0 0 80px rgba(255,40,80,.4),0 0 160px rgba(0,255,200,.12)}}
+.gz.c2 .gzAura{background:radial-gradient(circle,#ff2d55,#5a001a 60%,transparent);opacity:.3}
+.gz.c2 .gzVeins{display:block;position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.9;background:
+  radial-gradient(2px 120px at 12% 40%,rgba(255,60,100,.9),transparent),radial-gradient(2px 160px at 88% 55%,rgba(255,60,100,.9),transparent),
+  radial-gradient(140px 2px at 30% 88%,rgba(0,255,200,.7),transparent),radial-gradient(160px 2px at 70% 12%,rgba(0,255,200,.6),transparent),
+  radial-gradient(2px 90px at 50% 96%,rgba(255,60,100,.8),transparent);filter:blur(.4px) drop-shadow(0 0 4px #ff2d55);animation:gzPulseV 1.1s ease-in-out infinite}
+@keyframes gzPulseV{0%,100%{opacity:.55}15%{opacity:1}30%{opacity:.7}45%{opacity:.95}}
+.gz.c2 .gzTendril{display:block;position:absolute;top:-40px;width:5px;height:56px;border-radius:5px;background:linear-gradient(#ff8fa3,#3a0710);box-shadow:0 0 10px rgba(255,45,85,.7);transform-origin:bottom center}
+.gz.c2 .gzTendril.l{left:30%;animation:gzSway 2.8s ease-in-out infinite}.gz.c2 .gzTendril.r{right:30%;animation:gzSway 3.3s ease-in-out infinite reverse}
+.gz.c2 .gzTendril::after{content:"";position:absolute;top:-8px;left:-4px;width:13px;height:13px;border-radius:50%;background:radial-gradient(circle,#fff,#00ffc8 40%,#004a3c);box-shadow:0 0 12px #00ffc8}
+.gz.c2 .gzStalk{display:none}
+.gz.c2 .gzTop{color:#ffe6dc;text-shadow:0 0 14px rgba(255,45,85,.8);animation:none}.gz.c2 .gzTop em{background:linear-gradient(90deg,#ff2d55,#ff8fa3);color:#120709}
+.gz.c2 .gzLeds i{background:#ff2d55;box-shadow:0 0 10px #ff2d55}.gz.c2 .gzLeds i:nth-child(2){background:#00ffc8;box-shadow:0 0 10px #00ffc8}.gz.c2 .gzLeds i:nth-child(3){background:#ffb347;box-shadow:0 0 10px #ffb347}
+.gz.c2 .gzRune{color:rgba(255,80,110,.6);text-shadow:0 0 8px rgba(255,45,85,.8)}.gz.c2 .gzRune.rev{color:rgba(0,255,200,.5);text-shadow:0 0 8px rgba(0,255,200,.7)}
+.gz.c2 .gzScreen{border-radius:50%;background:radial-gradient(circle,#2a0c00,#0a0200 70%);box-shadow:0 0 0 4px #1a0608,0 0 0 7px rgba(255,45,85,.45),0 0 40px rgba(255,45,85,.45),inset 0 0 60px rgba(255,120,0,.35)}
+.gz.c2 .gzIris{inset:4%;background:repeating-conic-gradient(from 0deg,rgba(255,170,60,.55) 0deg 1deg,rgba(255,80,20,.15) 1deg 3deg);-webkit-mask:radial-gradient(circle,transparent 46%,#000 48% 96%,transparent 98%);mask:radial-gradient(circle,transparent 46%,#000 48% 96%,transparent 98%);filter:drop-shadow(0 0 8px #ff7a00);animation:gzIrisT 40s linear infinite}
+.gz.c2.live .gzIris{opacity:.35}
+.gz.c2 .gzLid{display:block;position:absolute;left:-5%;right:-5%;height:55%;z-index:2;background:radial-gradient(120% 100% at 50% 100%,#3a1218,#140608 70%);transition:transform .9s cubic-bezier(.7,0,.2,1);box-shadow:0 0 0 2px rgba(255,45,85,.35)}
+.gz.c2 .gzLid.t{top:-5%;border-radius:0 0 50% 50% / 0 0 30% 30%;transform:translateY(0)}.gz.c2 .gzLid.b{bottom:-5%;border-radius:50% 50% 0 0 / 30% 30% 0 0}
+.gz.c2.live .gzLid.t{transform:translateY(-82%)}.gz.c2.live .gzLid.b{transform:translateY(82%)}
+.gz.c2 .gzLid.t::after,.gz.c2 .gzLid.b::after{content:"";position:absolute;left:47%;right:47%;height:10px;background:#ff2d55;filter:blur(3px)}
+.gz.c2 .gzLid.t::after{bottom:0}.gz.c2 .gzLid.b::after{top:0}
+.gz.c2 .gzLaser{background:linear-gradient(90deg,transparent,#ff2d55,#fff,#ff2d55,transparent);box-shadow:0 0 18px 4px rgba(255,45,85,.6)}
+.gz.c2 .gzC{border-color:#ff2d55;filter:drop-shadow(0 0 6px #ff2d55);border-radius:50%}
+.gz.c2 .gzRead{color:#ffb3c1;text-shadow:0 0 8px #ff2d55}
+.gz.c2 .gzGrid{background:radial-gradient(circle,rgba(255,45,85,.18) 1px,transparent 1.5px) 0 0/12px 12px}
+.gz.c2 .gzRow button,.gz.c2 .gzType button{box-shadow:0 0 0 1px rgba(255,45,85,.45),0 0 14px rgba(255,45,85,.25);color:#ffe6dc}
+.gz.c2 #gzCam video{filter:sepia(.5) saturate(1.4) hue-rotate(-30deg) contrast(1.15)}
+.gz.c2 .mbCube i{background:radial-gradient(circle at 30% 30%,#ffd6cc,#ff2d55 45%,#3a0710);color:#fff;border-color:#ff8fa3}
+
+/* ===== concept III · PRISM TESSERACT: hard light in a crystal; orbits, Metatron's cube, holographic readouts ===== */
+.gz.c3{background:radial-gradient(circle at 50% 45%,rgba(0,40,60,.55),rgba(0,2,8,.94) 70%)}
+.gz.c3 .gzDev{border-radius:28px;clip-path:polygon(9% 0,91% 0,100% 6%,100% 94%,91% 100%,9% 100%,0 94%,0 6%);background:linear-gradient(155deg,rgba(220,250,255,.16),rgba(80,140,255,.06) 40%,rgba(255,255,255,.1) 60%,rgba(40,0,80,.2)),rgba(4,10,22,.72);backdrop-filter:blur(14px);border:0;box-shadow:inset 0 0 0 1px rgba(160,230,255,.35),inset 0 0 50px rgba(120,200,255,.18);animation:gzIn .7s cubic-bezier(.2,1.4,.4,1),gzFloat 5s ease-in-out infinite}
+.gz.c3 .gzAura{display:none}
+.gz.c3 .gzSheen{display:block;position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.22) 45%,rgba(120,255,255,.12) 50%,transparent 60%);background-size:250% 100%;animation:gzSheenA 4.5s ease-in-out infinite}
+@keyframes gzSheenA{from{background-position:120% 0}to{background-position:-120% 0}}
+.gz.c3 .gzStalk{display:none}
+.gz.c3 .gzTop{color:#eaffff;text-shadow:0 0 12px #6ff3ff,0 0 30px rgba(120,160,255,.6)}.gz.c3 .gzTop em{background:linear-gradient(90deg,#6ff3ff,#b6a0ff);color:#020814}
+.gz.c3 .gzLeds i{background:#6ff3ff;box-shadow:0 0 10px #6ff3ff;border-radius:2px;transform:rotate(45deg)}.gz.c3 .gzLeds i:nth-child(2){background:#fff;box-shadow:0 0 10px #fff}.gz.c3 .gzLeds i:nth-child(3){background:#b6a0ff;box-shadow:0 0 10px #b6a0ff}
+.gz.c3 .gzRune{color:rgba(111,243,255,.55);text-shadow:0 0 8px #6ff3ff}.gz.c3 .gzRune.rev{color:rgba(182,160,255,.55)}
+.gz.c3 .gzScreen{border-radius:50%;background:radial-gradient(circle,#03121c,#00040a 70%);box-shadow:0 0 0 2px rgba(111,243,255,.6),0 0 0 9px rgba(111,243,255,.08),0 0 50px rgba(111,243,255,.35),inset 0 0 60px rgba(111,243,255,.25)}
+.gz.c3 .gzMeta{display:block;position:absolute;inset:6%;width:88%;height:88%;fill:none;stroke:rgba(150,240,255,.32);stroke-width:.6;animation:gzIrisT 30s linear infinite;filter:drop-shadow(0 0 3px #6ff3ff);pointer-events:none}
+.gz.c3.live .gzMeta{opacity:.45}
+.gz.c3 .gzIris{inset:2%;background:repeating-conic-gradient(rgba(111,243,255,.8) 0deg .6deg,transparent .6deg 6deg);-webkit-mask:radial-gradient(circle,transparent 90%,#000 91% 94%,transparent 95%);mask:radial-gradient(circle,transparent 90%,#000 91% 94%,transparent 95%);animation-duration:22s}
+.gz.c3 .gzOrbits{display:block;position:absolute;inset:-9%;pointer-events:none;perspective:600px}
+.gz.c3 .gzOrbits i{position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(111,243,255,.55);box-shadow:0 0 12px rgba(111,243,255,.45);animation:gzOrb3 7s linear infinite}
+.gz.c3 .gzOrbits i:nth-child(2){border-color:rgba(182,160,255,.55);animation-duration:9s;animation-direction:reverse;inset:4%}
+.gz.c3 .gzOrbits i:nth-child(3){border-color:rgba(255,255,255,.4);animation-duration:12s;inset:-3%}
+.gz.c3 .gzOrbits i::after{content:"";position:absolute;top:-4px;left:50%;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 12px #6ff3ff,0 0 24px #6ff3ff}
+@keyframes gzOrb3{from{transform:rotateX(72deg) rotateZ(0)}to{transform:rotateX(72deg) rotateZ(360deg)}}
+.gz.c3 .gzOrbits i:nth-child(2){animation-name:gzOrb3b}@keyframes gzOrb3b{from{transform:rotateY(70deg) rotateZ(0)}to{transform:rotateY(70deg) rotateZ(360deg)}}
+.gz.c3 .gzOrbits i:nth-child(3){animation-name:gzOrb3c}@keyframes gzOrb3c{from{transform:rotateX(55deg) rotateY(35deg) rotateZ(0)}to{transform:rotateX(55deg) rotateY(35deg) rotateZ(360deg)}}
+.gz.c3 .gzHud{display:block;position:absolute;inset:-2% -4%;pointer-events:none;font:400 9px/1 "JetBrains Mono",monospace;letter-spacing:.14em;color:#9ff7ff;text-shadow:0 0 6px #6ff3ff;z-index:2}
+.gz.c3 .gzHud span{position:absolute;padding:3px 5px;border:1px solid rgba(111,243,255,.35);background:rgba(0,20,30,.5)}
+.gz.c3 .gzHud span:nth-child(1){top:0;left:0}.gz.c3 .gzHud span:nth-child(2){top:0;right:0}.gz.c3 .gzHud span:nth-child(3){bottom:0;left:0}.gz.c3 .gzHud span:nth-child(4){bottom:0;right:0}
+.gz.c3 .gzHud b{font-weight:400;color:#fff}
+.gz.c3 .gzPulse{display:block;position:absolute;inset:0;border-radius:50%;pointer-events:none}
+.gz.c3 .gzPulse::before,.gz.c3 .gzPulse::after{content:"";position:absolute;inset:45%;border-radius:50%;border:2px solid rgba(111,243,255,.8);animation:gzRipple 2.4s ease-out infinite}
+.gz.c3 .gzPulse::after{animation-delay:1.2s}
+@keyframes gzRipple{to{inset:-2%;opacity:0}}
+.gz.c3 .gzLaser{background:linear-gradient(90deg,transparent,#6ff3ff,#fff,#b6a0ff,transparent);box-shadow:0 0 18px 4px rgba(111,243,255,.55)}
+.gz.c3 .gzC{border-color:#6ff3ff;filter:drop-shadow(0 0 6px #6ff3ff);border-radius:0}
+.gz.c3 .gzRead{color:#cffcff;text-shadow:0 0 8px #6ff3ff}
+.gz.c3 .gzGrid{background:linear-gradient(rgba(111,243,255,.08) 1px,transparent 1px) 0 0/100% 14px;animation:gzScan 3s linear infinite}
+@keyframes gzScan{to{background-position:0 14px}}
+.gz.c3 .gzRow button,.gz.c3 .gzType button{border-radius:6px;box-shadow:0 0 0 1px rgba(111,243,255,.5),0 0 14px rgba(111,243,255,.2);color:#eaffff;background:rgba(0,20,30,.5)}
+.gz.c3 .gzType input{border-radius:6px;border-color:rgba(111,243,255,.45)}
+.gz.c3 #gzCam video{filter:saturate(.3) contrast(1.2) brightness(1.05) hue-rotate(160deg)}
+.gz.c3 .mbCube i{background:linear-gradient(135deg,rgba(220,255,255,.85),rgba(111,243,255,.55) 50%,rgba(182,160,255,.7));color:#020814;border-color:#fff}
+.gz.c3 .gzConcept,.gz.c3 .gzConcept button{border-color:rgba(111,243,255,.45);color:#9ff7ff}
+.gz.c2 .gzConcept button{border-color:rgba(255,45,85,.5);color:#ff8fa3}
 </style>
 </head>
 <body>
@@ -261,18 +353,26 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 <canvas id="veil"></canvas>
 <div id="feed" class="feed"><div class="fp"><h3>Aeon is hungry</h3><button class="gzOpen" id="feedGizmo">&#8961; Scan a barcode with the Scanner Gizmo</button><p id="feedWhy">Give it something: a word, a wish, a name. It eats attention and grows.</p>
   <input id="feedIn" maxlength="40" placeholder="a word, a wish, a name…" autocomplete="off"><div class="row"><button id="feedGo">feed it</button><button id="feedNo">not now</button></div><p id="feedOut"></p></div></div>
-<div class="gz" id="gz" role="dialog" aria-modal="true" aria-label="Scanner Gizmo">
+<div class="gz c1" id="gz" role="dialog" aria-modal="true" aria-label="Scanner Gizmo">
+  <div class="gzConcept"><button id="gzCPrev" aria-label="Previous concept">&#8249;</button><span id="gzCName">I · Oracle Lens</span><button id="gzCNext" aria-label="Next concept">&#8250;</button></div>
   <div class="gzDev" id="gzDev">
+    <div class="gzVeins"></div><div class="gzSheen"></div><div class="gzTendril l"></div><div class="gzTendril r"></div>
     <div class="gzAura"></div><div class="gzStalk"><i></i></div>
     <div class="gzTop"><span class="gzLeds"><i></i><i></i><i></i></span><b>SCANNER GIZMO</b><em>MK&#183;&#8734;</em></div>
     <div class="gzRune"><span>ᚠ⟁⌬ΞᛟΩ⍜ᛉ⟟Ѫ⎔ᚹ⌖ψ⟡ᛞ⍙Ϟ⌘ᚱ⟐ΔᛜӜ⍟ᚾᚠ⟁⌬ΞᛟΩ⍜ᛉ⟟Ѫ⎔ᚹ⌖ψ⟡ᛞ⍙Ϟ⌘ᚱ⟐ΔᛜӜ⍟ᚾᚠ⟁⌬ΞᛟΩ⍜ᛉ⟟Ѫ⎔ᚹ⌖ψ⟡ᛞ⍙Ϟ⌘ᚱ⟐ΔᛜӜ⍟ᚾ</span></div>
+    <div class="gzLensWrap">
+    <div class="gzOrbits"><i></i><i></i><i></i></div>
+    <div class="gzHud"><span>&#916; <b id="gzF">7.21</b> THz</span><span>&#968; <b id="gzQ">0.993</b></span><span>&#10209; 11D</span><span id="gzLock">&#8734; SEEK</span></div>
     <div class="gzScreen" id="gzScreen">
-      <div id="gzCam"></div><div class="gzGrid"></div><div class="gzIris"></div><div class="gzLaser"></div>
+      <div id="gzCam"></div><div class="gzGrid"></div><svg class="gzMeta" id="gzMeta" viewBox="-100 -100 200 200" aria-hidden="true"></svg><div class="gzIris"></div><div class="gzPulse"></div><div class="gzLaser"></div>
+      <div class="gzLid t"></div><div class="gzLid b"></div>
+      <button class="gzAllow" id="gzAllow" hidden>&#9673; Allow camera</button>
       <span class="gzC a"></span><span class="gzC b"></span><span class="gzC c"></span><span class="gzC d"></span>
       <div class="gzRead" id="gzRead">BOOTING<span class="cur">_</span></div>
     </div>
+    </div>
     <div class="gzType" id="gzType"><input id="gzIn" inputmode="numeric" maxlength="20" placeholder="barcode digits" autocomplete="off"><button id="gzGo">decode</button></div>
-    <div class="gzRow"><button id="gzKey">&#9000; type code</button><button id="gzWord">&#9998; feed a word</button><button id="gzOff">power off</button></div>
+    <div class="gzRow"><button id="gzKey">&#9000; code</button><button id="gzTorch" hidden>&#9788; light</button><button id="gzWord">&#9998; word</button><button id="gzOff">&#9211; off</button></div>
     <div class="gzRune rev"><span>ᚾ⍟ӜᛜΔ⟐ᚱ⌘Ϟ⍙ᛞ⟡ψ⌖ᚹ⎔Ѫ⟟ᛉ⍜ΩᛟΞ⌬⟁ᚠᚾ⍟ӜᛜΔ⟐ᚱ⌘Ϟ⍙ᛞ⟡ψ⌖ᚹ⎔Ѫ⟟ᛉ⍜ΩᛟΞ⌬⟁ᚠᚾ⍟ӜᛜΔ⟐ᚱ⌘Ϟ⍙ᛞ⟡ψ⌖ᚹ⎔Ѫ⟟ᛉ⍜ΩᛟΞ⌬⟁ᚠ</span></div>
   </div>
   <div class="mb" id="mb">
@@ -1728,21 +1828,47 @@ function foodFor(code) { // the same barcode always becomes the same food
 let gzScanner = null, gzBusy = false, gzItem = null;
 const gzLoad = () => window.Html5Qrcode ? Promise.resolve() : new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js'; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
 const gzSay = (t, cur = true) => { gzRead.innerHTML = t + (cur ? '<span class="cur">_</span>' : ''); };
-async function gzStop() { const s = gzScanner; gzScanner = null; if (s) { try { await s.stop(); } catch {} try { s.clear(); } catch {} } }
+async function gzStop() { const s = gzScanner; gzScanner = null; gzEl.classList.remove('live'); gzTorchOn = false; if (s) { try { await s.stop(); } catch {} try { s.clear(); } catch {} } }
 async function openGizmo() {
-  if (egg.on) return; feedEl.classList.remove('on'); mbEl.className = 'mb'; gzEl.classList.remove('got'); gzEl.classList.add('on'); gzBusy = false; audio.resume();
+  if (egg.on) return; feedEl.classList.remove('on'); mbEl.className = 'mb'; gzEl.classList.remove('got'); document.getElementById('gzLock').textContent = '∞ SEEK'; gzEl.classList.add('on'); gzBusy = false; audio.resume();
   [660, 880, 1320].forEach((f, i) => setTimeout(() => audio.bell(f, .12), i * 90)); gzSay('BOOTING'); track('gizmo');
+  gzStartCam();
+}
+async function gzStartCam() {
+  const allow = document.getElementById('gzAllow'), torch = document.getElementById('gzTorch'); allow.hidden = true; torch.hidden = true; gzEl.classList.remove('live');
+  if (!navigator.mediaDevices?.getUserMedia || !isSecureContext) { gzSay('OPEN IN SAFARI FOR CAMERA', false); document.getElementById('gzType').classList.add('on'); return; }
   try {
-    await gzLoad(); gzSay('SEARCHING FOR BARCODE');
+    await gzLoad(); await gzStop(); gzSay('OPENING THE EYE');
     const F = window.Html5QrcodeSupportedFormats;
     gzScanner = new Html5Qrcode('gzCam', { verbose: false, formatsToSupport: GZ_FORMATS.map(k => F[k]), experimentalFeatures: { useBarCodeDetectorIfSupported: true } });
-    await gzScanner.start({ facingMode: 'environment' }, { fps: 12, aspectRatio: 1.333 }, txt => gzGot(txt), () => {});
-  } catch (e) { gzSay('NO CAMERA · TYPE A CODE', false); document.getElementById('gzType').classList.add('on'); }
+    await gzScanner.start({ facingMode: 'environment' }, { fps: 15, aspectRatio: 1 }, txt => gzGot(txt), () => {});
+    gzCam.querySelector('video')?.setAttribute('playsinline', ''); // iPhone: play inside the lens, never full screen
+    gzEl.classList.add('live'); gzSay('SEARCHING FOR BARCODE'); audio.bell(98, 1.2);
+    try { if (gzScanner.getRunningTrackCapabilities?.().torch) torch.hidden = false; } catch {}
+  } catch (e) {
+    const denied = /NotAllowed|Permission|denied/i.test(String(e && (e.name || e)));
+    gzDenied += denied ? 1 : 0; gzSay(!denied ? 'NO CAMERA · TYPE A CODE' : gzDenied > 1 ? 'SETTINGS › SAFARI › CAMERA' : 'CAMERA BLOCKED', false); allow.hidden = !denied; document.getElementById('gzType').classList.add('on');
+  }
 }
+let gzTorchOn = false, gzDenied = 0; // a second refusal means the phone remembers it: point to Settings
+document.getElementById('gzTorch').onclick = async () => { gzTorchOn = !gzTorchOn; try { await gzScanner?.applyVideoConstraints({ advanced: [{ torch: gzTorchOn }] }); } catch {} document.getElementById('gzTorch').classList.toggle('on', gzTorchOn); };
+document.getElementById('gzAllow').onclick = () => gzStartCam();
+const gzCam = document.getElementById('gzCam');
+setTimeout(() => { if (!document.hidden) gzLoad().catch(() => {}); }, 6000); // fetch the decoder early, so the first scan opens fast
+// three concepts of the same instrument; the choice is remembered
+const GZ_CONCEPTS = ['I · Oracle Lens', 'II · Biomech Relic', 'III · Prism Tesseract'];
+let gzConcept = (() => { const q = +params.get('gizmo'); if (q >= 1 && q <= 3) return q; try { return +localStorage.getItem('aeon.gizmo') || 1; } catch { return 1; } })();
+function gzSetConcept(c) { gzConcept = (c + 2) % 3 + 1; gzEl.classList.remove('c1', 'c2', 'c3'); gzEl.classList.add('c' + gzConcept); document.getElementById('gzCName').textContent = GZ_CONCEPTS[gzConcept - 1]; try { localStorage.setItem('aeon.gizmo', gzConcept); } catch {} audio.bell([523, 392, 659][gzConcept - 1], .25); }
+document.getElementById('gzCPrev').onclick = () => gzSetConcept(gzConcept - 1); document.getElementById('gzCNext').onclick = () => gzSetConcept(gzConcept + 1);
+{ // Metatron's cube for the prism lens: 13 circles' centres, every pair joined
+  const pts = [[0, 0]]; for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + Math.PI / 6; pts.push([Math.cos(a) * 40, Math.sin(a) * 40], [Math.cos(a) * 80, Math.sin(a) * 80]); }
+  let h = ''; for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) h += `<line x1="${pts[i][0].toFixed(1)}" y1="${pts[i][1].toFixed(1)}" x2="${pts[j][0].toFixed(1)}" y2="${pts[j][1].toFixed(1)}"/>`;
+  pts.forEach(([x, y]) => h += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="20"/>`); document.getElementById('gzMeta').innerHTML = h; }
+setInterval(() => { if (!gzEl.classList.contains('on')) return; document.getElementById('gzF').textContent = (6 + Math.random() * 3).toFixed(2); document.getElementById('gzQ').textContent = (.9 + Math.random() * .099).toFixed(3); }, 180);
 async function closeGizmo() { await gzStop(); gzEl.classList.remove('on'); mbEl.className = 'mb'; }
 function gzGot(code) {
   code = String(code).trim(); if (gzBusy || !code) return; gzBusy = true;
-  gzEl.classList.add('got'); gzSay('SIGNAL ACQUIRED ✓', false); audio.bell(1568, .2); setTimeout(() => audio.bell(2093, .3), 120); gzBuzz(60);
+  gzEl.classList.add('got'); document.getElementById('gzLock').textContent = '∞ LOCK'; gzSay('SIGNAL ACQUIRED ✓', false); audio.bell(1568, .2); setTimeout(() => audio.bell(2093, .3), 120); gzBuzz(60);
   gzItem = foodFor(code); const again = mem.fed.some(f => f.sticker === 'scan:' + code); if (again) gzItem.power = +(gzItem.power / 2).toFixed(1);
   // a real product name, if Open Food Facts knows the barcode (only the digits are sent)
   if (/^\d{8,14}$/.test(code)) { const ac = new AbortController(); setTimeout(() => ac.abort(), 3200);
@@ -1785,6 +1911,7 @@ document.getElementById('gzGo').onclick = gzManual; document.getElementById('gzI
 addEventListener('keydown', e => { if (e.key === 'Escape' && gzEl.classList.contains('on')) closeGizmo(); });
 document.getElementById('feedGizmo').onclick = openGizmo; document.getElementById('bWord').onclick = () => openFeed(null);
 document.getElementById('gzWord').onclick = async () => { await closeGizmo(); openFeed(null); };
+gzSetConcept(gzConcept);
 if (params.has('gizmo')) setTimeout(() => { if (!egg.on) openGizmo(); }, 1500);
 { const r = document.getElementById('bBright'), v = document.getElementById('bBrightV'); r.value = Math.round(BRIGHT.value * 100); v.textContent = r.value + '%';
   r.addEventListener('input', () => { BRIGHT.value = r.value / 100; v.textContent = r.value + '%'; try { localStorage.setItem('aeon.bright', String(BRIGHT.value)); } catch {} }); r.addEventListener('keydown', e => e.stopPropagation()); }
