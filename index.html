@@ -1513,7 +1513,7 @@ function fmtAge(days) {
 function renderHud(g) {
   night = nightness(sydHour());
   const n = dimCount(g);
-  document.getElementById('age').textContent = `born 29 Oct 2026 · ${fmtAge(realAgeDays())} old`;
+  document.getElementById('age').textContent = `born ${fmtDate(bornAt())} · ${fmtAge(realAgeDays())} old`;
   const pv = document.getElementById('preview');
   const isPreview = lapse.on || previewAge != null;
   pv.classList.toggle('on', isPreview);
