@@ -382,6 +382,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 .shareToast{position:fixed;left:50%;bottom:calc(max(14px,env(safe-area-inset-bottom)) + 96px);transform:translateX(-50%);z-index:12;padding:10px 16px;border-radius:999px;background:#c7ff16;color:#070707;font:700 12px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap;box-shadow:0 0 24px rgba(199,255,22,.5);animation:toastA 2.4s forwards}
 @keyframes toastA{0%{opacity:0;transform:translate(-50%,10px)}10%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
 @media (max-width:760px){.sharePill{top:70px;right:12px}}
+@media (min-width:761px){.whisper{bottom:max(13vh,124px)}}
 </style>
 </head>
 <body>
@@ -1874,12 +1875,12 @@ function foodFor(code) { // the same barcode always becomes the same food
   const h = gzHash(code), h2 = gzHash(code + '·'), roll = h % 1000, r = RARITY.find(x => roll < x[0]);
   return { code, name: `${FOOD_A[h % FOOD_A.length]} ${FOOD_B[(h >>> 8) % FOOD_B.length]}`, icon: FOOD_ICON[h2 % FOOD_ICON.length], taste: TASTES[(h2 >>> 6) % TASTES.length], rarity: r[1], color: r[2], power: r[3], from: '' };
 }
-let gzScanner = null, gzBusy = false, gzItem = null;
+let gzScanner = null, gzBusy = false, gzItem = null, gzRun = 0; // gzRun changes on every open and close, so stale timers stop
 const gzLoad = () => window.Html5Qrcode ? Promise.resolve() : new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js'; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
 const gzSay = (t, cur = true) => { gzRead.innerHTML = t + (cur ? '<span class="cur">_</span>' : ''); };
 async function gzStop() { const s = gzScanner; gzScanner = null; gzEl.classList.remove('live'); gzTorchOn = false; if (s) { try { await s.stop(); } catch {} try { s.clear(); } catch {} } }
 async function openGizmo() {
-  if (egg.on) return; feedEl.classList.remove('on'); mbEl.className = 'mb'; gzEl.classList.remove('got', 'lock', 'implode'); document.getElementById('gzLock').textContent = '∞ SEEK'; gzEl.classList.add('on'); gzBusy = false; audio.resume();
+  if (egg.on) return; gzRun++; gzDenied = 0; feedEl.classList.remove('on'); mbEl.className = 'mb'; gzEl.classList.remove('got', 'lock', 'implode'); document.getElementById('gzLock').textContent = '∞ SEEK'; gzEl.classList.add('on'); gzBusy = false; audio.resume();
   [660, 880, 1320].forEach((f, i) => setTimeout(() => audio.bell(f, .12), i * 90)); gzSay('BOOTING'); track('gizmo');
   gzStartCam();
 }
@@ -1898,7 +1899,7 @@ async function gzStartCam() {
       const zb = document.getElementById('gzZoom'); gzZoomMax = cap.zoom?.max || 1; gzZoomMin = cap.zoom?.min || 1; gzZoomI = 0; zb.hidden = gzZoomMax < 1.5; zb.textContent = '⊕ 1×'; } catch {}
   } catch (e) {
     const denied = /NotAllowed|Permission|denied/i.test(String(e && (e.name || e)));
-    gzDenied += denied ? 1 : 0; gzSay(!denied ? 'NO CAMERA · TYPE A CODE' : gzDenied > 1 ? 'SETTINGS › SAFARI › CAMERA' : 'CAMERA BLOCKED', false); allow.hidden = !denied; document.getElementById('gzType').classList.add('on');
+    gzDenied += denied ? 1 : 0; gzSay(!denied ? 'NO CAMERA · TYPE A CODE' : gzDenied > 1 ? (/iPhone|iPad|iPod/.test(navigator.userAgent) ? 'SETTINGS › SAFARI › CAMERA' : 'ALLOW CAMERA IN SITE SETTINGS') : 'CAMERA BLOCKED', false); allow.hidden = !denied; document.getElementById('gzType').classList.add('on');
   }
 }
 let gzZoomMax = 1, gzZoomMin = 1, gzZoomI = 0; const GZ_ZOOMS = [1, 2, 3];
@@ -1920,31 +1921,31 @@ document.getElementById('gzCPrev').onclick = () => gzSetConcept(gzConcept - 1); 
   let h = ''; for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) h += `<line x1="${pts[i][0].toFixed(1)}" y1="${pts[i][1].toFixed(1)}" x2="${pts[j][0].toFixed(1)}" y2="${pts[j][1].toFixed(1)}"/>`;
   pts.forEach(([x, y]) => h += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="20"/>`); document.getElementById('gzMeta').innerHTML = h; }
 setInterval(() => { if (!gzEl.classList.contains('on')) return; document.getElementById('gzF').textContent = (6 + Math.random() * 3).toFixed(2); document.getElementById('gzQ').textContent = (.9 + Math.random() * .099).toFixed(3); }, 180);
-async function closeGizmo() { await gzStop(); gzEl.classList.remove('on'); mbEl.className = 'mb'; }
+async function closeGizmo() { gzRun++; await gzStop(); gzEl.classList.remove('on'); mbEl.className = 'mb'; }
 function gzGot(code) {
-  code = String(code).trim(); if (gzBusy || !code) return; gzBusy = true;
+  code = String(code).trim(); if (gzBusy || !code) return; gzBusy = true; const run = gzRun;
   gzEl.classList.add('got', 'lock'); document.getElementById('gzLock').textContent = '∞ LOCK';
   [784, 988, 1175, 1568].forEach((f, i) => setTimeout(() => audio.bell(f, .35), i * 45)); [1, 2, 3, 4, 5, 6].forEach(i => setTimeout(() => audio.bell(400 + i * 260, .06), 420 + i * 40)); gzBuzz([18, 30, 18, 30, 70]);
   const shown = code.slice(0, 24).replace(/[&<>"']/g, ch => '&#' + ch.charCodeAt(0) + ';'); // a QR can hold any text: never let it become markup
   let n = 0; const typeIt = () => { n++; gzSay(`◉ ${shown.slice(0, n)}`, n < shown.length); if (n < shown.length) setTimeout(typeIt, 28); else setTimeout(() => gzSay('SIGNAL ACQUIRED ✓', false), 160); }; typeIt();
-  setTimeout(() => { gzEl.classList.add('implode'); audio.bell(98, .8); }, 900);
+  setTimeout(() => { if (run !== gzRun) return; gzEl.classList.add('implode'); audio.bell(98, .8); }, 900);
   gzItem = foodFor(code); const again = mem.fed.some(f => f.sticker === 'scan:' + code); if (again) gzItem.power = +(gzItem.power / 2).toFixed(1);
   // a real product name, if Open Food Facts knows the barcode (only the digits are sent)
   if (/^\d{8,14}$/.test(code)) { const ac = new AbortController(); setTimeout(() => ac.abort(), 3200);
     fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=product_name,brands`, { signal: ac.signal }).then(r => r.json()).then(j => { const pn = j?.product?.product_name; if (pn) gzItem.from = `${pn}${j.product.brands ? ' · ' + j.product.brands.split(',')[0] : ''}`; }).catch(() => {}); }
-  setTimeout(async () => { await gzStop(); gzEl.classList.remove('lock', 'implode'); mysteryBox(again); }, 1250);
+  setTimeout(async () => { if (run !== gzRun) return; await gzStop(); gzEl.classList.remove('lock', 'implode'); if (run === gzRun) mysteryBox(again); }, 1250);
 }
 function mysteryBox(again) {
-  const it = gzItem, cube = document.getElementById('mbCube'); mbEl.style.setProperty('--rc', it.color + '88'); mbEl.style.setProperty('--rc2', it.color);
+  const it = gzItem, cube = document.getElementById('mbCube'), run = gzRun; mbEl.style.setProperty('--rc', it.color + '88'); mbEl.style.setProperty('--rc2', it.color);
   document.getElementById('mbStatus').textContent = 'DECODING MATTER…'; mbEl.className = 'mb on'; mbEl.style.setProperty('--k', 0);
   // suspense: the box shivers harder and harder while the ticks climb
-  setTimeout(() => mbEl.classList.add('charge'), 500);
+  setTimeout(() => { if (run === gzRun) mbEl.classList.add('charge'); }, 500);
   const orbit = document.getElementById('mbOrbit'), tier = document.getElementById('mbTier');
   const pool = [...FOOD_ICON].sort(() => Math.random() - .5).filter(x => x !== it.icon).slice(0, 9); pool.splice(Math.floor(Math.random() * 10), 0, it.icon);
   orbit.innerHTML = pool.map(ic => `<span style="--c:${RARITY[Math.floor(Math.random() * RARITY.length)][2]}">${ic}</span>`).join(''); const sil = [...orbit.children];
   tier.className = 'mbTier'; tier.textContent = '?'; let ang = 0, lastT = performance.now(), nextTier = 0, ti = 0;
   const t0 = performance.now(), dur = 3800; let tick = 0;
-  const step = () => { const now = performance.now(), k = Math.min(1, (now - t0) / dur), dt = (now - lastT) / 1000; lastT = now; mbEl.style.setProperty('--k', (k * k * 4).toFixed(2));
+  const step = () => { if (run !== gzRun) return; const now = performance.now(), k = Math.min(1, (now - t0) / dur), dt = (now - lastT) / 1000; lastT = now; mbEl.style.setProperty('--k', (k * k * 4).toFixed(2));
     if (now - t0 > tick * (260 - k * 200)) { tick++; audio.bell(220 + k * 880, .07); gzBuzz(8); }
     // the could-be prizes circle the box as dark silhouettes, faster and tighter as it charges
     ang += dt * (.7 + k * k * 11); const R = Math.min(innerWidth * .4, 150) * (1 - k * .25);
