@@ -343,6 +343,38 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 .gz.c3 .mbCube i{background:linear-gradient(135deg,rgba(220,255,255,.85),rgba(111,243,255,.55) 50%,rgba(182,160,255,.7));color:#020814;border-color:#fff}
 .gz.c3 .gzConcept,.gz.c3 .gzConcept button{border-color:rgba(111,243,255,.45);color:#9ff7ff}
 .gz.c2 .gzConcept button{border-color:rgba(255,45,85,.5);color:#ff8fa3}
+
+/* lock-on */
+.gzC{transition:transform .35s cubic-bezier(.2,1.6,.4,1),border-color .2s}
+.gz.lock .gzC{border-color:#fff!important;filter:drop-shadow(0 0 10px #fff)}
+.gz.lock .gzC.a{transform:translate(70%,70%)}.gz.lock .gzC.b{transform:translate(-70%,70%)}.gz.lock .gzC.c{transform:translate(70%,-70%)}.gz.lock .gzC.d{transform:translate(-70%,-70%)}
+.gzShock,.gzWhite{display:none;position:absolute;inset:0;border-radius:50%;pointer-events:none;z-index:2}
+.gz.lock .gzShock{display:block;animation:gzShockA .7s ease-out forwards}
+.gz.lock .gzShock::before{content:"";position:absolute;inset:45%;border-radius:50%;border:3px solid #fff;box-shadow:0 0 30px #fff,inset 0 0 20px #fff}
+@keyframes gzShockA{to{transform:scale(2.4);opacity:0}}
+.gz.lock .gzWhite{display:block;background:radial-gradient(circle,#fff,transparent 70%);animation:gzWhiteA .5s ease-out forwards}
+@keyframes gzWhiteA{from{opacity:.9}to{opacity:0}}
+.gz.lock .gzDev{animation:gzJolt .32s cubic-bezier(.2,2,.4,1)}
+@keyframes gzJolt{30%{transform:scale(1.035)}60%{transform:scale(.985)}}
+.gz.lock .gzLaser{animation:none;top:48%;height:6px;opacity:1;box-shadow:0 0 30px 10px rgba(255,255,255,.7)}
+.gz.implode .gzLensWrap{animation:gzImplode .35s cubic-bezier(.7,0,1,.5) forwards}
+@keyframes gzImplode{60%{transform:scale(1.06);filter:brightness(2.5)}to{transform:scale(.02);filter:brightness(6)}}
+/* suspense */
+.mbOrbit{position:absolute;top:45%;left:50%;width:0;height:0;z-index:1}
+.mbOrbit span{position:absolute;left:0;top:0;font-size:38px;line-height:1;filter:brightness(0) drop-shadow(0 0 1px var(--c)) drop-shadow(0 0 1px var(--c)) drop-shadow(0 0 1.5px var(--c)) drop-shadow(0 0 14px var(--c))}
+.mb.open .mbOrbit span{transition:transform .5s cubic-bezier(.6,0,1,.4),opacity .5s}
+.mbScene{z-index:2}
+.mbTier{position:absolute;top:calc(45% + 118px);left:50%;transform:translateX(-50%);font:700 15px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.32em;text-transform:uppercase;color:var(--tc,#fff);text-shadow:0 0 14px var(--tc,#fff);white-space:nowrap}
+.mbTier.lock{animation:mbLock .5s cubic-bezier(.2,2,.4,1);font-size:19px}
+@keyframes mbLock{40%{transform:translateX(-50%) scale(1.5)}}
+.mb.open .mbTier{opacity:0;transition:opacity .3s}
+/* waitlist */
+.eaList{margin:14px 0 4px;padding:12px;border:1px dashed rgba(199,255,22,.35);border-radius:12px;text-align:left}
+.eaListH{font:700 12px/1.3 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#c7ff16;margin-bottom:8px}
+.eaRow{display:flex;gap:8px}.eaRow input{flex:1;min-width:0;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.4);color:var(--fg);font:400 15px/1 system-ui,sans-serif}
+.eaRow button{padding:0 16px;border:0;border-radius:10px;background:#f0f0f0;color:#070707;font:700 13px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
+.eaFine{margin-top:7px;font:400 11px/1.35 system-ui,sans-serif;color:var(--fg3)}
+.eaList.done .eaRow,.eaList.done .eaFine{display:none}
 </style>
 </head>
 <body>
@@ -364,7 +396,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     <div class="gzOrbits"><i></i><i></i><i></i></div>
     <div class="gzHud"><span>&#916; <b id="gzF">7.21</b> THz</span><span>&#968; <b id="gzQ">0.993</b></span><span>&#10209; 11D</span><span id="gzLock">&#8734; SEEK</span></div>
     <div class="gzScreen" id="gzScreen">
-      <div id="gzCam"></div><div class="gzGrid"></div><svg class="gzMeta" id="gzMeta" viewBox="-100 -100 200 200" aria-hidden="true"></svg><div class="gzIris"></div><div class="gzPulse"></div><div class="gzLaser"></div>
+      <div id="gzCam"></div><div class="gzGrid"></div><svg class="gzMeta" id="gzMeta" viewBox="-100 -100 200 200" aria-hidden="true"></svg><div class="gzIris"></div><div class="gzPulse"></div><div class="gzLaser"></div><div class="gzShock"></div><div class="gzWhite"></div>
       <div class="gzLid t"></div><div class="gzLid b"></div>
       <button class="gzAllow" id="gzAllow" hidden>&#9673; Allow camera</button>
       <span class="gzC a"></span><span class="gzC b"></span><span class="gzC c"></span><span class="gzC d"></span>
@@ -376,7 +408,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     <div class="gzRune rev"><span>ᚾ⍟ӜᛜΔ⟐ᚱ⌘Ϟ⍙ᛞ⟡ψ⌖ᚹ⎔Ѫ⟟ᛉ⍜ΩᛟΞ⌬⟁ᚠᚾ⍟ӜᛜΔ⟐ᚱ⌘Ϟ⍙ᛞ⟡ψ⌖ᚹ⎔Ѫ⟟ᛉ⍜ΩᛟΞ⌬⟁ᚠᚾ⍟ӜᛜΔ⟐ᚱ⌘Ϟ⍙ᛞ⟡ψ⌖ᚹ⎔Ѫ⟟ᛉ⍜ΩᛟΞ⌬⟁ᚠ</span></div>
   </div>
   <div class="mb" id="mb">
-    <div class="mbRays"></div>
+    <div class="mbRays"></div><div class="mbOrbit" id="mbOrbit"></div><div class="mbTier" id="mbTier">?</div>
     <div class="mbScene"><div class="mbCube" id="mbCube"><i class="f1">?</i><i class="f2">?</i><i class="f3">?</i><i class="f4">?</i><i class="f5"></i><i class="f6"></i></div></div>
     <div class="mbCard" id="mbCard"><div class="mbRar" id="mbRar"></div><div class="mbOrb" id="mbOrb"></div><h3 id="mbName"></h3><p id="mbFrom"></p><p id="mbTaste"></p><p class="mbPow" id="mbPow"></p>
       <button class="mbFeed" id="mbFeed">Feed to Aeon</button><button class="mbAgain" id="mbAgain">scan another</button></div>
@@ -389,6 +421,13 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
   <h3 id="eaT">You found Aeon early.</h3>
   <p>This is an early demo with limited features. The final experience will be different, and much more is coming.</p>
   <p>Follow us on Instagram to stay up to date.</p>
+  <form class="eaList" id="eaList" action="https://lucidinstinct.com/contact#contact_form" method="post" target="_blank" accept-charset="UTF-8">
+    <div class="eaListH">Want to know when the official app drops?</div>
+    <input type="hidden" name="form_type" value="customer"><input type="hidden" name="utf8" value="&#10003;">
+    <input type="hidden" name="contact[tags]" value="newsletter,aeon-early-access">
+    <div class="eaRow"><input type="email" name="contact[email]" id="eaEmail" required placeholder="your email" autocomplete="email" aria-label="Email address"><button type="submit">Join</button></div>
+    <div class="eaFine">Join the Lucid Instinct list for the launch and community news. Unsubscribe any time.</div>
+  </form>
   <a class="btn primary" id="eaInsta" href="https://www.instagram.com/lucidinstinct/" target="_blank" rel="noopener">Follow @lucidinstinct</a>
   <a class="btn" id="eaHome" href="https://lucidinstinct.com/?utm_source=aeon&utm_medium=entity&utm_campaign=home" target="_blank" rel="noopener">&#8962; Take me home</a>
 </div></div>
@@ -1830,7 +1869,7 @@ const gzLoad = () => window.Html5Qrcode ? Promise.resolve() : new Promise((ok, n
 const gzSay = (t, cur = true) => { gzRead.innerHTML = t + (cur ? '<span class="cur">_</span>' : ''); };
 async function gzStop() { const s = gzScanner; gzScanner = null; gzEl.classList.remove('live'); gzTorchOn = false; if (s) { try { await s.stop(); } catch {} try { s.clear(); } catch {} } }
 async function openGizmo() {
-  if (egg.on) return; feedEl.classList.remove('on'); mbEl.className = 'mb'; gzEl.classList.remove('got'); document.getElementById('gzLock').textContent = '∞ SEEK'; gzEl.classList.add('on'); gzBusy = false; audio.resume();
+  if (egg.on) return; feedEl.classList.remove('on'); mbEl.className = 'mb'; gzEl.classList.remove('got', 'lock', 'implode'); document.getElementById('gzLock').textContent = '∞ SEEK'; gzEl.classList.add('on'); gzBusy = false; audio.resume();
   [660, 880, 1320].forEach((f, i) => setTimeout(() => audio.bell(f, .12), i * 90)); gzSay('BOOTING'); track('gizmo');
   gzStartCam();
 }
@@ -1874,27 +1913,41 @@ setInterval(() => { if (!gzEl.classList.contains('on')) return; document.getElem
 async function closeGizmo() { await gzStop(); gzEl.classList.remove('on'); mbEl.className = 'mb'; }
 function gzGot(code) {
   code = String(code).trim(); if (gzBusy || !code) return; gzBusy = true;
-  gzEl.classList.add('got'); document.getElementById('gzLock').textContent = '∞ LOCK'; gzSay('SIGNAL ACQUIRED ✓', false); audio.bell(1568, .2); setTimeout(() => audio.bell(2093, .3), 120); gzBuzz(60);
+  gzEl.classList.add('got', 'lock'); document.getElementById('gzLock').textContent = '∞ LOCK';
+  [784, 988, 1175, 1568].forEach((f, i) => setTimeout(() => audio.bell(f, .35), i * 45)); [1, 2, 3, 4, 5, 6].forEach(i => setTimeout(() => audio.bell(400 + i * 260, .06), 420 + i * 40)); gzBuzz([18, 30, 18, 30, 70]);
+  const shown = code.slice(0, 24).replace(/[&<>"']/g, ch => '&#' + ch.charCodeAt(0) + ';'); // a QR can hold any text: never let it become markup
+  let n = 0; const typeIt = () => { n++; gzSay(`◉ ${shown.slice(0, n)}`, n < shown.length); if (n < shown.length) setTimeout(typeIt, 28); else setTimeout(() => gzSay('SIGNAL ACQUIRED ✓', false), 160); }; typeIt();
+  setTimeout(() => { gzEl.classList.add('implode'); audio.bell(98, .8); }, 900);
   gzItem = foodFor(code); const again = mem.fed.some(f => f.sticker === 'scan:' + code); if (again) gzItem.power = +(gzItem.power / 2).toFixed(1);
   // a real product name, if Open Food Facts knows the barcode (only the digits are sent)
   if (/^\d{8,14}$/.test(code)) { const ac = new AbortController(); setTimeout(() => ac.abort(), 3200);
     fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=product_name,brands`, { signal: ac.signal }).then(r => r.json()).then(j => { const pn = j?.product?.product_name; if (pn) gzItem.from = `${pn}${j.product.brands ? ' · ' + j.product.brands.split(',')[0] : ''}`; }).catch(() => {}); }
-  setTimeout(async () => { await gzStop(); mysteryBox(again); }, 650);
+  setTimeout(async () => { await gzStop(); gzEl.classList.remove('lock', 'implode'); mysteryBox(again); }, 1250);
 }
 function mysteryBox(again) {
   const it = gzItem, cube = document.getElementById('mbCube'); mbEl.style.setProperty('--rc', it.color + '88'); mbEl.style.setProperty('--rc2', it.color);
   document.getElementById('mbStatus').textContent = 'DECODING MATTER…'; mbEl.className = 'mb on'; mbEl.style.setProperty('--k', 0);
   // suspense: the box shivers harder and harder while the ticks climb
   setTimeout(() => mbEl.classList.add('charge'), 500);
-  const t0 = performance.now(), dur = 3000; let tick = 0;
-  const step = () => { const k = Math.min(1, (performance.now() - t0) / dur); mbEl.style.setProperty('--k', (k * k * 4).toFixed(2));
-    if (performance.now() - t0 > tick * (260 - k * 200)) { tick++; audio.bell(220 + k * 880, .07); gzBuzz(8); }
+  const orbit = document.getElementById('mbOrbit'), tier = document.getElementById('mbTier');
+  const pool = [...FOOD_ICON].sort(() => Math.random() - .5).filter(x => x !== it.icon).slice(0, 9); pool.splice(Math.floor(Math.random() * 10), 0, it.icon);
+  orbit.innerHTML = pool.map(ic => `<span style="--c:${RARITY[Math.floor(Math.random() * RARITY.length)][2]}">${ic}</span>`).join(''); const sil = [...orbit.children];
+  tier.className = 'mbTier'; tier.textContent = '?'; let ang = 0, lastT = performance.now(), nextTier = 0, ti = 0;
+  const t0 = performance.now(), dur = 3800; let tick = 0;
+  const step = () => { const now = performance.now(), k = Math.min(1, (now - t0) / dur), dt = (now - lastT) / 1000; lastT = now; mbEl.style.setProperty('--k', (k * k * 4).toFixed(2));
+    if (now - t0 > tick * (260 - k * 200)) { tick++; audio.bell(220 + k * 880, .07); gzBuzz(8); }
+    // the could-be prizes circle the box as dark silhouettes, faster and tighter as it charges
+    ang += dt * (.7 + k * k * 11); const R = Math.min(innerWidth * .4, 150) * (1 - k * .25);
+    sil.forEach((el, i) => { const a = ang + i / sil.length * 6.283, z = Math.sin(a); el.style.transform = `translate(-50%,-50%) translate(${Math.cos(a) * R}px,${z * R * .32}px) scale(${.75 + (z + 1) * .3})`; el.style.zIndex = z > 0 ? 3 : 0; el.style.opacity = .55 + (z + 1) * .2; });
+    // the rarity roulette: fast at first, slowing, then it settles on what this really is
+    if (k < .9 && now >= nextTier) { const r = RARITY[ti++ % RARITY.length]; tier.textContent = r[1] + '?'; tier.style.setProperty('--tc', r[2]); nextTier = now + 60 + k * k * k * 420; audio.bell(880 + (ti % 5) * 110, .03); }
+    else if (k >= .9 && !tier.classList.contains('lock')) { tier.textContent = it.rarity; tier.style.setProperty('--tc', it.color); tier.classList.add('lock'); audio.bell(it.power >= 3 ? 1760 : 1320, .6); gzBuzz(40); }
     document.getElementById('mbStatus').textContent = k < .45 ? 'DECODING MATTER…' : k < .8 ? 'STABILISING…' : 'IT IS OPENING';
     if (k < 1) requestAnimationFrame(step); else burst(); };
   setTimeout(() => requestAnimationFrame(step), 500);
   const burst = () => {
     const fl = document.createElement('div'); fl.className = 'mbFlash'; document.body.appendChild(fl); setTimeout(() => fl.remove(), 800);
-    mbEl.classList.remove('charge'); mbEl.classList.add('open'); gzBuzz([30, 40, 90]);
+    mbEl.classList.remove('charge'); mbEl.classList.add('open'); sil.forEach(el => { el.style.transform = 'translate(-50%,-50%) scale(0)'; el.style.opacity = 0; }); gzBuzz([30, 40, 90]);
     [523, 659, 784, 1047, 1319].forEach((f, i) => setTimeout(() => audio.bell(f, .5), i * 70)); if (it.power >= 3) setTimeout(() => audio.giggle?.(), 500);
     document.getElementById('mbRar').textContent = it.rarity; document.getElementById('mbOrb').textContent = it.icon; document.getElementById('mbName').textContent = it.name;
     document.getElementById('mbFrom').textContent = it.from ? `decoded from: ${it.from}` : `barcode ${it.code}`;
@@ -1926,7 +1979,9 @@ function openEA() { eaEl.classList.add('on'); mem.eaSeen = true; save(); documen
 function closeEA() { eaEl.classList.remove('on'); }
 document.getElementById('eaPill').onclick = openEA; document.getElementById('eaX').onclick = closeEA;
 eaEl.addEventListener('click', e => { if (e.target === eaEl) closeEA(); }); addEventListener('keydown', e => { if (e.key === 'Escape' && eaEl.classList.contains('on')) closeEA(); });
-document.getElementById('eaInsta').addEventListener('click', () => track('instagram')); document.getElementById('eaHome').addEventListener('click', () => track('home'));
+document.getElementById('eaInsta').addEventListener('click', () => track('instagram'));
+document.getElementById('eaEmail').addEventListener('keydown', e => e.stopPropagation());
+document.getElementById('eaList').addEventListener('submit', () => { track('waitlist'); mem.waitlist = true; save(); setTimeout(() => { const f = document.getElementById('eaList'); f.classList.add('done'); f.querySelector('.eaListH').textContent = 'You are on the list. Check the new tab to confirm.'; }, 300); }); document.getElementById('eaHome').addEventListener('click', () => track('home'));
 document.getElementById('bHome').onclick = () => { track('home'); open('https://lucidinstinct.com/?utm_source=aeon&utm_medium=entity&utm_campaign=home', '_blank', 'noopener'); };
 document.getElementById('bInsta').onclick = () => { track('instagram'); open('https://www.instagram.com/lucidinstinct/', '_blank', 'noopener'); };
 function toggleFull() { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.().catch(() => {}); }
