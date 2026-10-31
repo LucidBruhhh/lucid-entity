@@ -375,6 +375,13 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 .eaRow button{padding:0 16px;border:0;border-radius:10px;background:#f0f0f0;color:#070707;font:700 13px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
 .eaFine{margin-top:7px;font:400 11px/1.35 system-ui,sans-serif;color:var(--fg3)}
 .eaList.done .eaRow,.eaList.done .eaFine{display:none}
+.sharePill{position:absolute;top:80px;right:20px;pointer-events:auto;font:700 9.5px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#070707;background:#f0f0f0;border:0;border-radius:999px;padding:6px 10px 5px;cursor:pointer;box-shadow:0 0 14px rgba(255,255,255,.25)}
+.hud.egging .sharePill,.hud.between .sharePill{display:none}
+.ea .btn{width:100%;cursor:pointer;background:none}.ea #eaShare{border-color:rgba(255,255,255,.35)}
+.mbMore{display:flex;justify-content:center;gap:14px}
+.shareToast{position:fixed;left:50%;bottom:calc(max(14px,env(safe-area-inset-bottom)) + 96px);transform:translateX(-50%);z-index:12;padding:10px 16px;border-radius:999px;background:#c7ff16;color:#070707;font:700 12px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap;box-shadow:0 0 24px rgba(199,255,22,.5);animation:toastA 2.4s forwards}
+@keyframes toastA{0%{opacity:0;transform:translate(-50%,10px)}10%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+@media (max-width:760px){.sharePill{top:70px;right:12px}}
 </style>
 </head>
 <body>
@@ -411,7 +418,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     <div class="mbRays"></div><div class="mbOrbit" id="mbOrbit"></div><div class="mbTier" id="mbTier">?</div>
     <div class="mbScene"><div class="mbCube" id="mbCube"><i class="f1">?</i><i class="f2">?</i><i class="f3">?</i><i class="f4">?</i><i class="f5"></i><i class="f6"></i></div></div>
     <div class="mbCard" id="mbCard"><div class="mbRar" id="mbRar"></div><div class="mbOrb" id="mbOrb"></div><h3 id="mbName"></h3><p id="mbFrom"></p><p id="mbTaste"></p><p class="mbPow" id="mbPow"></p>
-      <button class="mbFeed" id="mbFeed">Feed to Aeon</button><button class="mbAgain" id="mbAgain">scan another</button></div>
+      <button class="mbFeed" id="mbFeed">Feed to Aeon</button><div class="mbMore"><button class="mbAgain" id="mbShare">&#8599; share this find</button><button class="mbAgain" id="mbAgain">scan another</button></div></div>
     <div class="mbStatus" id="mbStatus">DECODING MATTER&#8230;</div>
   </div>
 </div>
@@ -429,6 +436,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     <div class="eaFine">Join the Lucid Instinct list for the launch and community news. Unsubscribe any time.</div>
   </form>
   <a class="btn primary" id="eaInsta" href="https://www.instagram.com/lucidinstinct/" target="_blank" rel="noopener">Follow @lucidinstinct</a>
+  <button class="btn" id="eaShare" type="button">&#8599; Share with a friend</button>
   <a class="btn" id="eaHome" href="https://lucidinstinct.com/?utm_source=aeon&utm_medium=entity&utm_campaign=home" target="_blank" rel="noopener">&#8962; Take me home</a>
 </div></div>
 <div class="hud" id="hud">
@@ -447,9 +455,11 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
   </div>
   <div class="hint" id="hint">move · click · hold · drag</div>
   <button class="eaPill" id="eaPill" title="About this demo">early access</button>
+  <button class="sharePill" id="sharePill" title="Share Aeon with a friend">&#8599; share</button>
   <div class="eaNote">early access demo · limited features</div>
   <div class="tr">
     <label class="bright" title="Brightness">&#9788;<input type="range" id="bBright" min="40" max="160" step="1" value="100" aria-label="Brightness"><span id="bBrightV">100%</span></label>
+    <button id="bShare" title="Share Aeon with a friend">&#8599; share</button>
     <button id="bWord" title="Feed Aeon a word, a wish or a name">&#9998; feed a word</button>
     <button id="bHome" title="Take me home: lucidinstinct.com">&#8962; take me home</button>
     <button id="bInsta" title="Follow Lucid Instinct on Instagram">follow on instagram</button>
@@ -1974,12 +1984,23 @@ gzSetConcept(gzConcept);
 if (params.has('gizmo')) setTimeout(() => { if (!egg.on) openGizmo(); }, 1500);
 { const r = document.getElementById('bBright'), v = document.getElementById('bBrightV'); r.value = Math.round(BRIGHT.value * 100); v.textContent = r.value + '%';
   r.addEventListener('input', () => { BRIGHT.value = r.value / 100; v.textContent = r.value + '%'; try { localStorage.setItem('aeon.bright', String(BRIGHT.value)); } catch {} }); r.addEventListener('keydown', e => e.stopPropagation()); }
+/* share: the phone's own share sheet where there is one (iPhone, Android), otherwise the link is copied */
+const SHARE_URL = 'https://entity.lucidinstinct.com/?utm_source=share&utm_medium=friend';
+const shareToast = t => { const d = document.createElement('div'); d.className = 'shareToast'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 2500); };
+async function shareAeon(text, tag = 'share') {
+  const data = { title: 'Lucid Aeon · Lucid Instinct', text: text || 'I hatched an interdimensional entity. Hatch yours, feed it, watch it evolve.', url: SHARE_URL }; track(tag);
+  if (navigator.share) { try { await navigator.share(data); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(`${data.text} ${data.url}`); shareToast('Link copied · send it to a friend'); }
+  catch { window.prompt('Copy this link and send it to a friend:', data.url); }
+}
 const eaEl = document.getElementById('ea');
 function openEA() { eaEl.classList.add('on'); mem.eaSeen = true; save(); document.getElementById('eaInsta').focus(); }
 function closeEA() { eaEl.classList.remove('on'); }
 document.getElementById('eaPill').onclick = openEA; document.getElementById('eaX').onclick = closeEA;
 eaEl.addEventListener('click', e => { if (e.target === eaEl) closeEA(); }); addEventListener('keydown', e => { if (e.key === 'Escape' && eaEl.classList.contains('on')) closeEA(); });
 document.getElementById('eaInsta').addEventListener('click', () => track('instagram'));
+document.getElementById('sharePill').onclick = () => shareAeon(); document.getElementById('bShare').onclick = () => shareAeon(); document.getElementById('eaShare').onclick = () => shareAeon();
+document.getElementById('mbShare').onclick = () => { const it = gzItem; shareAeon(it ? `I scanned a barcode and decoded a ${it.rarity} ${it.name} ${it.icon} (it tastes like ${it.taste}). Scan yours:` : null, 'share-find'); };
 document.getElementById('eaEmail').addEventListener('keydown', e => e.stopPropagation());
 document.getElementById('eaList').addEventListener('submit', () => { track('waitlist'); mem.waitlist = true; save(); setTimeout(() => { const f = document.getElementById('eaList'); f.classList.add('done'); f.querySelector('.eaListH').textContent = 'You are on the list. Check the new tab to confirm.'; }, 300); }); document.getElementById('eaHome').addEventListener('click', () => track('home'));
 document.getElementById('bHome').onclick = () => { track('home'); open('https://lucidinstinct.com/?utm_source=aeon&utm_medium=entity&utm_campaign=home', '_blank', 'noopener'); };
