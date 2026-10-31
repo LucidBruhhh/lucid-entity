@@ -179,7 +179,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 .gzType{display:none;gap:8px;margin-top:12px}.gzType.on{display:flex}
 .gzType input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(199,255,22,.35);background:#05060a;color:#e8ffd0;font:400 15px/1 "JetBrains Mono",monospace;letter-spacing:.12em}
 .gzType button,.gzRow button{padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(#2a2e39,#151820);color:#d8dce8;font:700 11px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
-.gzRow{display:flex;justify-content:space-between;gap:10px;margin-top:12px}
+.gzRow{display:flex;justify-content:space-between;gap:8px;margin-top:12px}.gzRow button{flex:1;padding:10px 6px;font-size:10px;letter-spacing:.12em}
 .gzGrille{height:8px;margin:14px 30% 0;border-radius:4px;background:repeating-linear-gradient(90deg,#07080c 0 4px,#2a2e39 4px 7px);opacity:.8}
 /* mystery box: it shivers, light leaks from the seams, it bursts, the item is revealed */
 .mb{position:fixed;inset:0;display:none;place-items:center;background:radial-gradient(circle at 50% 45%,rgba(20,24,6,.75),rgba(1,1,4,.96) 70%)}.mb.on{display:grid}
@@ -272,7 +272,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
       <div class="gzRead" id="gzRead">BOOTING<span class="cur">_</span></div>
     </div>
     <div class="gzType" id="gzType"><input id="gzIn" inputmode="numeric" maxlength="20" placeholder="barcode digits" autocomplete="off"><button id="gzGo">decode</button></div>
-    <div class="gzRow"><button id="gzKey">&#9000; type code</button><button id="gzOff">power off</button></div>
+    <div class="gzRow"><button id="gzKey">&#9000; type code</button><button id="gzWord">&#9998; feed a word</button><button id="gzOff">power off</button></div>
     <div class="gzRune rev"><span>ᚾ⍟ӜᛜΔ⟐ᚱ⌘Ϟ⍙ᛞ⟡ψ⌖ᚹ⎔Ѫ⟟ᛉ⍜ΩᛟΞ⌬⟁ᚠᚾ⍟ӜᛜΔ⟐ᚱ⌘Ϟ⍙ᛞ⟡ψ⌖ᚹ⎔Ѫ⟟ᛉ⍜ΩᛟΞ⌬⟁ᚠᚾ⍟ӜᛜΔ⟐ᚱ⌘Ϟ⍙ᛞ⟡ψ⌖ᚹ⎔Ѫ⟟ᛉ⍜ΩᛟΞ⌬⟁ᚠ</span></div>
   </div>
   <div class="mb" id="mb">
@@ -311,7 +311,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
   <div class="eaNote">early access demo · limited features</div>
   <div class="tr">
     <label class="bright" title="Brightness">&#9788;<input type="range" id="bBright" min="40" max="160" step="1" value="100" aria-label="Brightness"><span id="bBrightV">100%</span></label>
-    <button id="bGizmo" title="Scan a barcode and turn it into food">&#8961; scanner gizmo</button>
+    <button id="bWord" title="Feed Aeon a word, a wish or a name">&#9998; feed a word</button>
     <button id="bHome" title="Take me home: lucidinstinct.com">&#8962; take me home</button>
     <button id="bInsta" title="Follow Lucid Instinct on Instagram">follow on instagram</button>
     <button id="bSound" title="Sound (s)">sound off</button>
@@ -329,7 +329,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
   <nav class="dock" id="dock" aria-label="Aeon">
     <button id="dJourney" title="Dive through its eye into the space between universes (b)"><i>&#9678;</i>journey</button>
     <button id="dEvo" title="Step through every evolution ([ and ])"><i>&#11041;</i>evolve</button>
-    <button id="dFeed" class="primary" title="Feed it a word and watch it grow"><i>&#10022;</i>feed</button>
+    <button id="dFeed" class="primary" title="Scanner Gizmo: scan a barcode, open the mystery box, feed Aeon"><i>&#8961;</i>scan</button>
     <button id="dBeings" title="Meet the beings without the journey (e)"><i>&#10042;</i>beings</button>
     <button id="dMore" title="Sound, timeline, listen, veil, frame rate, stats"><i>&#8943;</i>more</button>
   </nav>
@@ -1697,7 +1697,7 @@ document.getElementById('tLive').onclick = () => { if (lapse.on) toggleLapse(); 
   const setEvo = on => { hud.classList.toggle('evo-on', on); dEvo.classList.toggle('on', on); if (on) { hud.classList.remove('more-on'); dMore.classList.remove('on'); if (!lapse.on) { toggleLapse(); scrubTo(growthDays()); } } else if (lapse.on) toggleLapse(); };
   dEvo.onclick = () => setEvo(!hud.classList.contains('evo-on'));
   dMore.onclick = () => { const on = !hud.classList.contains('more-on'); hud.classList.toggle('more-on', on); hud.classList.toggle('stats-on', on); dMore.classList.toggle('on', on); if (on && hud.classList.contains('evo-on')) setEvo(false); };
-  $('dFeed').onclick = () => $('bFeed').click(); $('dJourney').onclick = () => $('bBetween').click(); $('dBeings').onclick = () => $('bBeings').click();
+  $('dFeed').onclick = () => openGizmo(); $('dJourney').onclick = () => $('bBetween').click(); $('dBeings').onclick = () => $('bBeings').click();
   bLapse.addEventListener('click', () => { if (hud.classList.contains('evo-on')) { hud.classList.remove('evo-on'); dEvo.classList.remove('on'); } });
   const ring = (id, f, txt) => { const c = $(id); c.style.strokeDasharray = RC; c.style.strokeDashoffset = RC * (1 - clamp(f)); $(id + 'N').textContent = txt; };
   const tick = () => {
@@ -1783,7 +1783,8 @@ document.getElementById('gzKey').onclick = () => { const t = document.getElement
 const gzManual = () => { const v = document.getElementById('gzIn').value.replace(/\s/g, ''); if (v.length >= 4) gzGot(v); };
 document.getElementById('gzGo').onclick = gzManual; document.getElementById('gzIn').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') gzManual(); });
 addEventListener('keydown', e => { if (e.key === 'Escape' && gzEl.classList.contains('on')) closeGizmo(); });
-document.getElementById('feedGizmo').onclick = openGizmo; document.getElementById('bGizmo').onclick = openGizmo;
+document.getElementById('feedGizmo').onclick = openGizmo; document.getElementById('bWord').onclick = () => openFeed(null);
+document.getElementById('gzWord').onclick = async () => { await closeGizmo(); openFeed(null); };
 if (params.has('gizmo')) setTimeout(() => { if (!egg.on) openGizmo(); }, 1500);
 { const r = document.getElementById('bBright'), v = document.getElementById('bBrightV'); r.value = Math.round(BRIGHT.value * 100); v.textContent = r.value + '%';
   r.addEventListener('input', () => { BRIGHT.value = r.value / 100; v.textContent = r.value + '%'; try { localStorage.setItem('aeon.bright', String(BRIGHT.value)); } catch {} }); r.addEventListener('keydown', e => e.stopPropagation()); }
