@@ -961,6 +961,7 @@ let cracks, eggLight, eggEnv; const EGG_ART = { value: null }, EGG_ARTON = { val
   const metaGeo = new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(mv, 3)), metaMat = new THREE.LineBasicMaterial({ color: 0xc7ff16, ...ADD, opacity: .3 });
   const metaWall = new THREE.LineSegments(metaGeo, metaMat); metaWall.scale.setScalar(1.75); metaWall.position.z = -1.1; metaWall.frustumCulled = false; eggEnv.add(metaWall);
   const metaFloor = new THREE.LineSegments(metaGeo, metaMat); metaFloor.scale.setScalar(1.35); metaFloor.rotation.x = -Math.PI / 2; metaFloor.position.y = -1.36; metaFloor.frustumCulled = false; eggEnv.add(metaFloor);
+  metaWall.visible = metaFloor.visible = false; // just the egg (user, 1 Nov 2026); the cube stays in code for the intro and puzzles
   eggEnv.userData = { moteP, farP, aura, rings, nodes, sigil, metaWall, metaFloor, metaMat };
 }
 function eggTap() {
