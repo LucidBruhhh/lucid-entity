@@ -205,8 +205,14 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 @keyframes mbFloat{50%{transform:translateY(-6px) rotate(6deg)}}
 .gzRead.bar{white-space:normal;line-height:1.55;bottom:5%}
 /* the backpack: everything found, Mythics on a holographic card */
-.dock button{position:relative}.dock button:not(.primary){width:clamp(46px,calc((100vw - 152px) / 5),64px)}
+.dock button{position:relative}.dock button:not(.primary){width:clamp(50px,calc((100vw - 152px) / 4),64px)}
 @media (max-width:420px){.dock button:not(.primary){font-size:7.6px;letter-spacing:.1em}}
+/* two buttons each side, so SCAN sits in the middle of the screen; "more" lives top right as a ⋯ button and its drawer opens beneath it */
+.morePill{position:absolute;top:calc(max(14px,env(safe-area-inset-top)) + 96px);right:20px;width:44px;height:44px;border-radius:50%;pointer-events:auto;cursor:pointer;display:grid;place-items:center;padding:0 0 4px;font:700 20px/1 Rajdhani,Eurostile,Arial,sans-serif;color:var(--fg);background:rgba(10,6,24,.58);border:1px solid var(--line);box-shadow:0 0 18px rgba(140,110,255,.16);transition:background .3s,border-color .3s}
+.morePill.on{border-color:rgba(159,232,255,.45);color:var(--glow);background:rgba(159,232,255,.1)}
+.hud.more-on .tr{top:calc(max(14px,env(safe-area-inset-top)) + 148px);bottom:auto}
+.hud.between .morePill,.hud.egging .morePill{display:none}
+@media (max-width:760px){.morePill{right:12px;top:calc(max(14px,env(safe-area-inset-top)) + 86px)}}
 .dock button i svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .dock button.new::after{content:'';position:absolute;top:7px;right:calc(50% - 17px);width:8px;height:8px;border-radius:50%;background:#c7ff16;box-shadow:0 0 8px #c7ff16}
 .dock button.new.mythic::after{background:#7ff6ff;box-shadow:0 0 8px #1ec8ff,0 0 16px #ff5fd8}
@@ -512,6 +518,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
   </div>
   <div class="hint" id="hint">move · click · hold · drag</div>
   <button class="eaPill" id="eaPill" title="About this demo">early access</button>
+  <button class="morePill" id="dMore" title="More: sound, timeline, listen, veil, frame rate, stats" aria-label="More settings">&#8943;</button>
   <button class="sharePill" id="sharePill" title="Share Aeon with a friend">&#8599; share</button>
   <div class="eaNote">early access demo · limited features</div>
   <div class="tr">
@@ -539,7 +546,6 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     <button id="dFeed" class="primary" title="Scanner Gizmo: scan a barcode, open the mystery box, feed Aeon"><i>&#8961;</i>scan</button>
     <button id="dBag" title="Backpack: everything you have found (i)"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7V5.6a3 3 0 0 1 6 0V7"/><rect x="4.5" y="7" width="15" height="14" rx="4"/><rect x="8" y="13.2" width="8" height="4.6" rx="1.4"/><path d="M4.5 12h15"/></svg></i>bag</button>
     <button id="dBeings" title="Meet the beings without the journey (e)"><i>&#10042;</i>beings</button>
-    <button id="dMore" title="Sound, timeline, listen, veil, frame rate, stats"><i>&#8943;</i>more</button>
   </nav>
   <div class="ladder" id="ladder"></div>
   <div class="vitals" id="vitals"></div>
@@ -1017,10 +1023,62 @@ let cracks, eggLight, eggEnv; const EGG_ART = { value: null }, EGG_ARTON = { val
   metaWall.visible = metaFloor.visible = false; // just the egg (user, 1 Nov 2026); the cube stays in code for the intro and puzzles
   eggEnv.userData = { moteP, farP, aura, rings, nodes, sigil, metaWall, metaFloor, metaMat };
 }
+/* ---------- the Flower of Life under the egg (2 November 2026): born from the orbit rings, one tap at a time.
+   Tap 1: six circles are born on the inner ring and slide in to lock round a centre circle (the Seed of Life).
+   Tap 2: twelve more are born on the middle ring and lock into the full flower; the outer ring is its boundary.
+   Hatch: the whole flower flares white and bursts outward as rings of energy while Aeon is conceived.
+   Light runs round every circle (as on Aeon's lattice floor); each lock-in flashes and rings a bell. ---------- */
+const FL_R = .72, FL_N = 96; // circle radius: three radii fit the outer orbit ring (2.16 ≈ 2.15)
+const flower = { circles: [], state: 0, burst: 0, ringFade: [1, 1, 1], group: null, pts: null, lines: null, flash: [] };
+{
+  const grp = new THREE.Group(); grp.position.y = -1.33; eggEnv.add(grp); flower.group = grp;
+  const defs = [{ x: 0, z: 0, ring: 1, a0: 0 }];
+  for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; defs.push({ x: Math.cos(a) * FL_R, z: Math.sin(a) * FL_R, ring: 1, a0: a }); }
+  for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3, b = a + Math.PI / 6, d = FL_R * Math.sqrt(3); defs.push({ x: Math.cos(a) * 2 * FL_R, z: Math.sin(a) * 2 * FL_R, ring: 2, a0: a }); defs.push({ x: Math.cos(b) * d, z: Math.sin(b) * d, ring: 2, a0: b }); }
+  defs.forEach((d, i) => { const br = d.ring === 1 ? 1.15 : 1.6; flower.circles.push({ tx: d.x, tz: d.z, bx: i ? Math.cos(d.a0) * br : 0, bz: i ? Math.sin(d.a0) * br : 0, ring: d.ring, k: 0, seed: Math.random() * 6.283, lock: 0, delay: i ? (i % 7) * .07 : 0 }); });
+  const n = flower.circles.length, pos = new Float32Array(n * FL_N * 3), ang = new Float32Array(n * FL_N), seed = new Float32Array(n * FL_N), lpos = new Float32Array(n * FL_N * 6);
+  flower.circles.forEach((c, ci) => { for (let k = 0; k < FL_N; k++) { ang[ci * FL_N + k] = k / FL_N * 6.283; seed[ci * FL_N + k] = c.seed; } });
+  const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pos, 3)); pg.setAttribute('aAng', new THREE.BufferAttribute(ang, 1)); pg.setAttribute('aSeed', new THREE.BufferAttribute(seed, 1));
+  const pm = new THREE.ShaderMaterial({ uniforms: { uTime: { value: 0 }, uCol: { value: new THREE.Color() }, uCol2: { value: new THREE.Color(0xc7ff16) }, uAlpha: { value: 0 }, uSpeed: { value: 1 }, uSize: { value: 1 }, uPx: { value: 1 }, uWhite: { value: 0 }, uMap: { value: GLOW } },
+    vertexShader: 'attribute float aAng, aSeed; uniform float uTime, uSpeed, uSize, uPx; varying float vP, vP2; void main(){ vP = pow(max(sin(aAng * 3. - uTime * 2.4 * uSpeed + aSeed), 0.), 24.); vP2 = pow(max(sin(aAng * 2. + uTime * 1.9 * uSpeed + aSeed * 1.7), 0.), 24.); vec4 mv = modelViewMatrix * vec4(position, 1.); gl_PointSize = (7. + 24. * vP + 12. * vP2) * uSize * uPx * 6.2 / max(1., -mv.z); gl_Position = projectionMatrix * mv; }',
+    fragmentShader: 'uniform sampler2D uMap; uniform vec3 uCol, uCol2; uniform float uAlpha, uWhite; varying float vP, vP2; void main(){ float m = texture2D(uMap, gl_PointCoord).a; vec3 c = uCol * (.35 + vP * 2.2) + uCol2 * vP2 * 1.5 + vec3(1.) * (vP * vP + uWhite); gl_FragColor = vec4(c * m * uAlpha, m * uAlpha * (.45 + .55 * max(vP, vP2))); }',
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false });
+  flower.pts = new THREE.Points(pg, pm); flower.pts.frustumCulled = false; flower.pts.renderOrder = 4; flower.pts.visible = false; grp.add(flower.pts);
+  const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.BufferAttribute(lpos, 3));
+  flower.lines = new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ ...ADD, opacity: 0 })); flower.lines.frustumCulled = false; flower.lines.visible = false; grp.add(flower.lines);
+  flower.flash = flower.circles.map(() => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, ...ADD, opacity: 0, depthTest: false })); sp.scale.setScalar(.01); sp.renderOrder = 5; grp.add(sp); return sp; });
+}
+function flowerFrame(dt, t, hb) {
+  const F = flower; if (F.state === 0 && F.burst === 0) return;
+  F.pts.visible = F.lines.visible = true;
+  const pos = F.pts.geometry.attributes.position.array, lp = F.lines.geometry.attributes.position.array; let locked = 0;
+  for (let i = 0; i < 3; i++) if (i < F.state) F.ringFade[i] = Math.max(0, F.ringFade[i] - dt * 1.1); // the ring that gave birth fades as its circles lock
+  F.circles.forEach((c, ci) => {
+    const want = c.ring <= F.state; if (want && c.delay > 0) { c.delay -= dt; } else if (want) { const was = c.k; c.k = Math.min(1, c.k + dt / 1.05); if (was < 1 && c.k >= 1) { c.lock = 1; locked++; } }
+    c.lock = Math.max(0, c.lock - dt * 1.5);
+    const e = smooth(c.k), cx = lerp(c.bx, c.tx, e), cz = lerp(c.bz, c.tz, e), r = FL_R * (ci ? .2 + .8 * e : e) * (1 + c.lock * .08), wob = (1 - e) * .06 * Math.sin(t * 9 + c.seed), y = (1 - e) * .18 + c.lock * .06, spin = (c.ring === 2 ? -1 : 1) * t * .18;
+    for (let k = 0; k < FL_N; k++) { const a = k / FL_N * 6.283 + spin, i = (ci * FL_N + k) * 3; pos[i] = cx + Math.cos(a) * (r + wob); pos[i + 1] = y; pos[i + 2] = cz + Math.sin(a) * (r + wob); }
+    for (let k = 0; k < FL_N; k++) { const a0 = k / FL_N * 6.283, a1 = (k + 1) / FL_N * 6.283, i = (ci * FL_N + k) * 6; lp[i] = cx + Math.cos(a0) * r; lp[i + 1] = y; lp[i + 2] = cz + Math.sin(a0) * r; lp[i + 3] = cx + Math.cos(a1) * r; lp[i + 4] = y; lp[i + 5] = cz + Math.sin(a1) * r; }
+    const f = F.flash[ci]; f.position.set(cx, y + .02, cz); f.material.opacity = c.lock * c.lock * .7 * (1 - F.burst); f.scale.setScalar(.15 + (1 - c.lock) * .9); f.material.color.copy(colC).lerp(new THREE.Color(0xffffff), .55);
+  });
+  if (locked) { audio.bell(392 + F.state * 131, .35); audio.bell(587 + F.state * 131, .3); egg.pulse = Math.max(egg.pulse, .55); } // a circle locked into the lattice
+  F.pts.geometry.attributes.position.needsUpdate = true; F.lines.geometry.attributes.position.needsUpdate = true;
+  const u = F.pts.material.uniforms, b = F.burst; u.uTime.value = t; u.uCol.value.copy(colC); u.uSpeed.value = 1 + F.state * .6 + egg.pulse * 2 + b * 6; u.uPx.value = renderer.getPixelRatio();
+  u.uSize.value = (.75 + hb * .25 + egg.pulse * .7) * (1 + b * 1.6); u.uAlpha.value = Math.min(1, .35 + F.state * .4) * (1 - smooth(b)); u.uWhite.value = b > 0 ? Math.max(0, 1 - b * 3) * .5 : 0; // a flare, not a white-out: the hatch flash is already there
+  F.lines.material.color.copy(colB).lerp(new THREE.Color(0xffffff), b > 0 ? .8 : 0); F.lines.material.opacity = (.22 + hb * .15 + egg.pulse * .3 + F.state * .05) * (1 - smooth(b));
+}
+function flowerBurst(dt, t) { // the hatch: the flower flares white, lifts and bursts outward as rings of energy, then is gone
+  const F = flower; if (F.burst <= 0 || F.burst >= 1) return;
+  F.burst = Math.min(1, F.burst + dt / 1.7); const k = F.burst, g = F.group;
+  flowerFrame(dt, t, 0);
+  g.scale.setScalar(1 + k * k * 5.5); g.position.y = lerp(-1.33, .6, smooth(k)); g.rotation.y += dt * (1.2 + k * 2.5); g.rotation.x = -smooth(k) * .35;
+  if (k >= 1) { scene.remove(g); F.pts.visible = F.lines.visible = false; }
+}
+
 function eggTap() {
   ndc.set(ptr.x, ptr.y); ray.setFromCamera(ndc, camera); sphere.center.set(0, 0, 0); sphere.radius = 1.3;
   if (!ray.ray.intersectsSphere(sphere)) { whisper('Tap the egg itself.', 2.5); return; }
-  egg.taps++; egg.pulse = 1; egg.shake = 1; audio.bell(110 + egg.taps * 24, .7);
+  egg.taps++; egg.pulse = 1; egg.shake = 1; audio.bell(110 + egg.taps * 24, .7); flower.state = Math.min(2, egg.taps); // the rings below gather into the Flower of Life
   if (egg.taps >= 3) return eggHatch();
   egg.crackY = egg.taps === 1 ? .45 : -.35; whisper(EGG_SAYS[egg.taps - 1], 3.5);
 }
@@ -1080,6 +1138,7 @@ function aeonConception(cx, cy) {
 }
 function eggHatch() {
   EGG_ARTON.value = 0; egg.on = false; track('hatch'); egg.hatch = .001; egg.t0 = clock.t; egg.crackY = -1.6; cracks.visible = false;
+  flower.burst = .001; scene.add(flower.group); // the flower bursts outward in Aeon's own scene
   renderPass.scene = scene; eyePass.enabled = true; scene.add(eggGroup); // the shards fly in Aeon's own scene while it fades in
   mood.flash = 1; mood.fold = 1; wave(new THREE.Vector3(), 6, colC); [262, 392, 523, 784].forEach((f, i) => setTimeout(() => audio.bell(f, .5), i * 110));
   { const v = new THREE.Vector3(0, 0, 0).project(camera); aeonConception((v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight); } // how Aeon is born, centred on the egg
@@ -1111,7 +1170,8 @@ function eggFrame(dt, t, now) {
   eggLight.material.opacity = .02 + egg.pulse * .22 + egg.taps * .025; eggLight.material.color.copy(colC); eggLight.scale.setScalar(1.6 + egg.pulse * 1.2);
   { const E = eggEnv.userData; EGG_ARTON.value = 0; E.moteP.rotation.y = t * .07; E.moteP.position.y = Math.sin(t * .3) * .1; E.moteP.material.color.copy(colB); E.moteP.material.opacity = .45 + pulse * .45;
     E.farP.rotation.y = t * .004; E.aura.material.color.copy(colC); E.aura.material.opacity = .08 + pulse * .14; E.aura.scale.setScalar(6 + pulse * 1.5 + egg.pulse * 2);
-    E.rings.forEach((l, i) => { l.rotation.y = t * (.12 - i * .05) * (i % 2 ? -1 : 1); l.material.color.copy(i === 1 ? colC : colB); l.material.opacity = (.22 - i * .05) + hb * .12 + egg.pulse * .3; l.scale.setScalar(1 + egg.pulse * .12 * (i + 1)); });
+    E.rings.forEach((l, i) => { l.rotation.y = t * (.12 - i * .05) * (i % 2 ? -1 : 1); l.material.color.copy(i === 1 ? colC : colB); l.material.opacity = ((.22 - i * .05) + hb * .12 + egg.pulse * .3 + (i === 2 ? flower.state * .12 : 0)) * flower.ringFade[i]; l.scale.setScalar(1 + egg.pulse * .12 * (i + 1)); });
+    flowerFrame(dt, t, hb);
     E.metaWall.rotation.y = Math.sin(t * .35) * .55 + egg.taps * .4; E.metaWall.rotation.z = t * .06 + egg.taps * .5; E.metaWall.scale.setScalar(1.75 * (1 + egg.pulse * .07 + hb * .015));
     E.metaFloor.rotation.z = -t * .12 - egg.taps * .6; E.metaMat.opacity = .16 + hb * .18 + egg.pulse * .55 + egg.taps * .05;
     E.sigil.rotation.z = t * .08; E.sigil.material.color.copy(colC).lerp(new THREE.Color(0xc7ff16), .35); E.sigil.material.opacity = .28 + hb * .25 + egg.pulse * .6;
@@ -1387,8 +1447,11 @@ const eyeScene = new THREE.Scene(); eyeScene.add(eyeOver, eyeRingOver);
 const eyePass = new RenderPass(eyeScene, camera); eyePass.clear = false; composer.insertPass(eyePass, composer.passes.indexOf(bloom) + 1);
 
 /* ---------- D2 filaments ---------- */
-const TMAX = 30, TK = 26;
+const TMAX = 30, TK = 36;
 const tendrilRib = new Ribbons(TMAX * TK, 1); tendrilRib.mat.uniforms.uSpeed.value = 4; scene.add(tendrilRib.mesh);
+const helixRib = new Ribbons(TMAX * TK, 1); helixRib.mat.uniforms.uSpeed.value = 6; scene.add(helixRib.mesh); // a glowing thread wound round each tentacle
+const tSway = Float32Array.from({ length: TMAX }, (_, i) => .7 + ((i * 7919) % 13) / 20); // how strongly each tentacle swings with the phone
+const _gW = new THREE.Vector3(), _fW = new THREE.Vector3(), _hx = new THREE.Vector3();
 const tDirs = [], tBasis = [], tSeed = [];
 {
   let seed = 3; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
@@ -1400,6 +1463,9 @@ const tDirs = [], tBasis = [], tSeed = [];
     tDirs.push(d); tBasis.push([u, new THREE.Vector3().crossVectors(d, u)]); tSeed.push(rnd());
   }
 }
+const motion = { g: { x: 0, y: -1 }, acc: { x: 0, y: 0 }, f: { x: 0, y: 0 }, fv: { x: 0, y: 0 }, on: 0, jolt: 0, asked: false }; // the phone's tilt and movement
+const M_ON = () => performance.now() - motion.on < 2000 ? 1 : 0; // no tilt sensor (a computer): no hanging
+const WHITE = new THREE.Color(1, 1, 1);
 const tPts = new Float32Array(TMAX * TK * 3), tReach = new Float32Array(TMAX), tGrow = new Float32Array(TMAX);
 const SPK = TMAX * 4;
 const sparkGeo = new THREE.BufferGeometry();
@@ -3453,6 +3519,18 @@ addEventListener('focus', () => { if (!env.focus) { chr.bounceV += 2; chr.glance
 addEventListener('pagehide', saveMood);
 function saveMood() { mem.lastMood = chr.grumpy > 0 ? 'sulk' : chr.giggle > 0 ? 'giggle' : mood.sleep > .6 ? 'asleep' : ''; storeDream(); save(true); }
 // a phone tilts and shakes
+addEventListener('deviceorientation', e => { if (e.gamma == null || e.beta == null) return; motion.on = performance.now();
+  const b = e.beta * Math.PI / 180, g = e.gamma * Math.PI / 180, gx = Math.cos(b) * Math.sin(g), gy = -Math.sin(b), A = (screen.orientation?.angle ?? window.orientation ?? 0) * Math.PI / 180;
+  motion.g.x = lerp(motion.g.x, gx * Math.cos(A) - gy * Math.sin(A), .25); motion.g.y = lerp(motion.g.y, gx * Math.sin(A) + gy * Math.cos(A), .25); }); // gravity on screen: x right, y up
+addEventListener('devicemotion', e => { const a = e.acceleration; if (!a || a.x == null) return; const A = (screen.orientation?.angle ?? window.orientation ?? 0) * Math.PI / 180;
+  motion.acc.x = a.x * Math.cos(A) - a.y * Math.sin(A); motion.acc.y = a.x * Math.sin(A) + a.y * Math.cos(A);
+  const m = Math.hypot(a.x, a.y, a.z || 0); if (m > 9 && performance.now() - motion.jolt > 1500) { motion.jolt = performance.now(); chr.bounceV += 4; mood.startle = Math.max(mood.startle, .5); } });
+function askMotion() { // iPhone: tilt and motion reach a web page only after the player allows it, from a tap
+  if (motion.asked) return; motion.asked = true; const D = window.DeviceOrientationEvent, Mo = window.DeviceMotionEvent;
+  if (typeof D?.requestPermission !== 'function') return;
+  Promise.all([D.requestPermission(), Mo?.requestPermission?.() ?? 'granted']).then(r => { if (r[0] === 'granted') { mem.motionOk = true; save(true); setTimeout(() => whisper('Oh. I can feel which way is down now. Tilt me.', 5), 600); } }).catch(() => {});
+}
+canvas.addEventListener('pointerup', () => { if (!egg.on && clock.intro >= 1) askMotion(); });
 addEventListener('deviceorientation', e => { if (e.gamma == null || e.beta == null) return; env.gravity.set(clamp(e.gamma / 40, -1, 1), -clamp((e.beta - 40) / 40, -1, 1), 0); });
 addEventListener('devicemotion', e => { const a = e.acceleration; if (a && Math.hypot(a.x || 0, a.y || 0, a.z || 0) > 22 && chr.dizzy <= 0) { chr.dizzy = 3; whisper(pick(DIZZY), 4); } });
 // the connection to the other membranes
@@ -3571,6 +3649,7 @@ function frame(now) {
   clock.t += dt * speedK; const t = clock.t;
   if (egg.on) { eggFrame(dt, t, now); return; } // sealed in the egg until you tap it open: Aeon itself is not drawn yet
   if (egg.hatch > 0 && egg.hatch < 1) eggFling(dt); // the shards fly while Aeon fades in
+  if (flower.burst > 0 && flower.burst < 1) flowerBurst(dt, t); // and the Flower of Life bursts outward
   clock.intro = Math.min(1, clock.intro + dt / (reduced ? 1.2 : 4));
   const intro = 1 - Math.pow(1 - clock.intro, 3);
   if (between.mode === 'in' || between.mode === 'closing') { betweenFrame(dt); return; } // the Interstice replaces Aeon's view
@@ -3774,8 +3853,12 @@ function frame(now) {
 
   /* filaments */
   const tCount = (6 + 24 * smooth(g / 45)) * L[1];
-  tendrilRib.begin();
+  tendrilRib.begin(); helixRib.begin();
   const fil = tendrilRib;
+  { const M = motion, hdt = Math.min(dt, .05); // spring: pushed opposite to how the phone accelerates, then wobbles back
+    for (const ax of ['x', 'y']) { M.fv[ax] += (-M.f[ax] * 38 - M.fv[ax] * 3.2 - M.acc[ax] * 1.8) * hdt; M.f[ax] += M.fv[ax] * hdt; }
+    _gW.set(0, 0, 0).addScaledVector(_cR, M.g.x).addScaledVector(_cU, M.g.y); // which way is down, on screen
+    _fW.set(0, 0, 0).addScaledVector(_cR, M.f.x).addScaledVector(_cU, M.f.y); }
   for (let i = 0; i < TMAX; i++) {
     tGrow[i] = lerp(tGrow[i], clamp(tCount - i), dt * 1.5);
     const gr = tGrow[i]; if (gr < .01) continue;
@@ -3791,6 +3874,8 @@ function frame(now) {
       const a1 = Math.sin(ph + s * 4.5) * amp, a2 = Math.cos(ph * .83 + s * 3.7) * amp;
       const lk = 1 - s * .6; // tendrils root in the leaning body
       let x = d.x * base + u.x * a1 + w.x * a2 + chr.lean.x * lk, y = d.y * base + u.y * a1 + w.y * a2 + chr.lean.y * lk, z = d.z * base + u.z * a1 + w.z * a2 + chr.lean.z * lk;
+      const hang = len * s * s * .5 * M_ON() * (1 - tReach[i] * .7), fl = len * s * s * tSway[i]; // the tip hangs most, the root not at all
+      x += _gW.x * hang + _fW.x * fl; y += _gW.y * hang + _fW.y * fl; z += _gW.z * hang + _fW.z * fl;
       const r = tReach[i] * Math.pow(s, 1.5) * .9;
       x += (attn.x - x) * r; y += (attn.y - y) * r; z += (attn.z - z) * r;
       const o = (i * TK + k) * 3; tPts[o] = x; tPts[o + 1] = y; tPts[o + 2] = z;
@@ -3798,13 +3883,18 @@ function frame(now) {
     const alpha = (.7 + tReach[i] * .8) * intro * (1 - mood.sleep * .5) * (1 - mat * .35);
     for (let k = 0; k < TK - 1; k++) {
       const s0 = k / (TK - 1), s1 = (k + 1) / (TK - 1), o = (i * TK + k) * 3;
-      tmpC.copy(colB).lerp(colC, s0 * .8 + tReach[i] * .3);
+      tmpC.copy(colB).lerp(colC, s0 * .8 + tReach[i] * .3).lerp(WHITE, Math.pow(s0, 8) * .55); // the tips burn brightest
+      const pearl = s => 1 + .38 * Math.pow(Math.max(0, Math.sin(s * 47 - t * 1.6 + sd * 9)), 6) * (1 - s * .5); // bead-like segments that ripple outward
       fil.seg(tPts[o], tPts[o + 1], tPts[o + 2], tPts[o + 3], tPts[o + 4], tPts[o + 5],
-        R * .05 * Math.pow(1 - s0, .8) + .007, R * .05 * Math.pow(1 - s1, .8) + .007, tmpC, alpha * (1 - s0 * .55), alpha * (1 - s1 * .55), s0 * 2 + sd * 3, s1 * 2 + sd * 3);
+        (R * .05 * Math.pow(1 - s0, .8) + .007) * pearl(s0), (R * .05 * Math.pow(1 - s1, .8) + .007) * pearl(s1), tmpC, alpha * (1 - s0 * .55), alpha * (1 - s1 * .55), s0 * 2 + sd * 3, s1 * 2 + sd * 3);
+      if (perf.level < 2) { const hr = s => R * .06 * Math.pow(1 - s, .9) + .004, th0 = s0 * 17 + t * 2.2 + sd * 6, th1 = s1 * 17 + t * 2.2 + sd * 6; // the spiral thread
+        _hx.copy(u).multiplyScalar(Math.cos(th0) * hr(s0)).addScaledVector(w, Math.sin(th0) * hr(s0)); const ax0 = tPts[o] + _hx.x, ay0 = tPts[o + 1] + _hx.y, az0 = tPts[o + 2] + _hx.z;
+        _hx.copy(u).multiplyScalar(Math.cos(th1) * hr(s1)).addScaledVector(w, Math.sin(th1) * hr(s1));
+        tmpC.copy(colC).lerp(WHITE, .35); helixRib.seg(ax0, ay0, az0, tPts[o + 3] + _hx.x, tPts[o + 4] + _hx.y, tPts[o + 5] + _hx.z, .006 + R * .006 * (1 - s0), .006 + R * .006 * (1 - s1), tmpC, alpha * .55 * (1 - s0 * .4), alpha * .55 * (1 - s1 * .4), s0 * 3, s1 * 3); }
     }
   }
-  tendrilRib.mat.uniforms.uSpeed.value = 3 + mood.excite * 5;
-  tendrilRib.end(t);
+  tendrilRib.mat.uniforms.uSpeed.value = 3 + mood.excite * 5 + Math.hypot(motion.fv.x, motion.fv.y) * .3;
+  tendrilRib.end(t); helixRib.end(t);
   for (let j = 0; j < SPK; j++) {
     const i = j % TMAX, gr = tGrow[i];
     if (gr < .2) { sparkSize[j] = 0; continue; }
