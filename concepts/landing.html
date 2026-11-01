@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>First Contact · concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&family=JetBrains+Mono:wght@300;400&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--lime:#c7ff16;--red:#ff2d55;--cyan:#6ff3ff;--fg:#ece8ff;--fg2:rgba(236,232,255,.62);--bg:#020104}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);overflow:hidden;font-family:"JetBrains Mono",monospace;user-select:none;-webkit-user-select:none;touch-action:none}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+.bar{position:fixed;top:max(10px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5;padding:5px;border-radius:999px;background:rgba(8,6,16,.7);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px)}
+.bar button{border:0;border-radius:999px;padding:8px 12px;background:none;color:var(--fg2);font:700 11px/1 Rajdhani,Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+.bar button.on{background:var(--lime);color:#070707}
+.ui{position:fixed;inset:0;pointer-events:none;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:14px;padding:max(70px,calc(env(safe-area-inset-top) + 62px)) 22px max(28px,env(safe-area-inset-bottom))}
+.top{text-align:center;font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--lime);text-shadow:0 0 10px rgba(199,255,22,.6);min-height:3em;line-height:1.7}
+.say{font:300 italic 24px/1.3 "Cormorant Garamond",Georgia,serif;text-align:center;max-width:330px;min-height:2.6em;color:#fff;text-shadow:0 0 18px rgba(170,140,255,.6)}
+.cta{margin-top:auto;font:700 12px/1 Rajdhani,Arial,sans-serif;letter-spacing:.34em;text-transform:uppercase;color:var(--fg2);text-align:center;animation:pulse 2.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+.note{position:fixed;bottom:max(6px,env(safe-area-inset-bottom));left:0;right:0;text-align:center;font-size:9px;letter-spacing:.18em;color:rgba(255,255,255,.28);z-index:4;pointer-events:none;text-transform:uppercase}
+.again{position:fixed;left:50%;bottom:max(46px,calc(env(safe-area-inset-bottom) + 40px));transform:translateX(-50%);z-index:6;display:none;border:0;border-radius:999px;padding:12px 18px;background:var(--lime);color:#070707;font:700 12px/1 Rajdhani,Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;box-shadow:0 0 24px rgba(199,255,22,.5)}
+.again.on{display:block}
+.flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:7;transition:opacity 1.2s}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="bar"><button data-c="0" class="on">I · Signal</button><button data-c="1">II · Pod</button><button data-c="2">III · Sigil</button></div>
+<div class="ui"><div class="top" id="top"></div><div class="say" id="say"></div><div class="cta" id="cta"></div></div>
+<button class="again" id="again">play again</button>
+<div class="flash" id="flash"></div>
+<div class="note">first-contact concepts · Scanner Gizmo · sound on</div>
+<script>
+/* Three first-contact concepts for the Scanner Gizmo game: each is the first 20 seconds a stranger spends with Aeon, ending where the egg hatches. */
+const cv = document.getElementById('c'), x = cv.getContext('2d'), $ = id => document.getElementById(id);
+let W, H, DPR, mode = 0, t0 = performance.now(), S = {};
+const LIME = '#c7ff16';
+function size() { DPR = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * DPR; cv.height = H * DPR; x.setTransform(DPR, 0, 0, DPR, 0, 0); }
+addEventListener('resize', size); size();
+// sound: a small synth, unlocked on the first touch
+let AC = null; const au = () => { if (!AC) try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch {} if (AC && AC.state === 'suspended') AC.resume(); return AC; };
+function tone(f, d = .3, type = 'sine', g = .12, slide = 0) { const a = au(); if (!a) return; const o = a.createOscillator(), v = a.createGain(), n = a.currentTime; o.type = type; o.frequency.setValueAtTime(f, n); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, f * slide), n + d); v.gain.setValueAtTime(g, n); v.gain.exponentialRampToValueAtTime(.0001, n + d); o.connect(v).connect(a.destination); o.start(n); o.stop(n + d + .05); }
+let hum = null; function humOn(f) { const a = au(); if (!a || hum) return; const o = a.createOscillator(), o2 = a.createOscillator(), v = a.createGain(); o.type = 'sawtooth'; o2.type = 'sine'; o.frequency.value = f; o2.frequency.value = f * 1.5; v.gain.value = 0; const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 600; o.connect(lp); o2.connect(lp); lp.connect(v).connect(a.destination); o.start(); o2.start(); hum = { o, o2, v, lp }; }
+function humSet(f, g, cut) { if (!hum) return; const n = AC.currentTime; hum.o.frequency.setTargetAtTime(f, n, .05); hum.o2.frequency.setTargetAtTime(f * 1.5, n, .05); hum.v.gain.setTargetAtTime(g, n, .08); hum.lp.frequency.setTargetAtTime(cut, n, .1); }
+function humOff() { if (!hum) return; const h = hum; hum = null; h.v.gain.setTargetAtTime(0, AC.currentTime, .1); setTimeout(() => { try { h.o.stop(); h.o2.stop(); } catch {} }, 600); }
+const buzz = p => { try { if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(p); } catch {} };
+// type text in, letter by letter
+let typeT = 0; function say(el, txt, speed = 38) { clearTimeout(el._t); let i = 0; const go = () => { el.textContent = txt.slice(0, ++i); if (i < txt.length) el._t = setTimeout(go, speed); }; go(); }
+function flash(ms = 120) { const f = $('flash'); f.style.transition = 'none'; f.style.opacity = 1; requestAnimationFrame(() => { f.style.transition = 'opacity 1.4s'; setTimeout(() => f.style.opacity = 0, ms); }); }
+// the shared ending: an egg, alive, looking back at you
+function drawEgg(cx, cy, r, t, glow, col, eyeOpen = 0, look = [0, 0], cracks = 0) {
+  x.save(); x.translate(cx, cy);
+  const g = x.createRadialGradient(0, 0, r * .2, 0, 0, r * 2.4); g.addColorStop(0, col + '55'); g.addColorStop(1, 'transparent'); x.fillStyle = g; x.globalAlpha = .4 + glow * .6; x.beginPath(); x.arc(0, 0, r * 2.4, 0, 7); x.fill(); x.globalAlpha = 1;
+  x.beginPath(); for (let a = 0; a <= 6.3; a += .05) { const s = Math.sin(a), k = 1 - .18 * Math.cos(a); x.lineTo(Math.cos(a - Math.PI / 2) * r * .78 * k, Math.sin(a - Math.PI / 2) * r * 1.05 * (a > Math.PI / 2 && a < 1.5 * Math.PI ? 1 : .92)); }
+  x.closePath(); const eg = x.createRadialGradient(-r * .3, -r * .4, r * .1, 0, 0, r * 1.2); eg.addColorStop(0, '#2a2140'); eg.addColorStop(.6, '#0d0a18'); eg.addColorStop(1, '#05040a'); x.fillStyle = eg; x.fill();
+  x.save(); x.clip();
+  // bioluminescent cells that beat
+  for (let i = 0; i < 26; i++) { const a = i * 2.39996, rr = Math.sqrt((i + .5) / 26) * r * .95, px = Math.cos(a) * rr * .8, py = Math.sin(a) * rr * 1.05; x.strokeStyle = col; x.globalAlpha = (.12 + glow * .5) * (.5 + .5 * Math.sin(t * 3 - i * .4)); x.lineWidth = 1.2; x.beginPath(); for (let k = 0; k < 6; k++) { const b = k / 6 * 6.283 + i; x.lineTo(px + Math.cos(b) * r * .16, py + Math.sin(b) * r * .16); } x.closePath(); x.stroke(); }
+  x.globalAlpha = 1;
+  if (eyeOpen > 0) { // an eye inside, following you
+    const ex = look[0] * r * .12, ey = look[1] * r * .12, h = r * .32 * eyeOpen;
+    x.fillStyle = '#000'; x.beginPath(); x.ellipse(0, 0, r * .42, h, 0, 0, 7); x.fill();
+    const ig = x.createRadialGradient(ex, ey, 1, ex, ey, r * .3); ig.addColorStop(0, '#000'); ig.addColorStop(.25, '#000'); ig.addColorStop(.3, col); ig.addColorStop(.75, '#4fe3ff'); ig.addColorStop(1, '#100820'); x.fillStyle = ig; x.beginPath(); x.ellipse(0, 0, r * .42, h, 0, 0, 7); x.save(); x.clip(); x.beginPath(); x.arc(ex, ey, r * .3, 0, 7); x.fill(); x.fillStyle = '#000'; x.beginPath(); x.ellipse(ex, ey, r * .05, r * .2, 0, 0, 7); x.fill(); x.restore();
+  }
+  x.restore();
+  if (cracks > 0) { x.strokeStyle = '#fff'; x.shadowColor = col; x.shadowBlur = 14; x.lineWidth = 1.6; x.globalAlpha = Math.min(1, cracks); for (let i = 0; i < 5; i++) { x.beginPath(); let px = (i - 2) * r * .18, py = -r * .95; x.moveTo(px, py); for (let k = 0; k < 6 * Math.min(1, cracks); k++) { px += Math.sin(i * 7 + k * 3) * r * .12; py += r * .16; x.lineTo(px, py); } x.stroke(); } x.globalAlpha = 1; x.shadowBlur = 0; }
+  x.strokeStyle = col; x.globalAlpha = .5 + glow * .5; x.lineWidth = 1.5; x.shadowColor = col; x.shadowBlur = 20; x.beginPath(); for (let a = 0; a <= 6.3; a += .05) { const k = 1 - .18 * Math.cos(a); x.lineTo(Math.cos(a - Math.PI / 2) * r * .78 * k, Math.sin(a - Math.PI / 2) * r * 1.05 * (a > Math.PI / 2 && a < 1.5 * Math.PI ? 1 : .92)); } x.closePath(); x.stroke(); x.shadowBlur = 0; x.globalAlpha = 1;
+  x.restore();
+}
+const ptr = { x: 0, y: 0, down: false, nx: 0, ny: 0 };
+function setP(e) { ptr.x = e.clientX; ptr.y = e.clientY; ptr.nx = (ptr.x / W - .5) * 2; ptr.ny = (ptr.y / H - .5) * 2; }
+
+/* ===================== I · THE SIGNAL: hold to tune in; let go and you lose it ===================== */
+const SIG = {
+  init() { S = { tune: 0, done: 0, end: 0, egg: 0, lost: 0 }; say($('top'), 'INCOMING TRANSMISSION · ORIGIN UNKNOWN', 30); setTimeout(() => say($('say'), 'Something on the other side has your frequency.'), 1400); $('cta').textContent = 'hold anywhere to tune in'; },
+  down() { au(); humOn(55); },
+  up() { if (!S.done) { humSet(55, 0, 300); if (S.tune > .15) { say($('say'), 'Signal lost. It is still out there.'); tone(160, .5, 'triangle', .08, .4); } } },
+  frame(t, dt) {
+    if (!S.done) { S.tune = Math.max(0, Math.min(1, S.tune + (ptr.down ? dt * .32 : -dt * .5))); if (ptr.down) { humSet(55 + S.tune * 380, .05 + S.tune * .08, 300 + S.tune * 3000); if (Math.random() < S.tune * .25) buzz(6); }
+      if (S.tune >= 1) { S.done = 1; S.end = t; humOff(); flash(); buzz([40, 60, 120]); [432, 648, 864, 1296].forEach((f, i) => setTimeout(() => tone(f, 1.6, 'sine', .1), i * 120)); say($('top'), 'LOCKED · 432.00 Hz', 25); say($('say'), 'It heard you. It is coming through.'); $('cta').textContent = ''; } }
+    const n = S.tune, cy = H * .5;
+    // static that clears as you tune
+    const img = x.createImageData(Math.ceil(W / 4), Math.ceil(H / 4)); for (let i = 0; i < img.data.length; i += 4) { const v = Math.random() * 255 * (1 - n) * (S.done ? 0 : 1); img.data[i] = v * .5; img.data[i + 1] = v * .8; img.data[i + 2] = v * .4; img.data[i + 3] = 70; }
+    x.fillStyle = '#020104'; x.fillRect(0, 0, W, H); const tmp = SIG.tmp || (SIG.tmp = document.createElement('canvas')); tmp.width = img.width; tmp.height = img.height; tmp.getContext('2d').putImageData(img, 0, 0); x.imageSmoothingEnabled = false; x.globalAlpha = .55; x.drawImage(tmp, 0, 0, W, H); x.globalAlpha = 1;
+    if (!S.done) { // the waveform: chaos becoming a heartbeat
+      x.strokeStyle = LIME; x.shadowColor = LIME; x.shadowBlur = 12; x.lineWidth = 2; x.beginPath();
+      for (let px = 0; px <= W; px += 3) { const u = px / W, beat = Math.exp(-Math.pow(((u * 3 + t * .8) % 1 - .5) * 14, 2)); const y = cy + (Math.random() - .5) * 90 * (1 - n) + Math.sin(u * 40 + t * 9) * 14 * (1 - n) - beat * 70 * n * Math.sin(u * 60); x.lineTo(px, y); }
+      x.stroke(); x.shadowBlur = 0;
+      // the hold ring
+      const r = 54; x.strokeStyle = 'rgba(199,255,22,.18)'; x.lineWidth = 3; x.beginPath(); x.arc(W / 2, H * .78, r, 0, 7); x.stroke(); x.strokeStyle = LIME; x.shadowColor = LIME; x.shadowBlur = 16; x.beginPath(); x.arc(W / 2, H * .78, r, -Math.PI / 2, -Math.PI / 2 + n * 6.283); x.stroke(); x.shadowBlur = 0;
+      x.fillStyle = LIME; x.font = '400 11px "JetBrains Mono"'; x.textAlign = 'center'; x.fillText((55 + n * 377).toFixed(2) + ' Hz', W / 2, H * .78 + 4);
+    } else { // the rift opens and the egg descends through it
+      const k = Math.min(1, (t - S.end) / 3); for (let i = 0; i < 9; i++) { x.strokeStyle = `rgba(199,255,22,${.5 - i * .05})`; x.lineWidth = 1.5; x.beginPath(); x.ellipse(W / 2, cy, (40 + i * 26) * k * (1 + .05 * Math.sin(t * 3 + i)), (6 + i * 4) * k, 0, 0, 7); x.stroke(); }
+      const ey = cy - 260 * (1 - k) + Math.sin(t * 1.4) * 6; drawEgg(W / 2, ey, Math.min(W, H) * .17, t, .6 + .4 * Math.sin(t * 4), LIME, k > .8 ? Math.min(1, (t - S.end - 2.4) * .8) : 0, [ptr.nx, ptr.ny]);
+      if (t - S.end > 3.5 && !S.egg) { S.egg = 1; say($('say'), 'Tap it. It has been waiting for you.'); $('again').classList.add('on'); }
+    }
+  }
+};
+
+/* ===================== II · SPECIMEN POD: told not to touch it. You touch it. ===================== */
+const POD = {
+  init() { S = { taps: 0, cracks: [], shards: [], broken: 0, end: 0, eye: 0, alarm: 0 }; say($('top'), 'SPECIMEN 00098 · CLASS Ω · STATUS: DORMANT', 26); setTimeout(() => say($('say'), 'Do not tap the glass.'), 1300); $('cta').textContent = '⚠ containment active'; },
+  down(e) { au(); if (S.broken) return; S.taps++; const bx = ptr.x, by = ptr.y; tone(900 + S.taps * 200, .15, 'square', .05); tone(80, .4, 'sine', .3, .5); buzz(30 + S.taps * 20);
+    for (let i = 0; i < 6 + S.taps * 3; i++) { const a = Math.random() * 6.283, pts = [[bx, by]]; let px = bx, py = by; for (let k = 0; k < 7; k++) { px += Math.cos(a + (Math.random() - .5) * .9) * (14 + Math.random() * 26); py += Math.sin(a + (Math.random() - .5) * .9) * (14 + Math.random() * 26); pts.push([px, py]); } S.cracks.push(pts); }
+    const L = ['…', 'WARNING · IT MOVED', 'CONTAINMENT 64% · DO NOT', 'BREACH']; say($('top'), ['SPECIMEN 00098 · STATUS: STIRRING', 'SPECIMEN 00098 · STATUS: AWAKE', 'SPECIMEN 00098 · STATUS: ████████'][Math.min(2, S.taps - 1)], 20);
+    say($('say'), ['I said do not tap the glass.', 'It is looking at you now.', 'Oh no. Oh, it likes you.'][Math.min(2, S.taps - 1)]); $('cta').textContent = L[Math.min(3, S.taps)]; S.alarm = 1; S.eye = Math.min(1, S.taps * .45);
+    if (S.taps >= 3) { S.broken = 1; S.end = performance.now() / 1000; flash(80); buzz([60, 40, 200]); tone(60, 1.5, 'sawtooth', .2, .3); for (let i = 0; i < 40; i++) S.shards.push({ x: W / 2 + (Math.random() - .5) * W * .5, y: H * .45 + (Math.random() - .5) * H * .5, vx: (Math.random() - .5) * 600, vy: (Math.random() - .7) * 600, r: Math.random() * 6.28, s: 6 + Math.random() * 22 }); setTimeout(() => { say($('say'), 'Containment failed. It chose you.'); say($('top'), 'SPECIMEN 00098 · RELEASED', 22); $('cta').textContent = ''; $('again').classList.add('on'); }, 1200); }
+  },
+  up() {},
+  frame(t, dt) {
+    x.fillStyle = '#030206'; x.fillRect(0, 0, W, H);
+    const cx = W / 2, cy = H * .47, pw = Math.min(W * .62, 300), ph = Math.min(H * .52, 470);
+    // hazard bands
+    x.save(); x.globalAlpha = .9; for (const yy of [cy - ph / 2 - 30, cy + ph / 2 + 12]) { x.fillStyle = '#0c0c0c'; x.fillRect(0, yy, W, 18); x.save(); x.beginPath(); x.rect(0, yy, W, 18); x.clip(); x.fillStyle = S.alarm && Math.sin(t * 14) > 0 ? '#ff2d55' : '#e6c200'; for (let i = -2; i < W / 20 + 2; i++) { x.beginPath(); x.moveTo(i * 20 + (t * 20 % 20), yy); x.lineTo(i * 20 + 10 + (t * 20 % 20), yy); x.lineTo(i * 20 + (t * 20 % 20), yy + 18); x.lineTo(i * 20 - 10 + (t * 20 % 20), yy + 18); x.fill(); } x.restore(); } x.restore();
+    if (S.alarm) { x.fillStyle = `rgba(255,45,85,${.05 + .07 * Math.max(0, Math.sin(t * 7))})`; x.fillRect(0, 0, W, H); }
+    // the pod and its frost
+    if (!S.broken) { x.save(); x.beginPath(); x.roundRect(cx - pw / 2, cy - ph / 2, pw, ph, pw / 2); const pg = x.createLinearGradient(cx - pw / 2, 0, cx + pw / 2, 0); pg.addColorStop(0, 'rgba(120,200,255,.16)'); pg.addColorStop(.5, 'rgba(120,200,255,.04)'); pg.addColorStop(1, 'rgba(120,200,255,.18)'); x.fillStyle = pg; x.fill(); x.strokeStyle = 'rgba(160,220,255,.5)'; x.lineWidth = 2; x.stroke(); x.restore(); }
+    const shake = S.broken ? 0 : S.taps * 1.5; const lx = (ptr.x - cx) / W * 2, ly = (ptr.y - cy) / H * 2;
+    drawEgg(cx + (Math.random() - .5) * shake, cy + Math.sin(t * 1.2) * 5 - (S.broken ? Math.min(40, (t - S.end) * 30) : 0), Math.min(pw * .42, 120), t, .3 + S.eye * .7 + .2 * Math.sin(t * (2 + S.taps * 2)), S.taps ? '#ff2d55' : '#9fe8ff', S.eye * (Math.sin(t * .7) > .97 ? .1 : 1), [lx, ly], S.broken ? Math.min(1, (t - S.end) * .5) : 0);
+    if (!S.broken) { x.save(); x.beginPath(); x.roundRect(cx - pw / 2, cy - ph / 2, pw, ph, pw / 2); x.clip(); for (let i = 0; i < 60; i++) { const fx = cx - pw / 2 + ((i * 97) % pw), fy = cy + ph / 2 - ((i * 53) % (ph * .35)); x.fillStyle = 'rgba(220,240,255,.06)'; x.beginPath(); x.arc(fx, fy, 6 + (i % 5) * 4, 0, 7); x.fill(); } x.restore();
+      x.strokeStyle = 'rgba(255,255,255,.85)'; x.lineWidth = 1; x.shadowColor = '#9fe8ff'; x.shadowBlur = 6; for (const c of S.cracks) { x.beginPath(); c.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.stroke(); } x.shadowBlur = 0;
+      x.fillStyle = 'rgba(160,220,255,.7)'; x.font = '400 9px "JetBrains Mono"'; x.textAlign = 'center'; x.fillText('Ω-00098 · DO NOT TAP', cx, cy + ph / 2 - 16); }
+    for (const s of S.shards) { s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 900 * dt; s.r += dt * 4; x.save(); x.translate(s.x, s.y); x.rotate(s.r); x.fillStyle = 'rgba(180,230,255,.35)'; x.strokeStyle = 'rgba(255,255,255,.8)'; x.beginPath(); x.moveTo(-s.s / 2, -s.s / 3); x.lineTo(s.s / 2, -s.s / 4); x.lineTo(0, s.s / 2); x.closePath(); x.fill(); x.stroke(); x.restore(); }
+  }
+};
+
+/* ===================== III · THE SIGIL: trace Metatron's cube to wake it; the dark opens its eyes ===================== */
+const SGL = {
+  init() { const R = Math.min(W, H) * .34, cx = W / 2, cy = H * .5; const P = [[cx, cy]]; for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 - Math.PI / 2; P.push([cx + Math.cos(a) * R * .5, cy + Math.sin(a) * R * .5], [cx + Math.cos(a) * R, cy + Math.sin(a) * R]); }
+    S = { P, lit: [], path: [], done: 0, end: 0, eyes: [], R, cx, cy, rot: 0 }; for (let i = 0; i < 36; i++) S.eyes.push({ x: Math.random() * W, y: Math.random() * H, s: 6 + Math.random() * 16, o: 0, d: Math.random() * 2 });
+    say($('top'), 'A SIGIL, DORMANT · 13 POINTS', 26); setTimeout(() => say($('say'), 'Connect the points. Wake it.'), 1300); $('cta').textContent = 'drag through the points'; },
+  down() { au(); SGL.touch(); }, up() {},
+  at(i) { const [px, py] = S.P[i], c = Math.cos(S.rot), s = Math.sin(S.rot), dx = px - S.cx, dy = py - S.cy; return [S.cx + dx * c - dy * s, S.cy + dx * s + dy * c]; }, // where a point is now: the sigil turns slowly
+  touch() { if (S.done) return; S.P.forEach((_, i) => { const p = SGL.at(i); if (Math.hypot(p[0] - ptr.x, p[1] - ptr.y) < 34 && S.path[S.path.length - 1] !== i) { if (!S.lit.includes(i)) { S.lit.push(i); const sc = [261.6, 293.7, 329.6, 392, 440, 523.3, 587.3, 659.3, 784, 880, 1046.5, 1174.7, 1318.5]; tone(sc[S.lit.length - 1], .9, 'sine', .14); buzz(12); } S.path.push(i); } });
+    if (S.lit.length >= 13 || (S.lit.length >= 9 && S.path.length > 14)) { S.done = 1; S.end = performance.now() / 1000; flash(60); buzz([30, 50, 30, 50, 160]); [130.8, 196, 261.6, 392, 523.3].forEach((f, i) => setTimeout(() => tone(f, 2.4, 'sine', .1), i * 90)); say($('top'), 'THE SIGIL IS AWAKE', 26); say($('say'), 'It has been waiting a very long time.'); $('cta').textContent = ''; } else say($('top'), `A SIGIL · ${S.lit.length} OF 13 POINTS AWAKE`, 4); },
+  frame(t, dt) {
+    x.fillStyle = 'rgba(2,1,4,.35)'; x.fillRect(0, 0, W, H); if (ptr.down) SGL.touch();
+    const k = S.done ? Math.min(1, (t - S.end) / 2.5) : 0; S.rot += dt * (.05 + k * 1.2);
+    x.save(); x.translate(S.cx, S.cy); x.rotate(S.rot); x.scale(1 + k * .25, (1 + k * .25) * (1 - k * .55)); x.translate(-S.cx, -S.cy);
+    // every pair of the 13 points joined: Metatron's cube; faint until woken
+    for (let i = 0; i < 13; i++) for (let j = i + 1; j < 13; j++) { const on = S.lit.includes(i) && S.lit.includes(j); x.strokeStyle = on || S.done ? `rgba(199,255,22,${S.done ? .55 : .5})` : 'rgba(150,140,200,.08)'; x.lineWidth = on ? 1.4 : .8; x.beginPath(); x.moveTo(...S.P[i]); x.lineTo(...S.P[j]); x.stroke(); }
+    S.P.forEach((p, i) => { const on = S.lit.includes(i) || S.done; x.strokeStyle = on ? 'rgba(199,255,22,.45)' : 'rgba(150,140,200,.12)'; x.lineWidth = 1; x.beginPath(); x.arc(p[0], p[1], S.R * .25, 0, 7); x.stroke(); x.fillStyle = on ? LIME : 'rgba(200,190,255,.35)'; x.shadowColor = LIME; x.shadowBlur = on ? 18 : 0; x.beginPath(); x.arc(p[0], p[1], on ? 7 : 4 + Math.sin(t * 3 + i) * 1.5, 0, 7); x.fill(); x.shadowBlur = 0; });
+    x.restore();
+    if (!S.done && S.path.length > 1) { x.strokeStyle = '#fff'; x.lineWidth = 2.5; x.shadowColor = LIME; x.shadowBlur = 14; x.beginPath(); S.path.forEach((i, n) => n ? x.lineTo(...SGL.at(i)) : x.moveTo(...SGL.at(i))); if (ptr.down) x.lineTo(ptr.x, ptr.y); x.stroke(); x.shadowBlur = 0; }
+    if (S.done) { // the dark opens its eyes, then the egg forms from the light
+      S.eyes.forEach(e => { e.o = Math.min(1, e.o + dt * (t - S.end > e.d ? 2 : 0)); if (e.o <= 0) return; const lx = (S.cx - e.x) / W * e.s * .5, ly = (S.cy - e.y) / H * e.s * .5, bl = Math.sin(t * .9 + e.d * 9) > .96 ? .1 : 1; x.fillStyle = `rgba(255,255,255,${.08 * e.o})`; x.beginPath(); x.ellipse(e.x, e.y, e.s, e.s * .45 * e.o * bl, 0, 0, 7); x.fill(); x.fillStyle = `rgba(199,255,22,${.8 * e.o})`; x.beginPath(); x.arc(e.x + lx, e.y + ly, e.s * .28 * bl, 0, 7); x.fill(); x.fillStyle = '#000'; x.beginPath(); x.arc(e.x + lx, e.y + ly, e.s * .12 * bl, 0, 7); x.fill(); });
+      if (t - S.end > 1.8) { const m = Math.min(1, (t - S.end - 1.8) / 1.5); x.globalAlpha = m; drawEgg(S.cx, S.cy - 10 + Math.sin(t * 1.3) * 6, Math.min(W, H) * .15 * (.4 + .6 * m), t, .8, LIME, m > .9 ? 1 : 0, [ptr.nx, ptr.ny]); x.globalAlpha = 1; if (m >= 1 && !$('again').classList.contains('on')) { say($('say'), 'Tap it. It already knows your name.'); $('again').classList.add('on'); } }
+    }
+  }
+};
+
+const MODES = [SIG, POD, SGL];
+function start(m) { mode = m; humOff(); $('again').classList.remove('on'); x.fillStyle = '#020104'; x.fillRect(0, 0, W, H); ['top', 'say', 'cta'].forEach(id => { clearTimeout($(id)._t); $(id).textContent = ''; }); document.querySelectorAll('.bar button').forEach(b => b.classList.toggle('on', +b.dataset.c === m)); MODES[m].init(); try { history.replaceState(null, '', '#' + (m + 1)); } catch {} }
+document.querySelectorAll('.bar button').forEach(b => b.onclick = e => { e.stopPropagation(); start(+b.dataset.c); });
+$('again').onclick = e => { e.stopPropagation(); start(mode); };
+cv.addEventListener('pointerdown', e => { setP(e); ptr.down = true; MODES[mode].down(e); });
+addEventListener('pointermove', e => { setP(e); if (ptr.down && mode === 2) SGL.touch(); }); // every movement counts, so a fast swipe still lights the points
+addEventListener('pointerup', () => { ptr.down = false; MODES[mode].up(); }); addEventListener('pointercancel', () => { ptr.down = false; MODES[mode].up(); });
+let last = performance.now(); function loop(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; MODES[mode].frame((now - t0) / 1000, dt); requestAnimationFrame(loop); }
+start(Math.max(0, Math.min(2, (+location.hash.slice(1) || 1) - 1))); requestAnimationFrame(loop);
+</script>
+</body>
+</html>
