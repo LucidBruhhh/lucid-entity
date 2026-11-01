@@ -50,7 +50,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 .scan::after{content:"";position:absolute;left:0;right:0;height:22%;background:linear-gradient(transparent,rgba(var(--e),.06),transparent);animation:roll 4.2s linear infinite}
 @keyframes roll{from{top:-25%}to{top:110%}}
 .vig{position:fixed;inset:0;pointer-events:none;z-index:4;background:radial-gradient(120% 85% at 50% 48%,transparent 48%,rgba(0,0,0,.82))}
-.head,.code,.hud,.say{animation:holo 5s steps(1) infinite}
+.head,.code,.say,.counting .hud{animation:holo 5s steps(1) infinite}
 @keyframes holo{0%,100%{opacity:1;transform:none}91%{opacity:.75}92%{opacity:1;transform:translateX(2px)}93%{transform:translateX(-1px) skewX(-6deg)}94%{transform:none}97%{opacity:.85}}
 .q2,.code{text-shadow:0 0 18px var(--c),0 0 2px #fff,-1px 0 rgba(120,255,255,.45)!important}
 .guess button{background:rgba(6,14,2,.5)!important;border:1px solid rgba(var(--e),.75)!important;box-shadow:0 0 16px rgba(var(--e),.35),inset 0 0 14px rgba(var(--e),.18)!important;color:var(--el)!important;text-shadow:0 0 10px var(--lime);background-image:repeating-linear-gradient(0deg,rgba(var(--e),.08) 0 1px,transparent 1px 3px)!important}
@@ -207,7 +207,15 @@ function projector(t, k = 1) { const by = CY + R * 1.32, rw = R * .55; x.save();
   const cone = x.createLinearGradient(0, by, 0, CY - R); cone.addColorStop(0, `rgba(${TH.m},${.16 * k})`); cone.addColorStop(1, `rgba(${TH.m},0)`); x.fillStyle = cone;
   x.beginPath(); x.moveTo(CX - rw, by); x.lineTo(CX - R * 1.15, CY - R * 1.05); x.lineTo(CX + R * 1.15, CY - R * 1.05); x.lineTo(CX + rw, by); x.closePath(); x.fill();
   for (let i = 0; i < 4; i++) { x.strokeStyle = `rgba(${TH.m},${(.55 - i * .12) * k * (.8 + .2 * Math.sin(t * 6 + i))})`; x.lineWidth = 1.5; x.beginPath(); x.ellipse(CX, by, rw * (1 - i * .18), rw * .16 * (1 - i * .18), 0, 0, 7); x.stroke(); }
-  const dg = x.createRadialGradient(CX, by, 0, CX, by, rw); dg.addColorStop(0, `rgba(${TH.el},${.5 * k})`); dg.addColorStop(1, 'transparent'); x.fillStyle = dg; x.beginPath(); x.ellipse(CX, by, rw, rw * .2, 0, 0, 7); x.fill(); x.restore(); }
+  const dg = x.createRadialGradient(CX, by, 0, CX, by, rw); dg.addColorStop(0, `rgba(${TH.el},${.5 * k})`); dg.addColorStop(1, 'transparent'); x.fillStyle = dg; x.beginPath(); x.ellipse(CX, by, rw, rw * .2, 0, 0, 7); x.fill();
+  // beams: thin shafts of light flickering up from the disc into the figure
+  for (let i = 0; i < 7; i++) { const u = (i + .5) / 7 - .5, fl = Math.max(0, Math.sin(t * (3 + i) + i * 2.3)) ** 3; if (fl < .05) continue; const bx0 = CX + u * rw * 1.6, bx1 = CX + u * R * 1.9;
+    const bg = x.createLinearGradient(0, by, 0, CY - R * .9); bg.addColorStop(0, `rgba(${TH.el},${.28 * fl * k})`); bg.addColorStop(1, `rgba(${TH.m},0)`); x.strokeStyle = bg; x.lineWidth = 1.5 + fl * 2; x.beginPath(); x.moveTo(bx0, by); x.lineTo(bx1, CY - R * .9); x.stroke(); }
+  // motes rising up the cone
+  for (let i = 0; i < 26; i++) { const ph = (t * (.18 + (i % 5) * .04) + i * .137) % 1, u = Math.sin(i * 12.9) * .5, px = CX + u * (rw + (R * 1.1 - rw) * ph) * 1.4, py = by - ph * (by - (CY - R)); x.fillStyle = `rgba(${TH.el},${(1 - ph) * .6 * k})`; x.fillRect(px, py, 1.8, 1.8); }
+  // a ring of glyphs turning around the disc
+  x.font = '11px "JetBrains Mono", monospace'; x.textAlign = 'center'; x.textBaseline = 'middle'; for (let i = 0; i < 24; i++) { const a = i / 24 * 6.283 + t * .35, gx = CX + Math.cos(a) * rw * 1.18, gy = by + Math.sin(a) * rw * 1.18 * .2; x.fillStyle = `rgba(${TH.m},${(.25 + .35 * (Math.sin(a) + 1) / 2) * k})`; x.fillText(RUNE[i % RUNE.length], gx, gy); }
+  x.restore(); }
 // hologram finish on the figure: a soft flicker, and now and then a slice of the picture tears sideways
 function holoGlitch(t) { if (Math.random() < .045) { const n = 1 + (Math.random() * 3 | 0); for (let i = 0; i < n; i++) { const y = Math.random() * H, h = 4 + Math.random() * 26, dx = (Math.random() - .5) * 26; x.drawImage(cv, 0, y * DPR, cv.width, h * DPR, dx, y, W, h); } } }
 /* the landing cube: Metatron's points given depth (the inner ring alternates toward and away from you, the outer ring the other way),
@@ -220,7 +228,11 @@ function project() { const cx = Math.cos(C.rx), sx = Math.sin(C.rx), cy = Math.c
 function humStart() { const a = audio(); if (!a || C.hum) return; const o = a.createOscillator(), o2 = a.createOscillator(), f = a.createBiquadFilter(), g = a.createGain(); o.type = 'sawtooth'; o2.type = 'sine'; f.type = 'lowpass'; f.frequency.value = 300; g.gain.value = 0; o.connect(f); o2.connect(f); f.connect(g).connect(out()); o.start(); o2.start(); C.hum = { o, o2, f, g }; }
 function humSet(k) { if (!C.hum) return; const n = AC.currentTime; C.hum.o.frequency.setTargetAtTime(55 + k * 330, n, .04); C.hum.o2.frequency.setTargetAtTime(110 + k * 660, n, .04); C.hum.f.frequency.setTargetAtTime(240 + k * 5200, n, .05); C.hum.g.gain.setTargetAtTime(k > .001 ? .05 + k * .12 : 0, n, .06); }
 function humStop() { if (!C.hum) return; const h = C.hum; C.hum = null; h.g.gain.setTargetAtTime(0, AC.currentTime, .08); setTimeout(() => { try { h.o.stop(); h.o2.stop(); } catch {} }, 500); }
-function cubeDown(e) { C.down = true; C.touched = true; C.sx = C.lx = e.clientX; C.sy = C.ly = e.clientY; C.moved = 0;
+const RIPPLES = [], TILT = { x: 0, y: 0, asked: false };
+function askTilt() { if (TILT.asked) return; TILT.asked = true; const go = () => addEventListener('deviceorientation', e => { if (e.gamma == null) return; TILT.y = Math.max(-1, Math.min(1, e.gamma / 35)); TILT.x = Math.max(-1, Math.min(1, (e.beta - 50) / 35)); });
+  try { if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) DeviceOrientationEvent.requestPermission().then(r => r === 'granted' && go()).catch(() => {}); else go(); } catch {} }
+const RIPPLES_ = RIPPLES;
+function cubeDown(e) { RIPPLES.push({ x: e.clientX, y: e.clientY, t: S.t }); askTilt(); C.down = true; C.touched = true; C.sx = C.lx = e.clientX; C.sy = C.ly = e.clientY; C.moved = 0;
   if (Math.hypot(e.clientX - CX, e.clientY - CY) < R * .3) { C.hold = true; body.classList.add('charging'); humStart(); osc(110, .5, 'sine', .3, 0, 1.5); buzz(15); }
   promptFor(); }
 addEventListener('pointermove', e => { if (S.phase !== 'ask' || !C.down) return; const dx = e.clientX - C.lx, dy = e.clientY - C.ly; C.lx = e.clientX; C.ly = e.clientY; C.moved += Math.hypot(dx, dy);
@@ -236,10 +248,17 @@ function holoCube(t, dt) {
   humSet(C.charge); if (!C.hold && C.charge <= 0) humStop();
   if (C.hold && S.t - C.buzzT > .26 - C.charge * .2) { C.buzzT = S.t; buzz(6 + C.charge * 22); osc(70 + C.charge * 40, .12, 'sine', .25); }
   if (C.charge >= 1 && S.phase === 'ask') { humStop(); C.rx = C.ry = 0; C.hold = false; C.down = false; body.classList.remove('charging'); startCount(); return; }
+  C.rx += (TILT.x * .35 - C.rx) * (C.down ? 0 : .04); C.ry += (TILT.y * .45 - C.ry) * (C.down || Math.abs(C.vy) > .02 ? 0 : .04); // tilt, when the phone allows it
   const pr = project(), ch = C.charge, front = ch * 1.25, idle = C.touched ? 0 : 1;
   x.save(); x.globalCompositeOperation = 'lighter'; x.lineCap = 'round';
   // the 13 spheres, seen at an angle
-  for (let i = 0; i < 13; i++) { const [px, py, z, f] = pr[i]; const lit = front > Math.hypot(...PTS[i]) ? 1 : 0; x.strokeStyle = `rgba(${TH.m},${.16 + .14 * (z + 1) / 2 + lit * .25})`; x.lineWidth = 1; x.beginPath(); x.ellipse(px, py, R * .25 * f * Math.abs(Math.cos(C.ry)) + 1, R * .25 * f * Math.abs(Math.cos(C.rx)) + 1, 0, 0, 7); x.stroke(); }
+  for (let i = 0; i < 13; i++) { const [px, py, z, f] = pr[i]; const lit = front > Math.hypot(...PTS[i]) ? 1 : 0, rgb = lit ? TH.e : TH.m, al = .14 + .12 * (z + 1) / 2 + lit * .3;
+    x.beginPath(); x.ellipse(px, py, R * .25 * f * Math.abs(Math.cos(C.ry)) + 1, R * .25 * f * Math.abs(Math.cos(C.rx)) + 1, 0, 0, 7);
+    x.lineWidth = 5; x.strokeStyle = `rgba(${rgb},${al * .25})`; x.stroke(); x.lineWidth = 1.1; x.strokeStyle = `rgba(${rgb},${al})`; x.stroke();
+    x.setLineDash([6, 22]); x.lineDashOffset = -(t * (30 + ch * 120) + i * 9) * (i % 2 ? 1 : -1); x.lineWidth = 1.8; x.strokeStyle = `rgba(${TH.el},${al * 1.6})`; x.stroke(); x.setLineDash([]); }
+  // a halo of glyphs encircling the whole cube, lit where the charge has reached
+  { const hr = R * 1.36, n = 48; x.font = '12px "JetBrains Mono", monospace'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    for (let i = 0; i < n; i++) { const a = i / n * 6.283 + t * .08, gx = CX + Math.cos(a) * hr * Math.cos(C.ry * .5), gy = CY + Math.sin(a) * hr * Math.cos(C.rx * .5), lit = ch > (i / n) ? 1 : 0; x.fillStyle = `rgba(${lit ? TH.e : TH.m},${.18 + .2 * Math.max(0, Math.sin(t * 2 + i * .6)) + lit * .5})`; x.fillText(RUNE[(i * 5) % RUNE.length], gx, gy); } }
   // the 78 lines: depth-shaded, lit by the charge front, with sparks racing along the lit ones
   for (let i = 0; i < LINES.length; i++) { const [a, b] = LINES[i], A = pr[a], B = pr[b], dep = ((A[2] + B[2]) / 2 + 1) / 2, lit = Math.max(0, Math.min(1, (front - LDIST[i]) * 4));
     const wave = idle * Math.max(0, Math.sin(t * 1.4 - LDIST[i] * 5)) ** 6;
@@ -255,9 +274,15 @@ function holoCube(t, dt) {
   if (ch > 0) { x.strokeStyle = `rgba(${TH.e},.25)`; x.lineWidth = 4; x.beginPath(); x.arc(cx0, cy0, R * .22, 0, 7); x.stroke(); x.strokeStyle = TH.core; x.shadowColor = TH.eh; x.shadowBlur = 18; x.lineWidth = 4; x.beginPath(); x.arc(cx0, cy0, R * .22, -Math.PI / 2, -Math.PI / 2 + ch * 6.283); x.stroke(); x.shadowBlur = 0;
     const cg = x.createRadialGradient(cx0, cy0, 0, cx0, cy0, R * (.3 + ch * .9)); cg.addColorStop(0, `rgba(${TH.el},${ch * .45})`); cg.addColorStop(1, `rgba(${TH.e},0)`); x.fillStyle = cg; x.beginPath(); x.arc(cx0, cy0, R * (.3 + ch * .9), 0, 7); x.fill(); }
   x.restore();
+  x.save(); x.globalCompositeOperation = 'lighter'; for (let i = RIPPLES.length - 1; i >= 0; i--) { const r = RIPPLES[i], k = (S.t - r.t) / .9; if (k >= 1) { RIPPLES.splice(i, 1); continue; } for (const [w, a] of [[6, .12], [1.4, .7]]) { x.lineWidth = w; x.strokeStyle = `rgba(${TH.el},${a * (1 - k)})`; x.beginPath(); x.arc(r.x, r.y, 8 + k * 90, 0, 7); x.stroke(); } } x.restore();
   S.shake = Math.max(S.shake, ch * ch * .5); S.punch = Math.max(S.punch, ch * .25);
 }
-function smoke(t) { for (let i = 0; i < 5; i++) { const sx = W * (.5 + .45 * Math.sin(t * .05 + i * 1.7)), sy = H * (.55 + .35 * Math.cos(t * .04 + i)), r = Math.max(W, H) * .5; const g = x.createRadialGradient(sx, sy, 0, sx, sy, r); g.addColorStop(0, 'rgba(70,80,30,.10)'); g.addColorStop(1, 'transparent'); x.fillStyle = g; x.fillRect(0, 0, W, H); } }
+const STARS = [...Array(170)].map(() => ({ x: Math.random(), y: Math.random(), z: .2 + Math.random() * .8, tw: Math.random() * 9 }));
+function smoke(t) { x.save(); x.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 4; i++) { const sx = W * (.5 + .5 * Math.sin(t * .04 + i * 1.7)), sy = H * (.5 + .4 * Math.cos(t * .03 + i * 2.1)), r = Math.max(W, H) * (.45 + .1 * i); const g = x.createRadialGradient(sx, sy, 0, sx, sy, r); g.addColorStop(0, `rgba(${i % 2 ? TH.r : TH.m},.07)`); g.addColorStop(.5, `rgba(${i % 2 ? TH.r : TH.m},.025)`); g.addColorStop(1, 'transparent'); x.fillStyle = g; x.fillRect(0, 0, W, H); }
+  const ox = (typeof C !== 'undefined' ? C.ry : 0) * 40, oy = (typeof C !== 'undefined' ? C.rx : 0) * 30;
+  for (const st of STARS) { const a = (.25 + .55 * st.z) * (.6 + .4 * Math.sin(t * (1 + st.z * 2) + st.tw)); x.fillStyle = `rgba(220,235,255,${a})`; const px = ((st.x * W + ox * st.z) % W + W) % W, py = ((st.y * H + oy * st.z) % H + H) % H; x.fillRect(px, py, st.z * 1.6, st.z * 1.6); }
+  x.restore(); }
 /* plasma: a line drawn as living current. A wide halo, a mid glow and a hot core, each a polyline that ripples (slow in the halo,
    crackling in the core, pinned at both ends), then bright packets flowing along it. Additive, so crossings and nodes burn hottest. */
 const PSEG = 9, _pp = new Float32Array((PSEG + 1) * 2);
