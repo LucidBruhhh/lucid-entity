@@ -203,6 +203,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 .mbRar{display:inline-block;font:700 11px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#070707;background:var(--rc2,#c7ff16);padding:5px 10px 4px;border-radius:3px}
 .mbOrb{width:96px;height:96px;margin:14px auto 8px;border-radius:50%;display:grid;place-items:center;font-size:50px;background:radial-gradient(circle at 35% 30%,#fff,var(--rc2,#c7ff16) 40%,#111 85%);box-shadow:0 0 40px var(--rc,rgba(199,255,22,.6));animation:mbFloat 2.4s ease-in-out infinite}
 @keyframes mbFloat{50%{transform:translateY(-6px) rotate(6deg)}}
+.gzRead.bar{white-space:normal;line-height:1.55;bottom:5%}
 .mbOrb.art{width:116px;height:150px;margin:8px auto 4px;border-radius:0;background:none;box-shadow:none;filter:drop-shadow(0 0 16px #1ec8ff) drop-shadow(0 0 3px #7ff6ff)}.mbOrb.art svg{width:100%;height:100%;overflow:visible}
 .regToast{position:fixed;left:50%;top:calc(max(14px,env(safe-area-inset-top)) + 60px);transform:translateX(-50%);z-index:13;min-height:44px;padding:10px 18px;border:1px solid #ff5fd8;border-radius:999px;background:rgba(8,6,16,.9);color:#fff;font:600 14px/1.2 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.06em;box-shadow:0 0 22px rgba(30,200,255,.5),inset 0 0 12px rgba(255,95,216,.25);cursor:pointer}
 .mbCard h3{margin:4px 0 6px;font:300 28px/1.1 "Cormorant Garamond",Georgia,serif;font-style:italic;color:#fff}
@@ -2010,7 +2011,7 @@ const gzLoad = () => window.Html5Qrcode ? Promise.resolve() : new Promise((ok, n
 const gzSay = (t, cur = true) => { gzRead.innerHTML = t + (cur ? '<span class="cur">_</span>' : ''); };
 async function gzStop() { const s = gzScanner; gzScanner = null; gzEl.classList.remove('live'); gzTorchOn = false; if (s) { try { await s.stop(); } catch {} try { s.clear(); } catch {} } }
 async function openGizmo() {
-  if (egg.on) return; gzRun++; gzDenied = 0; feedEl.classList.remove('on'); mbEl.className = 'mb'; gzEl.classList.remove('got', 'lock', 'implode'); document.getElementById('gzLock').textContent = '∞ SEEK'; gzEl.classList.add('on'); gzBusy = false; audio.resume();
+  if (egg.on) return; gzRun++; gzDenied = 0; gzRead.classList.remove('bar'); feedEl.classList.remove('on'); mbEl.className = 'mb'; gzEl.classList.remove('got', 'lock', 'implode'); document.getElementById('gzLock').textContent = '∞ SEEK'; gzEl.classList.add('on'); gzBusy = false; audio.resume();
   [660, 880, 1320].forEach((f, i) => setTimeout(() => audio.bell(f, .12), i * 90)); gzSay('BOOTING'); track('gizmo');
   gzStartCam();
 }
@@ -2055,7 +2056,7 @@ async function closeGizmo() { gzRun++; await gzStop(); gzEl.classList.remove('on
 function gzGot(code) {
   code = String(code).trim(); if (gzBusy || !code) return; gzBusy = true; const run = gzRun;
   if (/^(https?:\/\/)?(www\.)?(lucidinstinct\.com\/qr\/adios|entity\.lucidinstinct\.com\/?\?(.*&)?item=adios)\b/i.test(code)) code = ADIOS_CODE; // the bar's own QR, scanned with the Gizmo itself
-  const bar = code === ADIOS_CODE;
+  const bar = code === ADIOS_CODE; gzRead.classList.toggle('bar', bar); // the official signal is long: it may take two lines
   gzEl.classList.add('got', 'lock'); document.getElementById('gzLock').textContent = '∞ LOCK';
   [784, 988, 1175, 1568].forEach((f, i) => setTimeout(() => audio.bell(f, .35), i * 45)); [1, 2, 3, 4, 5, 6].forEach(i => setTimeout(() => audio.bell(400 + i * 260, .06), 420 + i * 40)); gzBuzz([18, 30, 18, 30, 70]);
   const shown = bar ? 'OFFICIAL SIGNAL · BAR ADIOS · SHINJUKU' : code.slice(0, 24).replace(/[&<>"']/g, ch => '&#' + ch.charCodeAt(0) + ';'); // a QR can hold any text: never let it become markup
