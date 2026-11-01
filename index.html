@@ -677,7 +677,8 @@ const canvas = document.getElementById('c');
 let renderer;
 try { renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' }); }
 catch (e) { document.getElementById('err').style.display = 'grid'; throw e; }
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+const basePx = () => Math.min(devicePixelRatio || 1, 3, Math.max(1.75, Math.sqrt(2.6e6 / Math.max(1, innerWidth * innerHeight)))); // about 2.5× on a 3× phone, 1.75× on laptops
+renderer.setPixelRatio(basePx());
 // a GPU reset or laptop sleep can drop the WebGL context; say so instead of freezing black, and restart when it returns
 canvas.addEventListener('webglcontextlost', e => {
   e.preventDefault(); const el = document.getElementById('err');
@@ -706,9 +707,9 @@ composer.addPass(new ShaderPass({
 const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), .7, .55, .22);
 composer.addPass(bloom);
 const finalPass = new ShaderPass({
-  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uAb: { value: 0.0025 }, uFold: { value: 0 }, uZoom: { value: 0 }, uBright: BRIGHT, uGhost: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uAb: { value: 0.0025 }, uFold: { value: 0 }, uZoom: { value: 0 }, uBright: BRIGHT, uGhost: { value: 0 }, uGrain: { value: .028 } },
   vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-  fragmentShader: `uniform sampler2D tDiffuse;uniform float uTime,uAb,uFold,uZoom,uBright,uGhost;varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse;uniform float uTime,uAb,uFold,uZoom,uBright,uGhost,uGrain;varying vec2 vUv;
     float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
     void main(){vec2 c=vUv-.5;float d=dot(c,c);
       vec2 uv=vUv+c*uFold*.06*sin(d*40.-uTime*8.);
@@ -719,7 +720,7 @@ const finalPass = new ShaderPass({
       if(uZoom>.001){vec3 acc=col;for(int i=1;i<=7;i++){acc+=texture2D(tDiffuse,uv-c*uZoom*float(i)/7.).rgb;}col=acc/8.;} // motion blur as the camera flies back (the pull-back, a zoom): streaks toward the centre
       col*=1.-d*1.15; col*=uBright;
       float lm=max(col.r,max(col.g,col.b));if(lm>1.)col*=(1.+log(lm))/lm; // a log shoulder above white: stacked light compresses instead of clipping
-      col+=(h(vUv*vec2(1731.,947.)+fract(uTime))-.5)*.028;
+      col+=(h(vUv*vec2(1731.,947.)+fract(uTime))-.5)*uGrain; // film grain, one render pixel wide: lighter when the render is coarser than 1.5× so it never turns into blobs
       gl_FragColor=vec4(col,1.);}`
 });
 // volumetric light: god-rays gathered toward two lights on screen, Aeon's heart and the lamp over the jar (24 taps each, only when lit)
@@ -2288,7 +2289,7 @@ function renderHud(g) {
   ladder.innerHTML = html;
   const res = resonance();
   vitals.innerHTML = `<div class="mood">${mood.label}</div>` + (isPreview ? '' : `<span style="opacity:.7">${dayPart(sydHour())} in its world</span><br>`) +
-    `perceiving <b>${n}</b> of 12 dimensions<br>heart <b>${Math.round(mood.bpm)}</b> bpm · breath <b>${(60 / breathPeriod()).toFixed(1)}</b>/min · <b>${env.fps}</b> fps<br>` +
+    `perceiving <b>${n}</b> of 12 dimensions<br>heart <b>${Math.round(mood.bpm)}</b> bpm · breath <b>${(60 / breathPeriod()).toFixed(1)}</b>/min · <b>${env.fps}</b> fps · <b>${(env.px || 0).toFixed(2)}×</b> render${env.qLevel ? ' · lowered ' + env.qLevel : ''}<br>` +
     `resonance with you <b>+${res.toFixed(2)}</b> days · ${env.moonName}` + (mem.fed.length ? `<br>fed <b>${mem.fed.length}</b> times` : '') + (mem.relics.length ? `<br>brought back: <b>${mem.relics.slice(-3).map(x => x.name).join(', ')}</b>` : '') + (g >= 60 ? `<br>stage <b>${STAGES[stageAt(g)][1]}</b>` : '') + (mem.lexicon.length ? `<br>words it keeps: <b>${mem.lexicon.slice(-5).map(x => x.w).join(', ')}</b>` : '') + `<br>bond <b>${BOND[bondLv()][1]}</b>${bondLv() >= 2 ? ` · it calls you <b>${mem.name}</b>` : ''}` + (n < 12 && !isPreview ? `<br>next dimension in <b>${fmtAge(Math.max(0, DIMS[n][2] - g))}</b>` : n >= 12 ? '<br><b>fully awake</b>' : '');
 }
 const breathPeriod = () => lerp(lerp(7 + night * 1.5, 3.2, mood.excite), 11, mood.sleep) * (env.lowPower ? 1.4 : 1);
@@ -3281,8 +3282,11 @@ const env = { sx: window.screenX || 0, sy: window.screenY || 0, moving: 0, moved
   mic: null, micLvl: 0, micLow: 0, onset: 0, quiet: 0, online: navigator.onLine !== false, lowPower: false, charging: null, powerSaid: false,
   moonFull: 0, moonName: '', after: 0, fps: 0, fpsAcc: 0, fpsN: 0, hiccupT: 60 + Math.random() * 200, sneeze: 0, sneezed: false, riftFear: 0, riftDir: new THREE.Vector3(),
   gravity: new THREE.Vector3(), leanAdd: new THREE.Vector3(), veil: false, why: '', area: innerWidth * innerHeight, heartLog: [], breathLog: [] };
+const perf = { sum: 0, n: 0, level: 0, wait: 6000 };
+const PERF_PX = [1, .8, .6]; // the governor's levels, as a share of the base render size (it used to jump to 1× then 0.75× absolute, which is a quarter of a 3× phone)
 function resize() {
   const w = innerWidth, h = innerHeight, area = w * h;
+  renderer.setPixelRatio(basePx() * PERF_PX[perf.level]); env.px = renderer.getPixelRatio(); env.qLevel = perf.level; finalPass.uniforms.uGrain.value = env.px >= 1.5 ? .028 : .016;
   if (env.area) { // squeezed or stretched (the first size does not count)
     if (area < env.area * .65) { env.squeeze = 1; if (performance.now() - env.squeezeSaid > 30000) { env.squeezeSaid = performance.now(); env.pop = 8; env.popPhase = -1; } }
     else if (area > env.area * 1.5) env.stretch = true;
@@ -3298,15 +3302,16 @@ function resize() {
 addEventListener('resize', resize); resize();
 
 /* ---------- adaptive quality: a slow GPU gets a lighter render instead of a stutter ---------- */
-const perf = { sum: 0, n: 0, level: 0, wait: 6000 };
 function adapt(ms) {
   if (ms > 250 || document.hidden) return; // a paused or hidden tab is not a slow GPU
   perf.wait -= ms; if (perf.wait > 0) return; // let the intro and shader compiles settle first
   perf.sum += ms; perf.n++; if (perf.n < 180) return;
   const avg = perf.sum / perf.n; perf.sum = perf.n = 0;
   if (avg > 26 && perf.level < 2) {
-    perf.level++; renderer.setPixelRatio(perf.level === 1 ? Math.min(devicePixelRatio, 1) : .75); bAdapt.i = Math.min(bAdapt.i, perf.level === 1 ? 1 : 0); between.scale = bAdapt.steps[bAdapt.i]; resize(); perf.wait = 3000; // the Interstice's ceiling drops with it
-    console.info(`Aeon: frames averaged ${avg.toFixed(0)} ms, so resolution was lowered (level ${perf.level}).`);
+    perf.level++; bAdapt.i = Math.min(bAdapt.i, perf.level === 1 ? 1 : 0); between.scale = bAdapt.steps[bAdapt.i]; resize(); perf.wait = 3000; // the Interstice's ceiling drops with it
+    console.info(`Aeon: frames averaged ${avg.toFixed(0)} ms, so resolution was lowered (level ${perf.level}, ${env.px.toFixed(2)}×).`);
+  } else if (avg < 11 && perf.level > 0) { // quick again for 180 frames: one step back up, then a long wait so it cannot see-saw
+    perf.level--; resize(); perf.wait = 8000; console.info(`Aeon: frames averaged ${avg.toFixed(0)} ms, resolution restored (level ${perf.level}, ${env.px.toFixed(2)}×).`);
   }
 }
 
