@@ -203,6 +203,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 .mbRar{display:inline-block;font:700 11px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#070707;background:var(--rc2,#c7ff16);padding:5px 10px 4px;border-radius:3px}
 .mbOrb{width:96px;height:96px;margin:14px auto 8px;border-radius:50%;display:grid;place-items:center;font-size:50px;background:radial-gradient(circle at 35% 30%,#fff,var(--rc2,#c7ff16) 40%,#111 85%);box-shadow:0 0 40px var(--rc,rgba(199,255,22,.6));animation:mbFloat 2.4s ease-in-out infinite}
 @keyframes mbFloat{50%{transform:translateY(-6px) rotate(6deg)}}
+.hud.tl-on .eaPill,.hud.tl-on .sharePill{display:none} /* the timeline's own label takes that space */
 .eaVer{margin-left:7px;padding-left:7px;border-left:1px solid rgba(199,255,22,.35);color:rgba(240,240,240,.75);letter-spacing:.14em}
 .gzRead.bar{white-space:normal;line-height:1.55;bottom:5%}
 /* the backpack: everything found, Mythics on a holographic card */
@@ -518,7 +519,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     </div>
   </div>
   <div class="hint" id="hint">move · click · hold · drag</div>
-  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.11</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
+  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.12</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
   <button class="morePill" id="dMore" title="More: sound, timeline, listen, veil, frame rate, stats" aria-label="More settings">&#8943;</button>
   <button class="sharePill" id="sharePill" title="Share Aeon with a friend">&#8599; share</button>
   <div class="eaNote">early access demo · limited features</div>
@@ -4078,7 +4079,9 @@ function frame(now) {
   if (hoverRift) canvas.style.cursor = 'pointer';
 
   /* brightness governor: everything that adds light is summed into one glare figure and scaled together to a ceiling, so no state can bleach the frame to white */
-  const bl = Math.min(1.35, (.62 + mood.heart * .06 + mood.flash * 1.2 + mood.commune * .2 + asc * .25 + life.omega * .12 + life.sov * .06) * (1 - mood.sleep * .35) * (1 - (between.e || 0) * .9));
+  const lateK = smooth((g - 60) / 300); // the final forms: more structure, not more glow (audit 2 November 2026: from Ascendant to Omega brightness doubled while edge detail fell to a third)
+  const bl = Math.min(1.35, (.62 + mood.heart * .06 + mood.flash * 1.2 + mood.commune * .2) * (1 - lateK * .3) * (1 - mood.sleep * .35) * (1 - (between.e || 0) * .9));
+  bloom.threshold = .22 + lateK * .4; bloom.radius = .55 - lateK * .25; // only real highlights glow, and the glow stays close to them
   let glare = bl + halo.material.opacity * 2 + metaAura.material.opacity * 3 + orb.material.opacity * .3 + mood.flash * .8;
   for (const f of flames) glare += f.material.opacity * .8; for (const w of waves) if (w.visible) glare += w.material.opacity * .25;
   const gk = env.gov = Math.min(1, GOV_CEIL / Math.max(1e-3, glare)); godPass.uniforms.uI0.value *= gk; godPass.uniforms.uI1.value *= gk;
