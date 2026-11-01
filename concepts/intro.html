@@ -28,7 +28,11 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 .say{position:fixed;left:24px;right:24px;bottom:max(96px,calc(env(safe-area-inset-bottom) + 88px));text-align:center;z-index:5;font:300 italic clamp(20px,6vw,26px)/1.3 "Cormorant Garamond",Georgia,serif;color:#fff;text-shadow:0 0 18px rgba(63,224,255,.5);pointer-events:none;opacity:0;transition:opacity .5s}
 .say.on{opacity:1}
 .guess{position:fixed;left:50%;bottom:max(70px,calc(env(safe-area-inset-bottom) + 62px));transform:translateX(-50%);z-index:6;text-align:center;opacity:0;pointer-events:none;transition:opacity .5s}
-.asking .guess{opacity:1;pointer-events:auto}
+.prompt{position:fixed;left:0;right:0;bottom:max(64px,calc(env(safe-area-inset-bottom) + 56px));text-align:center;z-index:5;pointer-events:none;opacity:0;transition:opacity .6s}
+.asking .prompt{opacity:1}
+.prompt b{display:block;font:700 15px/1 Rajdhani,Arial,sans-serif;letter-spacing:.55em;margin-right:-.55em;color:#eaffb8;text-transform:uppercase;text-shadow:0 0 14px #c7ff16;animation:breathe 1.8s ease-in-out infinite}
+.prompt span{display:block;margin-top:10px;font:400 10px/1 "JetBrains Mono",monospace;letter-spacing:.32em;color:rgba(199,255,22,.6);text-transform:uppercase}
+.charging .prompt b{animation:none;color:#fff}
 .guess p{margin:0 0 12px;font:400 11px/1 "JetBrains Mono",monospace;letter-spacing:.3em;color:rgba(255,255,255,.6);text-transform:uppercase}
 .guess div{display:flex;gap:10px}
 .guess button{width:84px;height:58px;border-radius:14px;border:1px solid rgba(199,255,22,.5);background:rgba(10,14,4,.6);backdrop-filter:blur(8px);color:#fff;font:400 24px/1 "Russo One",Rajdhani,sans-serif;cursor:pointer;box-shadow:0 0 18px rgba(199,255,22,.18);transition:transform .15s}
@@ -62,7 +66,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 <div class="hud" id="hud">shapes found <b id="cnt">00</b> / 16<br>lines 78 · circles 13<br>metatron's cube</div>
 <div class="code" id="code"></div>
 <div class="say" id="say"></div>
-<div class="guess"><p>pause and count · your guess?</p><div><button data-g="8">8</button><button data-g="12">12</button><button data-g="16">16+</button></div></div>
+<div class="prompt" id="prompt"><b id="pr1">touch the cube</b><span id="pr2">drag it · feel it</span></div>
 <div class="tapcue" id="tapcue">tap the egg</div>
 <div class="final"><div class="logo">AEON</div><div class="sub">SCANNER GIZMO</div><a href="../" id="enter">enter</a></div>
 <div class="scan"></div><div class="vig"></div>
@@ -146,12 +150,12 @@ function onBeat(b, at) { setTimeout(() => { if (S.phase !== 'count') return; con
   else if (k === 'look2') { decode($('q2'), 'LUCID INSTINCT', 300); setColour('#c7ff16'); }
   else if (k === 'fruit') { preloadGame(); S.look = 0; found({ name: 'FRUIT OF LIFE' }, 'fruit'); [261.6, 329.6, 392, 523.3].forEach((f, i) => osc(f, 1.6, 'sine', .07, i * .04)); groove = 3; }
   else if (k === 'ask') { S.cur = null; setColour('#ffffff'); $('q1').textContent = ''; decode($('q1'), 'HOW MANY DID YOU SPOT?'); $('q2').textContent = ''; decode($('q2'), `${S.found}`, 400); $('code').textContent = ''; }
-  else if (k === 'twist') { groove = 0; S.phase = 'twist'; say(S.guess ? (S.guess >= 16 ? `You guessed ${S.guess}+. Sharp. There were ${S.found}…` : `You guessed ${S.guess}. There were ${S.found}…`) : `There were ${S.found}…`); decode($('q1'), ''); $('q2').textContent = ''; $('q1').textContent = '';
+  else if (k === 'twist') { groove = 0; S.phase = 'twist'; say(`You found all ${S.found}…`); decode($('q1'), ''); $('q2').textContent = ''; $('q1').textContent = '';
     setTimeout(() => { say('…and one more.'); osc(40, 2.5, 'sine', .5, 0, .8); setTimeout(() => { S.phase = 'implode'; S.collapseT = S.t; noise(1.2, .4, 0, 200, 4000); osc(400, 1.2, 'sawtooth', .08, 0, .1); }, 1300); }, 1700); }
 }, Math.max(0, at * 1000)); }
 
 // the guess starts everything: it unlocks sound on an iPhone and commits the player to the challenge
-document.querySelectorAll('.guess button').forEach(b => b.onclick = e => { e.stopPropagation(); S.guess = +b.dataset.g; startCount(); });
+
 function startCount() { if (S.phase !== 'ask') return; audio(); S.phase = 'riser'; body.classList.remove('asking'); buzz(20);
   noise(1.1, .35, 0, 300, 9000); osc(110, 1.1, 'sawtooth', .06, 0, 4);
   setTimeout(() => { flash(.9, 700); osc(55, 1, 'sine', .9, 0, .4); noise(.6, .3, 0, 2000); S.phase = 'count'; body.classList.add('counting'); buildPlan(); groove = 2; nextBeat = performance.now() / 1000 + .05; beatNo = 0; }, 1100); }
@@ -159,7 +163,7 @@ $('skip').onclick = e => { e.stopPropagation(); location.href = '../'; };
 $('replay').onclick = e => { e.stopPropagation(); location.reload(); }; // while developing: watch it again from the top
 
 // the egg: tap it three times
-cv.addEventListener('pointerdown', e => { audio(); if (S.phase === 'draw' || S.phase === 'ask' || S.phase === 'handoff') return; if (S.phase === 'egg') eggTap(e.clientX, e.clientY); });
+cv.addEventListener('pointerdown', e => { audio(); if (S.phase === 'ask') return cubeDown(e); if (S.phase === 'draw' || S.phase === 'handoff') return; if (S.phase === 'egg') eggTap(e.clientX, e.clientY); });
 function eggTap(px, py) { if (Math.hypot(px - CX, py - CY) > R * .7) return; S.taps++; S.crackT = S.t; S.punch = 1; S.shake = .6 + S.taps * .3;
   osc(80 + S.taps * 40, .8, 'sine', .7, 0, .4); noise(.25, .3, 0, 1200); osc(PENT[S.taps * 4], .9, 'triangle', .1); buzz([30, 40, 30 + S.taps * 40]); groove = S.taps; if (S.taps === 1) { nextBeat = performance.now() / 1000 + .05; }
   for (let i = 0; i < 18 + S.taps * 14; i++) { const a = Math.random() * 6.283, v = 120 + Math.random() * 420; S.sparks.push({ x: px, y: py, vx: Math.cos(a) * v, vy: Math.sin(a) * v, l: 1 }); }
@@ -184,6 +188,53 @@ function projector(t, k = 1) { const by = CY + R * 1.32, rw = R * .55; x.save();
   const dg = x.createRadialGradient(CX, by, 0, CX, by, rw); dg.addColorStop(0, `rgba(230,255,170,${.5 * k})`); dg.addColorStop(1, 'transparent'); x.fillStyle = dg; x.beginPath(); x.ellipse(CX, by, rw, rw * .2, 0, 0, 7); x.fill(); x.restore(); }
 // hologram finish on the figure: a soft flicker, and now and then a slice of the picture tears sideways
 function holoGlitch(t) { if (Math.random() < .045) { const n = 1 + (Math.random() * 3 | 0); for (let i = 0; i < n; i++) { const y = Math.random() * H, h = 4 + Math.random() * 26, dx = (Math.random() - .5) * 26; x.drawImage(cv, 0, y * DPR, cv.width, h * DPR, dx, y, W, h); } } }
+/* the landing cube: Metatron's points given depth (the inner ring alternates toward and away from you, the outer ring the other way),
+   so dragging turns it like a crystal; nodes chime under your finger; holding the centre fills the cube with energy until it wakes */
+const Z3 = [0, .55, -.55, .55, -.55, .55, -.55, -.32, .32, -.32, .32, -.32, .32];
+const LDIST = LINES.map(([a, b]) => Math.min(Math.hypot(...PTS[a]), Math.hypot(...PTS[b]))); // how far from the centre each line starts
+const C = { rx: 0, ry: 0, vx: 0, vy: 0, down: false, hold: false, charge: 0, touched: false, lx: 0, ly: 0, sx: 0, sy: 0, moved: 0, near: -1, flash: new Array(13).fill(0), chimeT: new Array(13).fill(-9), buzzT: 0, hum: null, proj: [] };
+function project() { const cx = Math.cos(C.rx), sx = Math.sin(C.rx), cy = Math.cos(C.ry), sy = Math.sin(C.ry);
+  C.proj = PTS.map(([px, py], i) => { const pz = Z3[i]; const x1 = px * cy + pz * sy, z1 = -px * sy + pz * cy; const y2 = py * cx - z1 * sx, z2 = py * sx + z1 * cx; const f = 3.2 / (3.2 - z2); return [CX + x1 * R * f, CY + y2 * R * f, z2, f]; }); return C.proj; }
+function humStart() { const a = audio(); if (!a || C.hum) return; const o = a.createOscillator(), o2 = a.createOscillator(), f = a.createBiquadFilter(), g = a.createGain(); o.type = 'sawtooth'; o2.type = 'sine'; f.type = 'lowpass'; f.frequency.value = 300; g.gain.value = 0; o.connect(f); o2.connect(f); f.connect(g).connect(out()); o.start(); o2.start(); C.hum = { o, o2, f, g }; }
+function humSet(k) { if (!C.hum) return; const n = AC.currentTime; C.hum.o.frequency.setTargetAtTime(55 + k * 330, n, .04); C.hum.o2.frequency.setTargetAtTime(110 + k * 660, n, .04); C.hum.f.frequency.setTargetAtTime(240 + k * 5200, n, .05); C.hum.g.gain.setTargetAtTime(k > .001 ? .05 + k * .12 : 0, n, .06); }
+function humStop() { if (!C.hum) return; const h = C.hum; C.hum = null; h.g.gain.setTargetAtTime(0, AC.currentTime, .08); setTimeout(() => { try { h.o.stop(); h.o2.stop(); } catch {} }, 500); }
+function cubeDown(e) { C.down = true; C.touched = true; C.sx = C.lx = e.clientX; C.sy = C.ly = e.clientY; C.moved = 0;
+  if (Math.hypot(e.clientX - CX, e.clientY - CY) < R * .3) { C.hold = true; body.classList.add('charging'); humStart(); osc(110, .5, 'sine', .3, 0, 1.5); buzz(15); }
+  promptFor(); }
+addEventListener('pointermove', e => { if (S.phase !== 'ask' || !C.down) return; const dx = e.clientX - C.lx, dy = e.clientY - C.ly; C.lx = e.clientX; C.ly = e.clientY; C.moved += Math.hypot(dx, dy);
+  if (C.hold && C.moved > 26) { C.hold = false; body.classList.remove('charging'); } // a drag is a spin, not a hold
+  if (!C.hold) { C.vy += dx * .0045; C.vx += dy * .0045; }
+  C.proj.forEach(([px, py], i) => { if (Math.hypot(px - e.clientX, py - e.clientY) < 26 && S.t - C.chimeT[i] > .22) { C.chimeT[i] = S.t; C.flash[i] = 1; osc(PENT[(i * 3) % PENT.length], .9, 'sine', .09); osc(PENT[(i * 3) % PENT.length] * 2, .5, 'triangle', .025); buzz(6); } }); });
+addEventListener('pointerup', () => { if (!C.down) return; C.down = false; if (C.hold) { C.hold = false; body.classList.remove('charging'); if (C.charge > .08 && C.charge < 1) osc(220 * (1 + C.charge), .7, 'sine', .08, 0, .35); } promptFor(); });
+function promptFor() { const a = $('pr1'), b = $('pr2'); if (!C.touched) { a.textContent = 'touch the cube'; b.textContent = 'drag it · feel it'; } else if (C.hold) { a.textContent = 'keep holding'; b.textContent = 'it is waking up'; } else { a.textContent = 'hold the centre'; b.textContent = 'wake it'; } }
+function holoCube(t, dt) {
+  // physics: spin with inertia, then spring home; the charge fills while you hold the centre and drains when you let go
+  C.ry += C.vy; C.rx += C.vx; C.vx *= .93; C.vy *= .93; if (!C.down) { C.ry = Math.atan2(Math.sin(C.ry), Math.cos(C.ry)); if (Math.abs(C.vy) < .02) { C.rx *= .965; C.ry *= .965; } } // after a flick it coasts, then settles home the short way C.rx = Math.max(-1.1, Math.min(1.1, C.rx));
+  if (C.hold) { C.charge = Math.min(1, C.charge + dt / 1.7); C.rx *= .9; C.ry *= .9; } else C.charge = Math.max(0, C.charge - dt * 1.1);
+  humSet(C.charge); if (!C.hold && C.charge <= 0) humStop();
+  if (C.hold && S.t - C.buzzT > .26 - C.charge * .2) { C.buzzT = S.t; buzz(6 + C.charge * 22); osc(70 + C.charge * 40, .12, 'sine', .25); }
+  if (C.charge >= 1 && S.phase === 'ask') { humStop(); C.rx = C.ry = 0; C.hold = false; C.down = false; body.classList.remove('charging'); startCount(); return; }
+  const pr = project(), ch = C.charge, front = ch * 1.25, idle = C.touched ? 0 : 1;
+  x.save(); x.globalCompositeOperation = 'lighter'; x.lineCap = 'round';
+  // the 13 spheres, seen at an angle
+  for (let i = 0; i < 13; i++) { const [px, py, z, f] = pr[i]; const lit = front > Math.hypot(...PTS[i]) ? 1 : 0; x.strokeStyle = `rgba(199,255,22,${.16 + .14 * (z + 1) / 2 + lit * .25})`; x.lineWidth = 1; x.beginPath(); x.ellipse(px, py, R * .25 * f * Math.abs(Math.cos(C.ry)) + 1, R * .25 * f * Math.abs(Math.cos(C.rx)) + 1, 0, 0, 7); x.stroke(); }
+  // the 78 lines: depth-shaded, lit by the charge front, with sparks racing along the lit ones
+  for (let i = 0; i < LINES.length; i++) { const [a, b] = LINES[i], A = pr[a], B = pr[b], dep = ((A[2] + B[2]) / 2 + 1) / 2, lit = Math.max(0, Math.min(1, (front - LDIST[i]) * 4));
+    const wave = idle * Math.max(0, Math.sin(t * 1.4 - LDIST[i] * 5)) ** 6;
+    x.strokeStyle = `rgba(199,255,22,${.12 + .2 * dep + lit * .55 + wave * .35})`; x.lineWidth = .8 + dep * .8 + lit * 1.4; x.beginPath(); x.moveTo(A[0], A[1]); x.lineTo(B[0], B[1]); x.stroke();
+    if (lit > .5 || wave > .4) { const k = (t * (1.2 + ch * 2.5) + i * .37) % 1; x.fillStyle = `rgba(240,255,210,${.8 * Math.max(lit, wave)})`; x.beginPath(); x.arc(A[0] + (B[0] - A[0]) * k, A[1] + (B[1] - A[1]) * k, 1.6 + lit, 0, 7); x.fill(); } }
+  // nodes: orbs that chime, flare and grow with the charge
+  for (let i = 0; i < 13; i++) { const [px, py, z] = pr[i]; C.flash[i] = Math.max(0, C.flash[i] - dt * 2.5); const lit = front > Math.hypot(...PTS[i]) ? 1 : 0, r = 3 + (z + 1) * 1.6 + C.flash[i] * 7 + lit * 2.5;
+    const g = x.createRadialGradient(px, py, 0, px, py, r * 4); g.addColorStop(0, `rgba(235,255,190,${.5 + C.flash[i] * .5 + lit * .3})`); g.addColorStop(1, 'rgba(199,255,22,0)'); x.fillStyle = g; x.beginPath(); x.arc(px, py, r * 4, 0, 7); x.fill();
+    x.fillStyle = '#f4ffe0'; x.beginPath(); x.arc(px, py, r * .6, 0, 7); x.fill(); }
+  // the centre: a pulsing target until touched, then the charge ring
+  const [cx0, cy0] = pr[0], pulse = .5 + .5 * Math.sin(t * 3.4);
+  if (C.touched && !C.hold && ch < .02) { x.strokeStyle = `rgba(234,255,184,${.35 + .4 * pulse})`; x.lineWidth = 2; x.beginPath(); x.arc(cx0, cy0, R * (.2 + .04 * pulse), 0, 7); x.stroke(); }
+  if (ch > 0) { x.strokeStyle = 'rgba(199,255,22,.25)'; x.lineWidth = 4; x.beginPath(); x.arc(cx0, cy0, R * .22, 0, 7); x.stroke(); x.strokeStyle = '#f4ffe0'; x.shadowColor = '#c7ff16'; x.shadowBlur = 18; x.lineWidth = 4; x.beginPath(); x.arc(cx0, cy0, R * .22, -Math.PI / 2, -Math.PI / 2 + ch * 6.283); x.stroke(); x.shadowBlur = 0;
+    const cg = x.createRadialGradient(cx0, cy0, 0, cx0, cy0, R * (.3 + ch * .9)); cg.addColorStop(0, `rgba(230,255,170,${ch * .45})`); cg.addColorStop(1, 'rgba(199,255,22,0)'); x.fillStyle = cg; x.beginPath(); x.arc(cx0, cy0, R * (.3 + ch * .9), 0, 7); x.fill(); }
+  x.restore();
+  S.shake = Math.max(S.shake, ch * ch * .5); S.punch = Math.max(S.punch, ch * .25);
+}
 function smoke(t) { for (let i = 0; i < 5; i++) { const sx = W * (.5 + .45 * Math.sin(t * .05 + i * 1.7)), sy = H * (.55 + .35 * Math.cos(t * .04 + i)), r = Math.max(W, H) * .5; const g = x.createRadialGradient(sx, sy, 0, sx, sy, r); g.addColorStop(0, 'rgba(70,80,30,.10)'); g.addColorStop(1, 'transparent'); x.fillStyle = g; x.fillRect(0, 0, W, H); } }
 function cubeLines(alpha, drawK, t, wob = 0) {
   const n = Math.floor(LINES.length * drawK); x.lineWidth = 1; x.save(); x.globalCompositeOperation = 'lighter';
@@ -219,8 +270,9 @@ function draw(t, dt) {
   x.globalAlpha = .9 + .1 * Math.sin(t * 53) * Math.sin(t * 17); // hologram flicker
   S.punch = Math.max(0, S.punch - dt * 4); S.shake = Math.max(0, S.shake - dt * 3);
   x.save(); const z = 1 + S.punch * .035, sh = S.shake * 6; x.translate(CX + (Math.random() - .5) * sh, CY + (Math.random() - .5) * sh); x.scale(z, z); x.translate(-CX, -CY);
-  if (S.phase === 'draw') { S.draw = Math.min(1, S.draw + dt * .55); cubeLines(.75, S.draw, t); if (S.draw >= 1) { S.phase = 'ask'; body.classList.add('asking'); } }
-  else if (S.phase === 'ask' || S.phase === 'riser') { cubeLines(.75, 1, t, S.phase === 'riser' ? 2 : 0); }
+  if (S.phase === 'draw') { S.draw = Math.min(1, S.draw + dt * .55); cubeLines(.75, S.draw, t); if (S.draw >= 1) { S.phase = 'ask'; body.classList.add('asking'); promptFor(); } }
+  else if (S.phase === 'ask') { holoCube(t, dt); }
+  else if (S.phase === 'riser') { cubeLines(.75, 1, t, 2); }
   else if (S.phase === 'count' || S.phase === 'twist') {
     cubeLines(S.cur && S.cur.kind === 'solid' ? .28 : .5, 1, t);
     const c = S.cur, k = t - S.curT;
@@ -251,7 +303,7 @@ const ease = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
 body.classList.add('show'); setColour('#c7ff16'); requestAnimationFrame(frame);
 
 // test hook: jump ahead in a hidden tab
-window.intro = { S, startCount, eggTap, preloadGame, get ready() { return gameReady; }, beat() { onBeat(beatNo++, 0); }, step(sec) { for (let i = 0; i < sec * 30; i++) { S.t += 1 / 30; draw(S.t, 1 / 30); } } };
+window.intro = { S, C, cubeDown, startCount, eggTap, preloadGame, get ready() { return gameReady; }, beat() { onBeat(beatNo++, 0); }, step(sec) { for (let i = 0; i < sec * 30; i++) { S.t += 1 / 30; draw(S.t, 1 / 30); } } };
 </script>
 </body>
 </html>
