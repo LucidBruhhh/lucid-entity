@@ -203,6 +203,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 .mbRar{display:inline-block;font:700 11px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#070707;background:var(--rc2,#c7ff16);padding:5px 10px 4px;border-radius:3px}
 .mbOrb{width:96px;height:96px;margin:14px auto 8px;border-radius:50%;display:grid;place-items:center;font-size:50px;background:radial-gradient(circle at 35% 30%,#fff,var(--rc2,#c7ff16) 40%,#111 85%);box-shadow:0 0 40px var(--rc,rgba(199,255,22,.6));animation:mbFloat 2.4s ease-in-out infinite}
 @keyframes mbFloat{50%{transform:translateY(-6px) rotate(6deg)}}
+.eaVer{margin-left:7px;padding-left:7px;border-left:1px solid rgba(199,255,22,.35);color:rgba(240,240,240,.75);letter-spacing:.14em}
 .gzRead.bar{white-space:normal;line-height:1.55;bottom:5%}
 /* the backpack: everything found, Mythics on a holographic card */
 .dock button{position:relative}.dock button:not(.primary){width:clamp(50px,calc((100vw - 152px) / 4),64px)}
@@ -517,7 +518,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     </div>
   </div>
   <div class="hint" id="hint">move · click · hold · drag</div>
-  <button class="eaPill" id="eaPill" title="About this demo">early access</button>
+  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.11</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
   <button class="morePill" id="dMore" title="More: sound, timeline, listen, veil, frame rate, stats" aria-label="More settings">&#8943;</button>
   <button class="sharePill" id="sharePill" title="Share Aeon with a friend">&#8599; share</button>
   <div class="eaNote">early access demo · limited features</div>
@@ -1026,16 +1027,21 @@ let cracks, eggLight, eggEnv; const EGG_ART = { value: null }, EGG_ARTON = { val
 /* ---------- the Flower of Life under the egg (2 November 2026): born from the orbit rings, one tap at a time.
    Tap 1: six circles are born on the inner ring and slide in to lock round a centre circle (the Seed of Life).
    Tap 2: twelve more are born on the middle ring and lock into the full flower; the outer ring is its boundary.
-   Hatch: the whole flower flares white and bursts outward as rings of energy while Aeon is conceived.
+   Hatch (concept A, "Metatron rises", chosen by the user on 2 November 2026): a third ring of eighteen circles blooms from the
+   boundary as the egg opens (37 circles), the boundary widens, the thirteen inner centres light and wire into Metatron's cube,
+   and the whole flower stays under Aeon as its floor, turning slowly and pulsing with its heart. Nothing is destroyed.
    Light runs round every circle (as on Aeon's lattice floor); each lock-in flashes and rings a bell. ---------- */
 const FL_R = .72, FL_N = 96; // circle radius: three radii fit the outer orbit ring (2.16 ≈ 2.15)
-const flower = { circles: [], state: 0, burst: 0, ringFade: [1, 1, 1], group: null, pts: null, lines: null, flash: [] };
+const flower = { circles: [], state: 0, h: 0, ringFade: [1, 1, 1], group: null, pts: null, lines: null, flash: [], meta: null, nodes: [], bound: null };
 {
   const grp = new THREE.Group(); grp.position.y = -1.33; eggEnv.add(grp); flower.group = grp;
   const defs = [{ x: 0, z: 0, ring: 1, a0: 0 }];
   for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; defs.push({ x: Math.cos(a) * FL_R, z: Math.sin(a) * FL_R, ring: 1, a0: a }); }
   for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3, b = a + Math.PI / 6, d = FL_R * Math.sqrt(3); defs.push({ x: Math.cos(a) * 2 * FL_R, z: Math.sin(a) * 2 * FL_R, ring: 2, a0: a }); defs.push({ x: Math.cos(b) * d, z: Math.sin(b) * d, ring: 2, a0: b }); }
-  defs.forEach((d, i) => { const br = d.ring === 1 ? 1.15 : 1.6; flower.circles.push({ tx: d.x, tz: d.z, bx: i ? Math.cos(d.a0) * br : 0, bz: i ? Math.sin(d.a0) * br : 0, ring: d.ring, k: 0, seed: Math.random() * 6.283, lock: 0, delay: i ? (i % 7) * .07 : 0 }); });
+  for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3, d7 = FL_R * Math.sqrt(7), o = Math.atan2(Math.sqrt(3) / 2, 2.5); // the third ring: 6 on the axes at 3R, 12 more at R·√7
+    defs.push({ x: Math.cos(a) * 3 * FL_R, z: Math.sin(a) * 3 * FL_R, ring: 3, a0: a }); defs.push({ x: Math.cos(a + o) * d7, z: Math.sin(a + o) * d7, ring: 3, a0: a + o }); defs.push({ x: Math.cos(a - o) * d7, z: Math.sin(a - o) * d7, ring: 3, a0: a - o }); }
+  defs.push({ x: 0, z: 0, ring: 2, a0: 0, boundary: true }); // the boundary circle: 3R while the flower forms, 4R once the third ring is in
+  defs.forEach((d, i) => { const br = d.ring === 1 ? 1.15 : d.ring === 2 ? 1.6 : 3 * FL_R; flower.circles.push({ tx: d.x, tz: d.z, bx: i && !d.boundary ? Math.cos(d.a0) * br : 0, bz: i && !d.boundary ? Math.sin(d.a0) * br : 0, ring: d.ring, boundary: !!d.boundary, k: 0, seed: Math.random() * 6.283, lock: 0, delay: d.boundary ? 0 : i ? (i % 7) * .07 : 0 }); });
   const n = flower.circles.length, pos = new Float32Array(n * FL_N * 3), ang = new Float32Array(n * FL_N), seed = new Float32Array(n * FL_N), lpos = new Float32Array(n * FL_N * 6);
   flower.circles.forEach((c, ci) => { for (let k = 0; k < FL_N; k++) { ang[ci * FL_N + k] = k / FL_N * 6.283; seed[ci * FL_N + k] = c.seed; } });
   const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pos, 3)); pg.setAttribute('aAng', new THREE.BufferAttribute(ang, 1)); pg.setAttribute('aSeed', new THREE.BufferAttribute(seed, 1));
@@ -1047,32 +1053,42 @@ const flower = { circles: [], state: 0, burst: 0, ringFade: [1, 1, 1], group: nu
   const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.BufferAttribute(lpos, 3));
   flower.lines = new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ ...ADD, opacity: 0 })); flower.lines.frustumCulled = false; flower.lines.visible = false; grp.add(flower.lines);
   flower.flash = flower.circles.map(() => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, ...ADD, opacity: 0, depthTest: false })); sp.scale.setScalar(.01); sp.renderOrder = 5; grp.add(sp); return sp; });
+  const MPf = [[0, 0]]; for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; MPf.push([Math.cos(a) * FL_R, Math.sin(a) * FL_R], [Math.cos(a) * 2 * FL_R, Math.sin(a) * 2 * FL_R]); } // the fruit of life: 13 centres
+  const mv = []; for (let a = 0; a < 13; a++) for (let b = a + 1; b < 13; b++) mv.push(MPf[a][0], .012, MPf[a][1], MPf[b][0], .012, MPf[b][1]); // 78 lines
+  const mg = new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(mv, 3)); mg.setDrawRange(0, 0);
+  flower.meta = new THREE.LineSegments(mg, new THREE.LineBasicMaterial({ color: 0xc7ff16, ...ADD, opacity: 0 })); flower.meta.frustumCulled = false; flower.meta.visible = false; grp.add(flower.meta);
+  flower.nodes = MPf.map(([x, z]) => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, ...ADD, opacity: 0, depthTest: false })); sp.position.set(x, .02, z); sp.scale.setScalar(.22); sp.renderOrder = 6; grp.add(sp); return sp; });
 }
 function flowerFrame(dt, t, hb) {
-  const F = flower; if (F.state === 0 && F.burst === 0) return;
+  const F = flower; if (F.state === 0) return;
   F.pts.visible = F.lines.visible = true;
   const pos = F.pts.geometry.attributes.position.array, lp = F.lines.geometry.attributes.position.array; let locked = 0;
   for (let i = 0; i < 3; i++) if (i < F.state) F.ringFade[i] = Math.max(0, F.ringFade[i] - dt * 1.1); // the ring that gave birth fades as its circles lock
-  F.circles.forEach((c, ci) => {
-    const want = c.ring <= F.state; if (want && c.delay > 0) { c.delay -= dt; } else if (want) { const was = c.k; c.k = Math.min(1, c.k + dt / 1.05); if (was < 1 && c.k >= 1) { c.lock = 1; locked++; } }
+  const H = F.state >= 3 ? F.h : 0, settled = H >= 1; // H: the hatch ceremony, 0 to 1
+  const bound = F.state >= 3 ? 3 + smooth(clamp((H - .08) / .5)) : 3; // the boundary widens from 3R to 4R as the third ring comes in
+  const anim = !settled || F.circles.some(c => (c.ring <= F.state && c.k < 1) || c.lock > 0); // once every circle has locked, the geometry is still: only the uniforms and the slow turn change
+  if (anim) F.circles.forEach((c, ci) => {
+    const want = c.ring <= F.state; if (want && c.delay > 0) { c.delay -= dt; } else if (want) { const was = c.k; c.k = Math.min(1, c.k + dt / (c.ring === 3 ? .8 : 1.05)); if (was < 1 && c.k >= 1) { c.lock = 1; if (!c.boundary) locked++; } }
     c.lock = Math.max(0, c.lock - dt * 1.5);
-    const e = smooth(c.k), cx = lerp(c.bx, c.tx, e), cz = lerp(c.bz, c.tz, e), r = FL_R * (ci ? .2 + .8 * e : e) * (1 + c.lock * .08), wob = (1 - e) * .06 * Math.sin(t * 9 + c.seed), y = (1 - e) * .18 + c.lock * .06, spin = (c.ring === 2 ? -1 : 1) * t * .18;
+    const e = smooth(c.k), cx = lerp(c.bx, c.tx, e), cz = lerp(c.bz, c.tz, e), r = c.boundary ? FL_R * bound * e : FL_R * (ci ? .2 + .8 * e : e) * (1 + c.lock * .08), wob = (1 - e) * .06 * Math.sin(t * 9 + c.seed), y = (1 - e) * .18 + c.lock * .06, spin = (c.ring === 2 ? -1 : 1) * t * .18;
     for (let k = 0; k < FL_N; k++) { const a = k / FL_N * 6.283 + spin, i = (ci * FL_N + k) * 3; pos[i] = cx + Math.cos(a) * (r + wob); pos[i + 1] = y; pos[i + 2] = cz + Math.sin(a) * (r + wob); }
     for (let k = 0; k < FL_N; k++) { const a0 = k / FL_N * 6.283, a1 = (k + 1) / FL_N * 6.283, i = (ci * FL_N + k) * 6; lp[i] = cx + Math.cos(a0) * r; lp[i + 1] = y; lp[i + 2] = cz + Math.sin(a0) * r; lp[i + 3] = cx + Math.cos(a1) * r; lp[i + 4] = y; lp[i + 5] = cz + Math.sin(a1) * r; }
-    const f = F.flash[ci]; f.position.set(cx, y + .02, cz); f.material.opacity = c.lock * c.lock * .7 * (1 - F.burst); f.scale.setScalar(.15 + (1 - c.lock) * .9); f.material.color.copy(colC).lerp(new THREE.Color(0xffffff), .55);
+    const f = F.flash[ci]; f.position.set(cx, y + .02, cz); f.material.opacity = c.boundary ? 0 : c.lock * c.lock * .7; f.scale.setScalar(.15 + (1 - c.lock) * .9); f.material.color.copy(colC).lerp(new THREE.Color(0xffffff), .55);
   });
-  if (locked) { audio.bell(392 + F.state * 131, .35); audio.bell(587 + F.state * 131, .3); egg.pulse = Math.max(egg.pulse, .55); } // a circle locked into the lattice
-  F.pts.geometry.attributes.position.needsUpdate = true; F.lines.geometry.attributes.position.needsUpdate = true;
-  const u = F.pts.material.uniforms, b = F.burst; u.uTime.value = t; u.uCol.value.copy(colC); u.uSpeed.value = 1 + F.state * .6 + egg.pulse * 2 + b * 6; u.uPx.value = renderer.getPixelRatio();
-  u.uSize.value = (.75 + hb * .25 + egg.pulse * .7) * (1 + b * 1.6); u.uAlpha.value = Math.min(1, .35 + F.state * .4) * (1 - smooth(b)); u.uWhite.value = b > 0 ? Math.max(0, 1 - b * 3) * .5 : 0; // a flare, not a white-out: the hatch flash is already there
-  F.lines.material.color.copy(colB).lerp(new THREE.Color(0xffffff), b > 0 ? .8 : 0); F.lines.material.opacity = (.22 + hb * .15 + egg.pulse * .3 + F.state * .05) * (1 - smooth(b));
+  if (anim) { F.pts.geometry.attributes.position.needsUpdate = true; F.lines.geometry.attributes.position.needsUpdate = true; }
+  if (locked) { audio.bell(392 + Math.min(F.state, 3) * 131, .35); audio.bell(587 + Math.min(F.state, 3) * 131, .3); if (egg.on) egg.pulse = Math.max(egg.pulse, .55); else mood.flash = Math.max(mood.flash, .18); } // a circle locked into the lattice
+  // Metatron's cube: from H = .35 the thirteen centres light, then the 78 lines draw themselves in, three or four at a time
+  if (F.state >= 3) { const m = clamp((H - .35) / .55), lit = clamp((H - .3) / .25); F.meta.visible = m > 0; F.meta.geometry.setDrawRange(0, Math.floor(smooth(m) * 78) * 2);
+    F.meta.material.opacity = (.55 - .3 * smooth(clamp((H - .9) / .1))) * Math.min(1, m * 3) + (settled ? .06 * hb : 0); // bright while it draws, then a quiet .25
+    F.nodes.forEach((sp, i) => { const k = clamp(lit * 13 - i * .85), tw = settled ? .5 + .5 * Math.sin(t * 2.4 + i * 1.7) : 1; sp.material.opacity = k * (settled ? .22 + .18 * tw + hb * .15 : .85); sp.scale.setScalar(settled ? .18 + .06 * tw : .22 + .3 * k * (1 - k) * 4); sp.material.color.copy(i === 0 ? colC : new THREE.Color(0xc7ff16)).lerp(new THREE.Color(0xffffff), i === 0 ? .6 : .25); }); }
+  const u = F.pts.material.uniforms; u.uTime.value = t; u.uCol.value.copy(colC); u.uPx.value = renderer.getPixelRatio();
+  const rise = F.state >= 3 ? Math.sin(Math.min(1, H / .7) * Math.PI) : 0; // the ceremony's surge, then it settles
+  u.uSpeed.value = 1 + F.state * .5 + (egg.on ? egg.pulse * 2 : mood.flash * 2) + rise * 3; u.uSize.value = (.75 + hb * .25 + (egg.on ? egg.pulse * .7 : 0)) * (1 + rise * .5) * (settled ? .8 : 1); u.uAlpha.value = Math.min(1, .35 + Math.min(F.state, 2) * .4) * (settled ? .72 : 1); u.uWhite.value = rise * .35;
+  F.lines.material.color.copy(colB).lerp(new THREE.Color(0xffffff), rise * .5); F.lines.material.opacity = (.22 + hb * .15 + (egg.on ? egg.pulse * .3 : 0) + Math.min(F.state, 2) * .05) * (settled ? .8 : 1);
+  if (F.state >= 3) { F.group.rotation.y += dt * (.03 + rise * .25); F.group.position.y = -1.33 + rise * .08; } // alive under Aeon: a slow turn, a lift during the ceremony
 }
-function flowerBurst(dt, t) { // the hatch: the flower flares white, lifts and bursts outward as rings of energy, then is gone
-  const F = flower; if (F.burst <= 0 || F.burst >= 1) return;
-  F.burst = Math.min(1, F.burst + dt / 1.7); const k = F.burst, g = F.group;
-  flowerFrame(dt, t, 0);
-  g.scale.setScalar(1 + k * k * 5.5); g.position.y = lerp(-1.33, .6, smooth(k)); g.rotation.y += dt * (1.2 + k * 2.5); g.rotation.x = -smooth(k) * .35;
-  if (k >= 1) { scene.remove(g); F.pts.visible = F.lines.visible = false; }
+function flowerHatch(dt, t) { // the hatch ceremony's clock: about 2.8 seconds from the first crack to the finished cube
+  const F = flower; if (F.state < 3 || F.h >= 1) return; F.h = Math.min(1, F.h + dt / 2.8);
 }
 
 function eggTap() {
@@ -1138,7 +1154,7 @@ function aeonConception(cx, cy) {
 }
 function eggHatch() {
   EGG_ARTON.value = 0; egg.on = false; track('hatch'); egg.hatch = .001; egg.t0 = clock.t; egg.crackY = -1.6; cracks.visible = false;
-  flower.burst = .001; scene.add(flower.group); // the flower bursts outward in Aeon's own scene
+  flower.state = 3; flower.h = .001; scene.add(flower.group); // Metatron rises: the flower completes and stays as the floor in Aeon's own scene
   renderPass.scene = scene; eyePass.enabled = true; scene.add(eggGroup); // the shards fly in Aeon's own scene while it fades in
   mood.flash = 1; mood.fold = 1; wave(new THREE.Vector3(), 6, colC); [262, 392, 523, 784].forEach((f, i) => setTimeout(() => audio.bell(f, .5), i * 110));
   { const v = new THREE.Vector3(0, 0, 0).project(camera); aeonConception((v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight); } // how Aeon is born, centred on the egg
@@ -1376,8 +1392,9 @@ const EYE_CONST = `const float PUP=${EYE_ART.pup},IRIS=${EYE_ART.iris},GAP=${EYE
   vec2 lids(vec3 p){float o=1.-uBlink*1.04,c=.12*p.x*p.x,t=p.y+c-(o-uLidT+uTilt*p.x),b=c-p.y-(o-uLidB);
     return vec2(max(smoothstep(-.02,.02,t),smoothstep(-.02,.02,b)),min(abs(t),abs(b)));}`;
 const eyeU = { uTime: { value: 0 }, uDilate: { value: .3 }, uBlink: { value: 0 }, uLidT: { value: 0 }, uLidB: { value: 0 }, uTilt: { value: 0 }, uColB: { value: colB }, uColC: { value: colC }, uColA: { value: colA }, uGlow: { value: 1 }, uHeart: { value: 0 },
-  uTex: { value: eyeArt }, uC: { value: EYE_ART.c }, uView: { value: riftRT.texture }, uRes: { value: riftRes }, uMul: { value: 1 } };
-const EYE_F = `uniform float uTime,uDilate,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,uTilt;uniform vec3 uColA,uColB,uColC;uniform sampler2D uTex,uView;uniform vec2 uC,uRes;varying vec3 vL,vN,vV;
+  uTex: { value: eyeArt }, uC: { value: EYE_ART.c }, uView: { value: riftRT.texture }, uRes: { value: riftRes }, uMul: { value: 1 }, uSkin: { value: 0 } };
+const EYE_F = NOISE + `uniform float uSkin;float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+uniform float uTime,uDilate,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,uTilt;uniform vec3 uColA,uColB,uColC;uniform sampler2D uTex,uView;uniform vec2 uC,uRes;varying vec3 vL,vN,vV;
   ${EYE_CONST}
   void main(){vec3 p=normalize(vL),n=normalize(vN),v=normalize(vV);
     float fr=1.-clamp(dot(n,v),0.,1.);
@@ -1385,6 +1402,7 @@ const EYE_F = `uniform float uTime,uDilate,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,
     float th=fr*1.6+.35*sin(p.x*5.+uTime*.4)*sin(p.y*4.-uTime*.3)+uTime*.05;
     vec3 film=.5+.5*cos(6.2832*(th+vec3(0.,.33,.67)));
     vec3 col=uColA*.06+film*pow(fr,2.2)*.5;
+    if(uSkin>.5){
     // polar position on the artwork: the angle from the gaze axis sets the radius, so the art wraps the front of the eye
     float r=acos(clamp(p.z,-1.,1.))/THMAX*EDGE,a=atan(p.y,p.x);
     float w=r-mod(uTime*.07,.62)+.05,wave=exp(-w*w*900.); // a pulse of light runs outward
@@ -1412,26 +1430,36 @@ const EYE_F = `uniform float uTime,uDilate,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,
       col+=uColC*smoothstep(.5,.9,lit)*.1;
       if(r<GAP){float ag=a-uTime*.05;float gl=dot(texture2D(uTex,uC+(GAP+(r-IRIS)*.9)*vec2(cos(ag),sin(ag))).rgb,vec3(.333));col+=vec3(.55,.25,1.)*smoothstep(.5,.9,gl)*.22*(.6+.4*sin(uTime*1.3+a*3.));} // in the gap, the words of the dimension next door turn the other way
     }
+    }else{ // the Origin eye
+      float r=length(p.xy),a=atan(p.y,p.x); col=uColA*.12+uColB*pow(fr,3.)*.3;
+      if(p.z>0.){ float irisR=.64,fib=.5+.5*sin(a*46.+snoise(vec3(a*2.,r*7.,uTime*.25))*2.6),fib2=.5+.5*sin(a*13.-r*20.+uTime*.6),t=r/irisR;
+        vec3 iris=mix(uColC*.9,uColB*.55,smoothstep(.15,1.,t))*(.3+.9*fib)*(.6+.5*fib2)*(1.+uHeart*.12); iris+=uColC*exp(-((t-.42)*9.)*((t-.42)*9.))*.6; iris*=smoothstep(1.,.86,t);
+        col=mix(col,iris,smoothstep(irisR+.015,irisR-.015,r)); col+=uColB*exp(-((r-irisR)*40.)*((r-irisR)*40.))*.6;
+        float pw=mix(.06,.33,uDilate),ph=mix(.42,.36,uDilate),e=(p.x*p.x)/(pw*pw)+(p.y*p.y)/(ph*ph),pupil=smoothstep(1.08,.92,e);
+        vec2 sp=p.xy*90.;float st=step(.93,h2(floor(sp)))*smoothstep(.45,0.,length(fract(sp)-.5)),neb=snoise(vec3(p.xy*6.,uTime*.15))*.5+.5;
+        vec3 inside=vec3(.004,.002,.012)+uColB*neb*neb*.12+vec3(1.,.95,.85)*st*.9;
+        col=mix(col,inside,pupil); col+=uColC*exp(-((sqrt(e)-1.)*6.)*((sqrt(e)-1.)*6.))*.45*(1.-pupil*.3); }
+    }
     vec2 ld=lids(p);
     vec3 lidc=uColA*.35+uColB*pow(fr,2.)*.35;
     col=mix(col,lidc,ld.x);col+=uColC*exp(-ld.y*55.)*.7*smoothstep(.0,.08,uBlink+uLidT+uLidB);
     gl_FragColor=vec4(col*uGlow*uMul,1.);}`;
-const RING_F = `uniform float uTime,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,uTilt;uniform vec3 uColC;uniform sampler2D uTex;uniform vec2 uC;varying vec3 vL,vN,vV;
+const RING_F = `uniform float uSkin;uniform float uTime,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,uTilt;uniform vec3 uColC;uniform sampler2D uTex;uniform vec2 uC;varying vec3 vL,vN,vV;
   ${EYE_CONST}
   float L(float r,float a){return dot(texture2D(uTex,uC+r*vec2(cos(a),sin(a))).rgb,vec3(.333));}
   void main(){vec3 p=normalize(vL);
     float r=acos(clamp(p.z,-1.,1.))/THMAX*EDGE,a=atan(p.y,p.x)+uTime*.03; // the words turn the other way
-    if(r<GAP-.02||r>EDGE)discard;
+    if(r<GAP-.02||r>EDGE||uSkin<.01)discard; // the words belong to the Lucid Instinct skin
     float w=r-mod(uTime*.07,.62)+.05,wave=exp(-w*w*900.);
     // prismatic echo: each colour reads the words from a slightly different turn and depth of the ring
     float s=.0045+.0025*sin(uTime*.7);
     vec3 lit=smoothstep(.45,.9,vec3(L(r,a+s),L(r,a),L(r*1.004,a-s)));
     lit+=smoothstep(.45,.9,vec3(L(r*1.03,a+.5)))*vec3(.6,.3,1.)*.3; // an echo of the words, turned, in violet
     vec3 col=lit*mix(vec3(1.,.93,.86),uColC,.3)*(.85+wave*1.2+uHeart*.15);
-    col*=1.-lids(p).x;
+    col*=(1.-lids(p).x)*uSkin;
     gl_FragColor=vec4(col*uGlow*uMul,1.);}`;
 const eyeGeo = new THREE.SphereGeometry(1, 128, 96);
-const ringU = { uTime: eyeU.uTime, uBlink: eyeU.uBlink, uLidT: eyeU.uLidT, uLidB: eyeU.uLidB, uTilt: eyeU.uTilt, uGlow: eyeU.uGlow, uHeart: eyeU.uHeart, uColC: eyeU.uColC, uTex: eyeU.uTex, uC: eyeU.uC };
+const ringU = { uTime: eyeU.uTime, uBlink: eyeU.uBlink, uLidT: eyeU.uLidT, uLidB: eyeU.uLidB, uTilt: eyeU.uTilt, uGlow: eyeU.uGlow, uHeart: eyeU.uHeart, uColC: eyeU.uColC, uTex: eyeU.uTex, uC: eyeU.uC, uSkin: eyeU.uSkin };
 const RING_SCALE = 1.13; // how far the words float above the eye
 // Each layer has two copies sharing one shader: a dimmer one in the scene feeds the bloom its glow, and a crisp one is drawn
 // on top after the bloom so the lettering never washes out. The crisp copies skip the depth test: the composer's buffer then
@@ -1466,6 +1494,12 @@ const tDirs = [], tBasis = [], tSeed = [];
 const motion = { g: { x: 0, y: -1 }, acc: { x: 0, y: 0 }, f: { x: 0, y: 0 }, fv: { x: 0, y: 0 }, on: 0, jolt: 0, asked: false }; // the phone's tilt and movement
 const M_ON = () => performance.now() - motion.on < 2000 ? 1 : 0; // no tilt sensor (a computer): no hanging
 const WHITE = new THREE.Color(1, 1, 1);
+let tFeedK = 1, tSpurt = 0; // every feeding makes the tentacles a little longer for good (up to twice as long), and each meal stretches them for a moment
+const tFeedCalc = () => { const p = (mem.fed || []).reduce((a, f) => a + (f.p || .4), 0); tFeedK = 1 + (1 - Math.exp(-p / 8)); }; tFeedCalc(); // a Common ≈ +5 %, The Adios ≈ +50 %, up to twice as long
+const fedGrow = () => { tFeedCalc(); tSpurt = 1; };
+const tFl = new Float32Array(TMAX), tFlD = Array.from({ length: 30 }, () => new THREE.Vector3()), tTouch = new Uint8Array(TMAX); // tap: flinch; hold: curious touch
+const touchK = { said: -1e9, n: 0 }; const TOUCH_SAYS = ['…curious.', 'Warm. You are warm.', 'Is that you? It is you.', 'Hello, finger.', 'Soft. I will remember this one.'];
+const FLINCH_SAYS = ['Ow— that one is attached to me.', 'Eep.', 'Gently. Those feel everything.', 'Ticklish one, that.'];
 const tPts = new Float32Array(TMAX * TK * 3), tReach = new Float32Array(TMAX), tGrow = new Float32Array(TMAX);
 const SPK = TMAX * 4;
 const sparkGeo = new THREE.BufferGeometry();
@@ -1978,7 +2012,7 @@ function openFeed(sticker) {
 const FEED_TIERS = [[1, 'a taste'], [3, 'a bond'], [7, 'a key'], [15, 'a crown']];
 function feedIt() {
   const w = feedIn.value.trim().slice(0, 40); if (!w) { feedIn.focus(); return; }
-  mem.fed.push({ sticker: feedSticker, what: w, at: Date.now() }); mem.touches += 25; track('feed');
+  mem.fed.push({ sticker: feedSticker, what: w, at: Date.now() }); mem.touches += 25; track('feed'); fedGrow();
   if (/^[a-z']{3,24}$/i.test(w) && !mem.lexicon.some(x => x.w === w.toLowerCase())) mem.lexicon.push({ w: w.toLowerCase(), u: Math.floor(Math.random() * UNI_NAMES.length), at: Date.now() });
   save(true);
   // it eats: the offering is swallowed, it flashes, grows a little and giggles
@@ -2169,6 +2203,7 @@ async function closeGizmo() { gzRun++; await gzStop(); gzEl.classList.remove('on
 function gzGot(code) {
   code = String(code).trim(); if (gzBusy || !code) return; gzBusy = true; const run = gzRun;
   if (/^(https?:\/\/)?(www\.)?(lucidinstinct\.com\/qr\/adios|entity\.lucidinstinct\.com\/?\?(.*&)?item=adios)\b/i.test(code)) code = ADIOS_CODE; // the bar's own QR, scanned with the Gizmo itself
+  if (/^(https?:\/\/)?(www\.)?(lucidinstinct\.com\/qr\/skin|entity\.lucidinstinct\.com\/?\?(.*&)?skin=instinct)\b/i.test(code)) { gzBusy = false; closeGizmo(); unlockSkin(); return; } // a Lucid Instinct skin code
   const bar = code === ADIOS_CODE; gzRead.classList.toggle('bar', bar); // the official signal is long: it may take two lines
   gzEl.classList.add('got', 'lock'); document.getElementById('gzLock').textContent = '∞ LOCK';
   [784, 988, 1175, 1568].forEach((f, i) => setTimeout(() => audio.bell(f, .35), i * 45)); [1, 2, 3, 4, 5, 6].forEach(i => setTimeout(() => audio.bell(400 + i * 260, .06), 420 + i * 40)); gzBuzz([18, 30, 18, 30, 70]);
@@ -2219,7 +2254,7 @@ function mysteryBox(again) {
 }
 function gizmoFeed() {
   const it = gzItem; if (!it) return; closeGizmo();
-  mem.fed.push({ sticker: it.sticker || 'scan:' + it.code, what: it.name, p: it.power, at: Date.now() }); mem.touches += 25; save(true); track('feed');
+  mem.fed.push({ sticker: it.sticker || 'scan:' + it.code, what: it.name, p: it.power, at: Date.now() }); mem.touches += 25; save(true); track('feed'); fedGrow();
   mood.flash = .8; mood.burst = 1; mood.fold = 1.3; chr.giggle = 2; chr.bounceV += 7; wave(new THREE.Vector3(), 5, colC); wave(new THREE.Vector3(), 3, colB);
   audio.resume(); audio.bell(392, .6); audio.bell(523, .5); setTimeout(() => audio.giggle?.(), 300);
   whisper(`${it.name}. ${it.rarity}! It tastes like ${it.taste}. I grew ${it.power} days on that.`, 7);
@@ -2230,7 +2265,7 @@ function gizmoFeed() {
   }
   bagBadge();
 }
-function toast(text, onTap, ms) { document.querySelector('.regToast')?.remove(); const d = document.createElement('button'); d.className = 'regToast'; d.textContent = text; d.onclick = () => { d.remove(); onTap(); }; document.body.appendChild(d); setTimeout(() => d.remove(), ms); }
+function toast(text, onTap, ms) { document.querySelector('.regToast')?.remove(); if (bagEl.classList.contains('on')) return; /* the backpack is already open */ const d = document.createElement('button'); d.className = 'regToast'; d.textContent = text; d.onclick = () => { d.remove(); onTap(); }; document.body.appendChild(d); setTimeout(() => d.remove(), ms); }
 /* the backpack: every food ever found (rebuilt from the save, so older finds appear too), the Bar Adios set, and journey keepsakes */
 const bagEl = document.getElementById('bag'), bagIn = document.getElementById('bagIn'), dBag = document.getElementById('dBag');
 const RANK = { Mythic: 4, Legendary: 3, Epic: 2, Rare: 1, Common: 0 };
@@ -2243,6 +2278,11 @@ function bagItems() {
   return map;
 }
 function bagBadge() { const items = [...bagItems().values()], fresh = items.filter(e => e.last > (mem.bagSeen || 0)); dBag.classList.toggle('new', fresh.length > 0); dBag.classList.toggle('mythic', fresh.some(e => e.it.mythic)); }
+const skinTiles = () => { const on = skinNow(), art = document.getElementById('eye-art')?.textContent.trim() || '';
+  const o = `<button class="bagT${on === 'origin' ? ' r-Rare' : ''}" data-skin="origin" style="--c:#38e8ff"><span class="o" style="background:radial-gradient(ellipse 18% 42% at 50% 50%,#05030c 92%,transparent 100%),repeating-conic-gradient(#7dffd0 0 4deg,#38e8ff 4deg 8deg,#0b3a52 8deg 11deg);"></span><b>Origin eye</b><em>${on === 'origin' ? '✓ wearing' : 'tap to wear'}</em></button>`;
+  const i = mem.skins.instinct ? `<button class="bagT${on === 'instinct' ? ' r-Legendary' : ''}" data-skin="instinct" style="--c:#1fd8ea"><span class="o" style="background:#000 url('${art}') 49% 50%/180% no-repeat;"></span><b>Lucid Instinct eye</b><em>${on === 'instinct' ? '✓ wearing' : 'tap to wear'}</em></button>`
+    : `<div class="bagT lock"><span class="o">?</span><b>???</b><em style="color:#7d86a8">Skin · scan a Lucid Instinct QR</em></div>`;
+  return o + i; };
 const bagSparks = [[8, 12, 0], [62, 8, .7], [88, 30, 1.3], [78, 78, .4], [40, 88, 1.8], [22, 60, 1.1], [92, 62, 2.1], [50, 40, 1.6]].map(([x, y, d]) => `<i class="sp" style="left:${x}%;top:${y}%;animation-delay:${d}s"></i>`).join('');
 function bagList() {
   const all = bagItems(), adios = all.get(ADIOS.sticker), rest = [...all.values()].filter(e => !e.it.mythic).sort((a, b) => RANK[b.it.rarity] - RANK[a.it.rarity] || b.last - a.last);
@@ -2256,6 +2296,7 @@ function bagList() {
   const relics = (mem.relics || []).map(r => `<div class="bagT r-Rare" style="--c:#ffe0a0;cursor:default"><span class="o">◇</span><b>${String(r.name).replace(/[&<>"']/g, ch => '&#' + ch.charCodeAt(0) + ';')}</b><em>keepsake</em></div>`).join('');
   bagIn.innerHTML = `<div class="bagHd"><div><h2>BACKPACK</h2><small>${kinds} find${kinds === 1 ? '' : 's'} · fed ${fed} time${fed === 1 ? '' : 's'}</small></div><button class="bagX" id="bagX" aria-label="Close backpack">✕</button></div>
     <div class="bagSec">Bar Adios · Shinjuku · ${(adios ? 1 : 0) + (mem.regular ? 1 : 0)} of 2</div>${hero}<div class="bagGrid" style="margin-top:10px">${reg}</div>
+    <div class="bagSec">Aeon's eye · skins</div><div class="bagGrid">${skinTiles()}</div>
     <div class="bagSec">Foods</div>${rest.length ? `<div class="bagGrid">${rest.map(tile).join('')}</div>` : `<div class="bagEmpty">Nothing here yet. Scan any barcode and feed what you find.</div>`}
     ${relics ? `<div class="bagSec">From the journey</div><div class="bagGrid">${relics}</div>` : ''}`;
 }
@@ -2276,6 +2317,7 @@ function openBag(k) {
 function closeBag() { bagEl.classList.remove('on'); dBag.classList.remove('on'); }
 bagEl.addEventListener('click', e => {
   if (e.target.closest('#bagX')) return closeBag(); if (e.target.closest('#bagBack')) { bagList(); bagEl.scrollTop = 0; return; }
+  const sk = e.target.closest('[data-skin]'); if (sk) { if (sk.dataset.skin !== skinNow()) setSkin(sk.dataset.skin); bagList(); return; }
   const b = e.target.closest('[data-being]'); if (b) { closeBag(); toggleGallery(true); galleryShow(VIS.findIndex(v => v.id === b.dataset.being)); return; }
   const t = e.target.closest('[data-k]'); if (t) { bagDetail(decodeURIComponent(t.dataset.k)); bagEl.scrollTop = 0; audio.bell(880, .08); }
 });
@@ -2291,6 +2333,17 @@ document.getElementById('feedGizmo').onclick = openGizmo; document.getElementByI
 document.getElementById('gzWord').onclick = async () => { await closeGizmo(); openFeed(null); };
 gzSetConcept(gzConcept);
 if (params.has('gizmo')) setTimeout(() => { if (!egg.on) openGizmo(); }, 1500);
+/* eye skins (2 November 2026): the Origin eye is everyone's; the Lucid Instinct eye is a skin unlocked by a Lucid Instinct QR (lucidinstinct.com/qr/skin → ?skin=instinct) */
+mem.skins = mem.skins || {}; const skinNow = () => mem.skin === 'instinct' && mem.skins.instinct ? 'instinct' : 'origin';
+eyeU.uSkin.value = skinNow() === 'instinct' ? 1 : 0;
+function setSkin(k, quiet) { // a flash, and the eye is different on the other side of it
+  mem.skin = k; save(true); const to = k === 'instinct' ? 1 : 0; mood.flash = Math.max(mood.flash, .7); mood.blink = 1; chr.bounceV += 3; audio.resume(); audio.bell(523, .4); audio.bell(784, .35);
+  const t0 = performance.now(), from = eyeU.uSkin.value, step = () => { const k2 = Math.min(1, (performance.now() - t0) / 900); eyeU.uSkin.value = from + (to - from) * k2 * k2 * (3 - 2 * k2); if (k2 < 1) requestAnimationFrame(step); }; requestAnimationFrame(step);
+  if (!quiet) whisper(k === 'instinct' ? 'The Lucid Instinct eye. Create your reality.' : 'My first eye. The one I was born with.', 4); track('skin-' + k);
+}
+function unlockSkin() { const fresh = !mem.skins.instinct; mem.skins.instinct = mem.skins.instinct || Date.now(); save(true); if (egg.on) { mem.skin = 'instinct'; eyeU.uSkin.value = 1; save(true); return; }
+  setTimeout(() => { setSkin('instinct', true); whisper(fresh ? 'A Lucid Instinct signal… my eye is changing. Keep it, or switch back, in your bag.' : 'The Lucid Instinct eye, again.', 6); if (fresh) setTimeout(() => toast('✦ New skin: the Lucid Instinct eye · tap to see it', () => openBag(), 8000), 6500); }, 900); }
+if (params.get('skin') === 'instinct') { try { const u = new URL(location.href); u.searchParams.delete('skin'); history.replaceState(history.state, '', u.pathname + u.search + u.hash); } catch {} setTimeout(unlockSkin, 1600); }
 if (params.get('item') === 'adios') { // the bar's QR; the address is cleaned so a reload does not drop it again
   try { const u = new URL(location.href); u.searchParams.delete('item'); history.replaceState(history.state, '', u.pathname + u.search + u.hash); } catch {}
   setTimeout(adiosDrop, 1500); }
@@ -2573,9 +2626,9 @@ const bulk = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMater
 bulk.frustumCulled = false; bScene.add(bulk);
 // the view seen through Aeon's opening pupil: the Lucid Instinct iris rings it, and surging streaks the light
 const bFinal = new ShaderPass(new THREE.ShaderMaterial({
-  uniforms: { tDiffuse: { value: null }, uBright: BRIGHT, uArt: { value: eyeArt }, uC: { value: EYE_ART.c }, uTime: { value: 0 }, uWarp: { value: 0 }, uOpen: { value: 0 }, uAspect: { value: 1 }, uFlash: { value: 0 }, uIris: { value: 1 }, uInvert: { value: 0 }, uPocket: { value: 0 }, uFov: { value: 0 }, uGhost: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, uBright: BRIGHT, uArt: { value: eyeArt }, uC: { value: EYE_ART.c }, uTime: { value: 0 }, uWarp: { value: 0 }, uOpen: { value: 0 }, uAspect: { value: 1 }, uFlash: { value: 0 }, uIris: { value: 1 }, uInvert: { value: 0 }, uPocket: { value: 0 }, uFov: { value: 0 }, uGhost: { value: 0 }, uSkin: eyeU.uSkin },
   vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-  fragmentShader: `uniform sampler2D tDiffuse, uArt; uniform vec2 uC; uniform float uTime, uWarp, uOpen, uAspect, uFlash, uIris, uInvert, uPocket, uFov, uBright, uGhost; varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse, uArt; uniform vec2 uC; uniform float uTime, uWarp, uOpen, uAspect, uFlash, uIris, uInvert, uPocket, uFov, uBright, uGhost, uSkin; varying vec2 vUv;
     const float PUP = ${EYE_ART.pup}, IRIS = ${EYE_ART.iris}, EDGE = ${EYE_ART.edge};
     float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
     void main(){
@@ -2594,7 +2647,8 @@ const bFinal = new ShaderPass(new THREE.ShaderMaterial({
       } else if (r > R0 - .006){
         float ar = PUP + max(r - R0, 0.) / W * (EDGE - PUP);
         vec3 eyeCol = vec3(.004, .002, .01);
-        if (ar < EDGE){ vec4 t = texture2D(uArt, uC + ar * vec2(cos(a), sin(a))); float lit = dot(t.rgb, vec3(.299, .587, .114));
+        if (uSkin < .5){ if (ar < IRIS * 1.3){ float fib = .5 + .5 * sin(a * 46. + sin(a * 7. + uTime * .3) * 2.6); eyeCol = mix(vec3(.3, .9, 1.), vec3(.45, .3, 1.), smoothstep(PUP, IRIS * 1.3, ar)) * (.3 + .9 * fib) * smoothstep(IRIS * 1.3, IRIS * 1.12, ar); } }
+        else if (ar < EDGE){ vec4 t = texture2D(uArt, uC + ar * vec2(cos(a), sin(a))); float lit = dot(t.rgb, vec3(.299, .587, .114));
           eyeCol = ar < IRIS + .004 ? t.rgb : vec3(1., .93, .86) * smoothstep(.45, .9, lit) * .95; }
         col = mix(col, eyeCol, smoothstep(R0 - .006, R0 + .006, r));
       }
@@ -3525,6 +3579,17 @@ addEventListener('deviceorientation', e => { if (e.gamma == null || e.beta == nu
 addEventListener('devicemotion', e => { const a = e.acceleration; if (!a || a.x == null) return; const A = (screen.orientation?.angle ?? window.orientation ?? 0) * Math.PI / 180;
   motion.acc.x = a.x * Math.cos(A) - a.y * Math.sin(A); motion.acc.y = a.x * Math.sin(A) + a.y * Math.cos(A);
   const m = Math.hypot(a.x, a.y, a.z || 0); if (m > 9 && performance.now() - motion.jolt > 1500) { motion.jolt = performance.now(); chr.bounceV += 4; mood.startle = Math.max(mood.startle, .5); } });
+canvas.addEventListener('pointerdown', e => { if (egg.on || between.mode !== 'out' || !tendrilRib.n) return;
+  const W = innerWidth, H = innerHeight, rad = e.pointerType === 'mouse' ? 18 : 30, near = []; let hits = 0;
+  for (let i = 0; i < TMAX; i++) { if (tGrow[i] < .3) continue; let best = 1e9, bx = 0, by = 0;
+    for (let k = Math.floor(TK * .2); k < TK; k += 2) { const o = (i * TK + k) * 3; _hx.set(tPts[o], tPts[o + 1], tPts[o + 2]).project(camera); const sx = (_hx.x + 1) / 2 * W, sy = (1 - _hx.y) / 2 * H, dd = Math.hypot(sx - e.clientX, sy - e.clientY); if (dd < best) { best = dd; bx = sx; by = sy; } }
+    if (best <= rad * 2.2) { near.push([i, best, bx, by]); if (best < rad) hits++; } }
+  if (hits) for (const [i, best, bx, by] of near) { const k = best < rad ? 1 : .45; // a direct hit, and its close neighbours less
+    let ax = bx - e.clientX, ay = by - e.clientY, l = Math.hypot(ax, ay); if (l < 2) { ax = Math.random() - .5; ay = Math.random() - .5; l = Math.hypot(ax, ay); }
+    tFlD[i].set(0, 0, 0).addScaledVector(_cR, ax / l).addScaledVector(_cU, -ay / l).addScaledVector(tDirs[i], -.6).normalize(); // away from the finger, and back toward the body
+    tFl[i] = Math.max(tFl[i], k); tReach[i] = 0; }
+  if (hits) { chr.bounceV += 2; mood.startle = Math.max(mood.startle, .35); mood.blink = 1; audio.bell(880, .05); audio.bell(660, .07); gzBuzz(12);
+    if (Math.random() < .35 && clock.t - touchK.said > 12) { touchK.said = clock.t; whisper(pick(FLINCH_SAYS), 2.5); } } }); // tap a tentacle: it flinches
 function askMotion() { // iPhone: tilt and motion reach a web page only after the player allows it, from a tap
   if (motion.asked) return; motion.asked = true; const D = window.DeviceOrientationEvent, Mo = window.DeviceMotionEvent;
   if (typeof D?.requestPermission !== 'function') return;
@@ -3649,7 +3714,7 @@ function frame(now) {
   clock.t += dt * speedK; const t = clock.t;
   if (egg.on) { eggFrame(dt, t, now); return; } // sealed in the egg until you tap it open: Aeon itself is not drawn yet
   if (egg.hatch > 0 && egg.hatch < 1) eggFling(dt); // the shards fly while Aeon fades in
-  if (flower.burst > 0 && flower.burst < 1) flowerBurst(dt, t); // and the Flower of Life bursts outward
+  if (flower.state >= 3) { flowerHatch(dt, t); flowerFrame(dt, t, mood.heart || 0); } // the Flower of Life completes at the hatch and lives on under Aeon
   clock.intro = Math.min(1, clock.intro + dt / (reduced ? 1.2 : 4));
   const intro = 1 - Math.pow(1 - clock.intro, 3);
   if (between.mode === 'in' || between.mode === 'closing') { betweenFrame(dt); return; } // the Interstice replaces Aeon's view
@@ -3852,6 +3917,8 @@ function frame(now) {
   eyeU.uDilate.value = clamp(mood.dilate + mood.breath * .05 + mood.heart * .04 + chr.near * .18 + bond() * .08 + env.micLvl * .25 - env.moving * .2 - env.riftFear * .25 + (chr.yawn > 1.3 ? .3 : 0) - mood.flash * .4 - chr.grumpy / 8 * .2); eyeU.uGlow.value = intro * (1 - mood.sleep * .5) * (1 + mood.heart * .12) * (life.hide > 0 ? .18 : 1); eyeU.uHeart.value = mood.heart;
 
   /* filaments */
+  const holdT = ptr.down && !ptr.drag && !taffy.on && between.mode === 'out' && !egg.on ? (now - ptr.downAt) / 1000 : 0; // a still finger, held
+  if (!holdT) touchK.n = 0; tSpurt = Math.max(0, tSpurt - dt * .45);
   const tCount = (6 + 24 * smooth(g / 45)) * L[1];
   tendrilRib.begin(); helixRib.begin();
   const fil = tendrilRib;
@@ -3863,11 +3930,17 @@ function frame(now) {
     tGrow[i] = lerp(tGrow[i], clamp(tCount - i), dt * 1.5);
     const gr = tGrow[i]; if (gr < .01) continue;
     const d = tDirs[i], [u, w] = tBasis[i], sd = tSeed[i];
-    const len = R * (1.2 + 1.5 * sd) * (.75 + .5 * mat) * gr * (1 - mood.sleep * .45) * (1 + mood.breath * .07);
+    tFl[i] = Math.max(0, tFl[i] - dt * .8); const fl = tFl[i] * tFl[i] * (3 - 2 * tFl[i]);
+    const len = R * (1.2 + 1.5 * sd) * (.75 + .5 * mat) * gr * (1 - mood.sleep * .45) * (1 + mood.breath * .07) * (1 - fl * .35) * tFeedK * (1 + tSpurt * tSpurt * .3); // a flinch pulls it in; food makes them longer
     const tipx = d.x * (R * .85 + len), tipy = d.y * (R * .85 + len), tipz = d.z * (R * .85 + len);
     const dd = Math.hypot(tipx - attn.x, tipy - attn.y, tipz - attn.z);
-    const desire = (ptr.on ? 1 : .25) * mood.attention * clamp(1 - dd / (len * 1.6 + 1.2)) * (1 - mood.sleep);
-    tReach[i] = lerp(tReach[i], desire, Math.min(1, dt * 2.2));
+    let desire = (ptr.on ? 1 : .25) * mood.attention * clamp(1 - dd / (len * 1.6 + 1.2)) * (1 - mood.sleep);
+    const cur = holdT > 0 ? clamp((holdT - .3 - sd * 1.4 - i % 3 * .15) / 1.3) : 0; // each one dares at its own moment
+    if (cur > 0) desire = Math.max(desire, cur < 1 ? cur * (.6 + .28 * Math.sin(t * 2.6 + i * 1.9)) : 1); // tentative: it creeps, stops, creeps, then touches
+    desire *= 1 - fl;
+    tReach[i] = lerp(tReach[i], desire, Math.min(1, dt * (cur > 0 ? 2.8 : 2.2)));
+    if (holdT > 0 && tReach[i] > .93 && !tTouch[i]) { tTouch[i] = 1; touchK.n++; audio.bell(1320 + (i % 6) * 110, .06); gzBuzz(6); mood.dilate = Math.max(mood.dilate, .5);
+      if (touchK.n === 1 && clock.t - touchK.said > 25) { touchK.said = clock.t; whisper(pick(TOUCH_SAYS), 3.5); } } else if (!holdT) tTouch[i] = 0;
     const amp0 = len * .22 * (1 - mood.sleep * .6) * (.6 + mood.excite * .9), ph = t * (.7 + sd * .7) + i * 1.7;
     for (let k = 0; k < TK; k++) {
       const s = k / (TK - 1), base = R * .85 + len * s, amp = amp0 * s;
@@ -3876,8 +3949,10 @@ function frame(now) {
       let x = d.x * base + u.x * a1 + w.x * a2 + chr.lean.x * lk, y = d.y * base + u.y * a1 + w.y * a2 + chr.lean.y * lk, z = d.z * base + u.z * a1 + w.z * a2 + chr.lean.z * lk;
       const hang = len * s * s * .5 * M_ON() * (1 - tReach[i] * .7), fl = len * s * s * tSway[i]; // the tip hangs most, the root not at all
       x += _gW.x * hang + _fW.x * fl; y += _gW.y * hang + _fW.y * fl; z += _gW.z * hang + _fW.z * fl;
-      const r = tReach[i] * Math.pow(s, 1.5) * .9;
+      const r = tReach[i] * Math.pow(s, 1.5) * (holdT > 0 ? 1 : .9);
       x += (attn.x - x) * r; y += (attn.y - y) * r; z += (attn.z - z) * r;
+      if (holdT > 0 && r > .5) { const q = Math.pow(s, 4) * R * .05 * r; x += (u.x * Math.sin(t * 9 + i) + w.x * Math.cos(t * 7 + i)) * q; y += (u.y * Math.sin(t * 9 + i) + w.y * Math.cos(t * 7 + i)) * q; z += (u.z * Math.sin(t * 9 + i) + w.z * Math.cos(t * 7 + i)) * q; } // the tip feels around your finger
+      if (fl > .001) { const f = fl * len * .55 * Math.pow(s, 1.2); x += tFlD[i].x * f; y += tFlD[i].y * f; z += tFlD[i].z * f; } // jerked away from where you touched
       const o = (i * TK + k) * 3; tPts[o] = x; tPts[o + 1] = y; tPts[o + 2] = z;
     }
     const alpha = (.7 + tReach[i] * .8) * intro * (1 - mood.sleep * .5) * (1 - mat * .35);
@@ -4074,7 +4149,7 @@ function glance() {
   let sum = 0, white = 0, bright = 0; for (let i = 0; i < px.length; i += 16) { const l = (px[i] * .299 + px[i + 1] * .587 + px[i + 2] * .114); sum += l; if (l > 245) white++; if (l > 200) bright++; }
   const n = px.length / 16; return { mean: +(sum / n).toFixed(1), whitePct: +(white / n * 100).toFixed(2), brightPct: +(bright / n * 100).toFixed(2), gov: +(env.gov || 1).toFixed(2), bgov: +(between.gov || 1).toFixed(2) };
 }
-window.aeon = { egg, eggTap, bench, frame, glance, bTemporal, betweenAdapt, bAdapt, visCache, VIS_DRAW, pupilSeen, renderRiftView, setFpsCap, get fpsCap() { return fpsCap; }, clock, eye, eyeDir, vis, VIS, bScene, bComposer, bulk, BRAIN, relics, life, hideGlow, teachWord, env, feedKey, veilDraw, chr, bondLv, bondXP, bondUp, eyeU, eyeRing, mood, L, lapse, between, rifts, openRift, riftRT, riftRes, renderer, composer, camera, bulkU, BRANES, bBloom, bFinal, bCam, ptr, tendrilRib, polyRib, perf, adapt, universes, mem, get night() { return night; }, get growth() { return growthDays(); } }; // for inspection from the console
+window.aeon = { egg, eggTap, bench, frame, glance, bTemporal, betweenAdapt, bAdapt, visCache, VIS_DRAW, pupilSeen, renderRiftView, setFpsCap, get fpsCap() { return fpsCap; }, clock, eye, eyeDir, vis, VIS, bScene, bComposer, bulk, BRAIN, relics, life, hideGlow, teachWord, env, feedKey, veilDraw, chr, bondLv, bondXP, bondUp, eyeU, eyeRing, mood, L, lapse, between, rifts, openRift, riftRT, riftRes, renderer, composer, camera, bulkU, BRANES, bBloom, bFinal, bCam, ptr, tendrilRib, polyRib, tFl, tReach, tGrow, get tFeedK() { return tFeedK; }, perf, adapt, universes, mem, get night() { return night; }, get growth() { return growthDays(); } }; // for inspection from the console
 addEventListener('beforeunload', () => save(true));
 </script>
 <!-- the Lucid Instinct eye artwork (white lettering on black), embedded so it works from file:// and inside the dashboard -->
