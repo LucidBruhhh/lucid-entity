@@ -388,6 +388,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 .boot{display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;font:700 11px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.32em;text-transform:uppercase;color:rgba(199,255,22,.8)}
 .hud.booting .boot{display:block}
 .boot i{display:block;width:46px;height:46px;margin:0 auto 16px;border-radius:50%;border:2px solid rgba(199,255,22,.15);border-top-color:#c7ff16;animation:gzIrisT 1s linear infinite;box-shadow:0 0 18px rgba(199,255,22,.25)}
+.gzConcept{display:none!important} /* one scanner now: no concept switcher */
 </style>
 </head>
 <body>
@@ -1922,8 +1923,8 @@ const gzCam = document.getElementById('gzCam');
 setTimeout(() => { if (!document.hidden) gzLoad().catch(() => {}); }, 6000); // fetch the decoder early, so the first scan opens fast
 // three concepts of the same instrument; the choice is remembered
 const GZ_CONCEPTS = ['I · Oracle Lens', 'II · Biomech Relic', 'III · Prism Tesseract'];
-let gzConcept = (() => { const q = +params.get('gizmo'); if (q >= 1 && q <= 3) return q; try { return +localStorage.getItem('gizmo.concept') || 3; } catch { return 3; } })(); // Prism Tesseract is the default (user's choice, 31 Oct 2026)
-function gzSetConcept(c) { gzConcept = (c + 2) % 3 + 1; gzEl.classList.remove('c1', 'c2', 'c3'); gzEl.classList.add('c' + gzConcept); document.getElementById('gzCName').textContent = GZ_CONCEPTS[gzConcept - 1]; try { localStorage.setItem('gizmo.concept', gzConcept); } catch {} audio.bell([523, 392, 659][gzConcept - 1], .25); }
+let gzConcept = 3; // the Prism Tesseract is the scanner (user's choice); Oracle Lens and Biomech Relic remain in the code only // Prism Tesseract is the default (user's choice, 31 Oct 2026)
+function gzSetConcept(c) { gzConcept = (c + 2) % 3 + 1; gzEl.classList.remove('c1', 'c2', 'c3'); gzEl.classList.add('c' + gzConcept); document.getElementById('gzCName').textContent = GZ_CONCEPTS[gzConcept - 1]; }
 document.getElementById('gzCPrev').onclick = () => gzSetConcept(gzConcept - 1); document.getElementById('gzCNext').onclick = () => gzSetConcept(gzConcept + 1);
 { // Metatron's cube for the prism lens: 13 circles' centres, every pair joined
   const pts = [[0, 0]]; for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + Math.PI / 6; pts.push([Math.cos(a) * 40, Math.sin(a) * 40], [Math.cos(a) * 80, Math.sin(a) * 80]); }
