@@ -221,6 +221,8 @@ function draw(t, dt) {
 }
 const ease = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
 body.classList.add('show'); setColour('#c7ff16'); requestAnimationFrame(frame);
+// ?egg2d: jump straight to the intro's own drawn egg (the earlier concept, kept as the fallback) to compare it
+if (new URLSearchParams(location.search).has('egg2d')) { S.phase = 'egg'; S.eggT = 0; S.found = 16; $('cnt').textContent = '16'; body.classList.add('counting'); $('q1').textContent = 'SHAPE 17'; $('q2').textContent = 'UNKNOWN'; $('tapcue').classList.add('on'); }
 // test hook: jump ahead in a hidden tab
 window.intro = { S, startCount, eggTap, preloadGame, get ready() { return gameReady; }, beat() { onBeat(beatNo++, 0); }, step(sec) { for (let i = 0; i < sec * 30; i++) { S.t += 1 / 30; draw(S.t, 1 / 30); } } };
 </script>
