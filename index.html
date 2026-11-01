@@ -49,6 +49,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 #ents{position:fixed;inset:0;pointer-events:none;z-index:4;display:none;mix-blend-mode:screen}#ents.on{display:block}#ents.gallery{mix-blend-mode:normal;background:#020108;z-index:6}
 #galBar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:none;align-items:center;gap:10px;z-index:12;padding:8px 12px;border:1px solid rgba(255,255,255,.2);border-radius:999px;background:rgba(8,6,20,.75);backdrop-filter:blur(6px)}#galBar.on{display:flex}#galBar button{font:700 18px/1 ui-monospace,Consolas,monospace;color:var(--fg);background:transparent;border:1px solid rgba(255,255,255,.25);border-radius:999px;width:36px;height:36px;cursor:pointer}#galBar button:hover{background:rgba(255,255,255,.12)}#galName{font-family:"Cormorant Garamond",Georgia,serif;font-size:19px;letter-spacing:.04em;min-width:200px;text-align:center}
 #veil{position:fixed;inset:0;pointer-events:none;z-index:5;display:none}#veil.on{display:block}
+#hatchfx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:4}
 .feed{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:8;background:rgba(2,1,8,.45);backdrop-filter:blur(6px)}.feed.on{display:flex}.fp{width:min(92vw,380px);padding:22px 24px;border:1px solid rgba(255,255,255,.18);border-radius:14px;background:rgba(8,6,20,.85);color:var(--fg);font-family:"Cormorant Garamond",Georgia,serif}.fp h3{margin:0 0 6px;font-weight:400;font-size:26px;letter-spacing:.06em}.fp p{margin:6px 0;opacity:.85;font-size:17px}.fp input{width:100%;box-sizing:border-box;margin:10px 0;padding:10px 12px;font:18px "Cormorant Garamond",Georgia,serif;color:var(--fg);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-radius:8px}.fp .row{display:flex;gap:8px}.fp button{flex:1;padding:9px;font:600 12px/1 ui-monospace,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;color:#0b0820;background:#cfe9ff;border:0;border-radius:8px;cursor:pointer}.fp button#feedNo{background:transparent;color:var(--fg);border:1px solid rgba(255,255,255,.25)}#feedOut{min-height:22px;font-size:15px;color:#ffe6b3}
 .mood{font-family:"Cormorant Garamond",Georgia,serif;font-style:italic;font-size:22px;color:var(--fg);letter-spacing:.04em;line-height:1.2;margin-bottom:4px}
 .whisper{position:absolute;left:50%;bottom:13vh;transform:translateX(-50%);width:min(680px,84vw);text-align:center;font-family:"Cormorant Garamond",Georgia,serif;font-style:italic;font-weight:300;font-size:clamp(17px,2.1vw,25px);line-height:1.35;color:#f3eeff;text-shadow:0 0 18px rgba(170,140,255,.55);opacity:0;transition:opacity 1.8s ease;letter-spacing:.02em}
@@ -202,6 +203,8 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 .mbRar{display:inline-block;font:700 11px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#070707;background:var(--rc2,#c7ff16);padding:5px 10px 4px;border-radius:3px}
 .mbOrb{width:96px;height:96px;margin:14px auto 8px;border-radius:50%;display:grid;place-items:center;font-size:50px;background:radial-gradient(circle at 35% 30%,#fff,var(--rc2,#c7ff16) 40%,#111 85%);box-shadow:0 0 40px var(--rc,rgba(199,255,22,.6));animation:mbFloat 2.4s ease-in-out infinite}
 @keyframes mbFloat{50%{transform:translateY(-6px) rotate(6deg)}}
+.mbOrb.art{width:116px;height:150px;margin:8px auto 4px;border-radius:0;background:none;box-shadow:none;filter:drop-shadow(0 0 16px #1ec8ff) drop-shadow(0 0 3px #7ff6ff)}.mbOrb.art svg{width:100%;height:100%;overflow:visible}
+.regToast{position:fixed;left:50%;top:calc(max(14px,env(safe-area-inset-top)) + 60px);transform:translateX(-50%);z-index:13;min-height:44px;padding:10px 18px;border:1px solid #ff5fd8;border-radius:999px;background:rgba(8,6,16,.9);color:#fff;font:600 14px/1.2 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.06em;box-shadow:0 0 22px rgba(30,200,255,.5),inset 0 0 12px rgba(255,95,216,.25);cursor:pointer}
 .mbCard h3{margin:4px 0 6px;font:300 28px/1.1 "Cormorant Garamond",Georgia,serif;font-style:italic;color:#fff}
 .mbCard p{margin:4px 0;font:400 15px/1.35 "Cormorant Garamond",Georgia,serif;color:var(--fg2)}
 .mbCard .mbPow{font:700 12px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--rc2,#c7ff16);margin-top:10px}
@@ -397,6 +400,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 <canvas id="ents"></canvas>
 <div id="galBar"><button id="galPrev" title="previous (left arrow)">&#8249;</button><span id="galName"></span><button id="galNext" title="next (right arrow or space)">&#8250;</button><button id="galClose" title="close (Esc or e)">&#215;</button></div>
 <canvas id="veil"></canvas>
+<canvas id="hatchfx"></canvas>
 <div id="feed" class="feed"><div class="fp"><h3>Aeon is hungry</h3><button class="gzOpen" id="feedGizmo">&#8961; Scan a barcode with the Scanner Gizmo</button><p id="feedWhy">Give it something: a word, a wish, a name. It eats attention and grows.</p>
   <input id="feedIn" maxlength="40" placeholder="a word, a wish, a name…" autocomplete="off"><div class="row"><button id="feedGo">feed it</button><button id="feedNo">not now</button></div><p id="feedOut"></p></div></div>
 <div class="gz c3" id="gz" role="dialog" aria-modal="true" aria-label="Scanner Gizmo">
@@ -656,14 +660,16 @@ composer.addPass(new ShaderPass({
 const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), .7, .55, .22);
 composer.addPass(bloom);
 const finalPass = new ShaderPass({
-  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uAb: { value: 0.0025 }, uFold: { value: 0 }, uZoom: { value: 0 }, uBright: BRIGHT },
+  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uAb: { value: 0.0025 }, uFold: { value: 0 }, uZoom: { value: 0 }, uBright: BRIGHT, uGhost: { value: 0 } },
   vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-  fragmentShader: `uniform sampler2D tDiffuse;uniform float uTime,uAb,uFold,uZoom,uBright;varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse;uniform float uTime,uAb,uFold,uZoom,uBright,uGhost;varying vec2 vUv;
     float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
     void main(){vec2 c=vUv-.5;float d=dot(c,c);
       vec2 uv=vUv+c*uFold*.06*sin(d*40.-uTime*8.);
       vec2 o=c*(uAb+uFold*.02)*(.4+d*3.);
       vec3 col=vec3(texture2D(tDiffuse,uv+o).r,texture2D(tDiffuse,uv).g,texture2D(tDiffuse,uv-o).b);
+      if(uGhost>.001){vec2 go=vec2(.016,.005)*uGhost*(.65+.35*sin(uTime*1.4)); // double vision (The Adios): a breathing, chromatic second image
+        vec3 g2=vec3(texture2D(tDiffuse,uv+go*1.25).r,texture2D(tDiffuse,uv+go).g,texture2D(tDiffuse,uv+go*.8).b);col=mix(col,max(col,g2*vec3(.55,.9,1.1)),.6*uGhost);}
       if(uZoom>.001){vec3 acc=col;for(int i=1;i<=7;i++){acc+=texture2D(tDiffuse,uv-c*uZoom*float(i)/7.).rgb;}col=acc/8.;} // motion blur as the camera flies back (the pull-back, a zoom): streaks toward the centre
       col*=1.-d*1.15; col*=uBright;
       float lm=max(col.r,max(col.g,col.b));if(lm>1.)col*=(1.+log(lm))/lm; // a log shoulder above white: stacked light compresses instead of clipping
@@ -971,13 +977,51 @@ function eggTap() {
   if (egg.taps >= 3) return eggHatch();
   egg.crackY = egg.taps === 1 ? .45 : -.35; whisper(EGG_SAYS[egg.taps - 1], 3.5);
 }
+
+/* ---------- the hatch: a plasma bloom inspired by fireworks. Streamers of living current spiral out of the egg like a pinwheel galaxy,
+   each head splits into a second smaller bloom, two plasma rings ripple out, and glitter drifts down while Aeon arrives ---------- */
+function hatchFireworks(cx, cy) {
+  const cv = document.getElementById('hatchfx'), g = cv.getContext('2d'), D = Math.min(2, devicePixelRatio || 1); cv.width = innerWidth * D; cv.height = innerHeight * D; g.setTransform(D, 0, 0, D, 0, 0);
+  const PAL = ['63,224,255', '199,255,22', '176,132,255', '235,255,250'], S = Math.min(innerWidth, innerHeight);
+  const mk = (x, y, a, v, life, rgb, curl, gen) => ({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life, age: 0, rgb, curl, gen, trail: [], split: false });
+  const streams = [], glitter = [], rings = [{ r: 0, v: S * 1.3, a: 1 }, { r: 0, v: S * .8, a: .8, d: .18 }];
+  const spin = Math.random() < .5 ? 1 : -1;
+  for (let i = 0; i < 42; i++) { const a = i / 42 * Math.PI * 2 + Math.random() * .15; streams.push(mk(cx, cy, a, S * (.75 + Math.random() * .55), 1.3 + Math.random() * .7, PAL[i % 3], spin * (1.6 + Math.random() * 1.4), 0)); }
+  let last = performance.now(), t = 0, chimes = 0;
+  const wob = (k, i) => Math.sin(k * 1.9 + t * 14 + i) * 1.6;
+  function trailPath(s) { const tr = s.trail; g.beginPath(); for (let k = 0; k < tr.length; k++) { const [x, y] = tr[k], w = wob(k, s.vx); k ? g.lineTo(x + w, y - w) : g.moveTo(x, y); } }
+  function step(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; t += dt;
+    g.clearRect(0, 0, innerWidth, innerHeight); g.globalCompositeOperation = 'lighter'; g.lineCap = 'round'; g.lineJoin = 'round';
+    // rings: plasma shockwaves
+    for (const r of rings) { if ((r.d || 0) > t) continue; r.r += r.v * dt; r.v *= Math.exp(-dt * 2.2); r.a -= dt * .7; if (r.a <= 0) continue; for (const [w, al] of [[10, .06], [3, .22], [1.2, .7]]) { g.lineWidth = w; g.strokeStyle = `rgba(${al > .5 ? '235,255,250' : '63,224,255'},${al * r.a})`; g.beginPath(); g.arc(cx, cy, r.r, 0, 7); g.stroke(); } }
+    // a hot core that blooms, then burns down
+    const core = Math.max(0, 1 - t * 1.4); if (core > 0) { const cg = g.createRadialGradient(cx, cy, 0, cx, cy, S * .35 * (1 + t)); cg.addColorStop(0, `rgba(255,255,255,${core})`); cg.addColorStop(.25, `rgba(199,255,22,${core * .5})`); cg.addColorStop(1, 'rgba(63,224,255,0)'); g.fillStyle = cg; g.fillRect(0, 0, innerWidth, innerHeight); }
+    let alive = 0;
+    for (const s of streams) { if (s.age >= s.life) continue; alive++; s.age += dt; const k = s.age / s.life;
+      const ang = s.curl * dt, c = Math.cos(ang), sn = Math.sin(ang); [s.vx, s.vy] = [s.vx * c - s.vy * sn, s.vx * sn + s.vy * c]; // the spiral
+      s.vx *= Math.exp(-dt * 1.6); s.vy *= Math.exp(-dt * 1.6); s.vy += (s.gen ? 60 : 25) * dt; s.x += s.vx * dt; s.y += s.vy * dt;
+      s.trail.push([s.x, s.y]); if (s.trail.length > (s.gen ? 9 : 18)) s.trail.shift();
+      if (!s.gen && !s.split && k > .5) { s.split = true; for (let j = 0; j < 6; j++) streams.push(mk(s.x, s.y, Math.random() * 6.283, S * (.18 + Math.random() * .22), .6 + Math.random() * .4, PAL[(j + 1) % 4], -s.curl * .6, 1)); if (chimes++ < 10) audio.bell(784 + (chimes % 5) * 196, .25); }
+      const fade = (1 - k) * (k < .08 ? k / .08 : 1);
+      trailPath(s); g.lineWidth = s.gen ? 5 : 8; g.strokeStyle = `rgba(${s.rgb},${.08 * fade})`; g.stroke();
+      g.lineWidth = s.gen ? 1.8 : 2.8; g.strokeStyle = `rgba(${s.rgb},${.35 * fade})`; g.stroke();
+      g.lineWidth = 1; g.strokeStyle = `rgba(240,255,250,${.85 * fade})`; g.stroke();
+      const hg = g.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.gen ? 8 : 14); hg.addColorStop(0, `rgba(255,255,255,${fade})`); hg.addColorStop(1, `rgba(${s.rgb},0)`); g.fillStyle = hg; g.beginPath(); g.arc(s.x, s.y, s.gen ? 8 : 14, 0, 7); g.fill();
+      if (Math.random() < .35 * fade) glitter.push({ x: s.x, y: s.y, vx: (Math.random() - .5) * 30, vy: 10 + Math.random() * 30, l: 1, rgb: s.rgb, tw: Math.random() * 9 }); }
+    for (const q of glitter) { q.x += q.vx * dt; q.y += q.vy * dt; q.vy += 18 * dt; q.l -= dt * .45; if (q.l <= 0) continue; alive++; const tw = .5 + .5 * Math.sin(t * 18 + q.tw); g.fillStyle = `rgba(${q.rgb},${q.l * tw})`; g.fillRect(q.x - 1, q.y - 1, 2.2, 2.2); }
+    g.globalCompositeOperation = 'source-over';
+    if (alive > 0 || t < 1.2) requestAnimationFrame(step); else g.clearRect(0, 0, innerWidth, innerHeight); }
+  requestAnimationFrame(step);
+}
 function eggHatch() {
   EGG_ARTON.value = 0; egg.on = false; track('hatch'); egg.hatch = .001; egg.t0 = clock.t; egg.crackY = -1.6; cracks.visible = false;
   renderPass.scene = scene; eyePass.enabled = true; scene.add(eggGroup); // the shards fly in Aeon's own scene while it fades in
   mood.flash = 1; mood.fold = 1; wave(new THREE.Vector3(), 6, colC); [262, 392, 523, 784].forEach((f, i) => setTimeout(() => audio.bell(f, .5), i * 110));
+  { const v = new THREE.Vector3(0, 0, 0).project(camera); hatchFireworks((v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight); } // the plasma bloom, centred on the egg
   hintEl.textContent = 'move · click · hold · drag';
   if (!eggWanted) { mem.hatched = true; if (PUBLIC && !mem.born) mem.born = Date.now(); save(true); }
   setTimeout(() => { if (egg.greet) { egg.greet(); egg.greet = null; } }, 5200); // its first words come once it is out
+  if (adiosWaiting) { adiosWaiting = false; setTimeout(adiosDrop, 7500); } // a Bar Adios signal that arrived before hatching continues now
   if (!eggWanted && !mem.eaSeen) setTimeout(() => { if (between.mode === 'out' && !document.querySelector('.feed.on')) openEA(); }, 30000); // once: what this demo is, and where to follow
 }
 function eggFling(dt) {
@@ -1897,6 +1941,52 @@ function foodFor(code) { // the same barcode always becomes the same food
   const h = gzHash(code), h2 = gzHash(code + '·'), roll = h % 1000, r = RARITY.find(x => roll < x[0]);
   return { code, name: `${FOOD_A[h % FOOD_A.length]} ${FOOD_B[(h >>> 8) % FOOD_B.length]}`, icon: FOOD_ICON[h2 % FOOD_ICON.length], taste: TASTES[(h2 >>> 6) % TASTES.length], rarity: r[1], color: r[2], power: r[3], from: '' };
 }
+/* Bar Adios exclusives (1 Nov 2026): the bar's QR (lucidinstinct.com/qr/adios → ?item=adios) drops The Adios, a Mythic found only there.
+   Once per device per Tokyo night (the night turns at 6:00 Asia/Tokyo); a repeat gets a small bar snack. The effects happen to Aeon, never to the player. */
+const ADIOS_CODE = 'bar:adios', ADIOS_FX = 90; // seconds of blue, hiccups and double vision
+const ADIOS = { code: ADIOS_CODE, sticker: 'bar:adios', bar: true, mythic: true, name: 'The Adios', icon: '🍸', taste: 'neon rain and a promise you won\'t keep', rarity: 'Mythic', color: '#1ec8ff', power: 6, where: 'Found at Bar Adios · Shinjuku, Tokyo' };
+const BAR_SNACK = { code: 'bar:snack', sticker: 'bar:snack', bar: true, name: 'Neon Edamame', icon: '🥜', taste: 'salt, good company and the last train home', rarity: 'Common', color: '#ff5fd8', power: .4, where: 'A little something from Bar Adios · on the house', note: 'You already tasted The Adios tonight' };
+const ADIOS_ART = `<svg viewBox="0 0 116 150" aria-hidden="true"><defs>
+  <linearGradient id="adL" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#03135e"/><stop offset=".35" stop-color="#0a4dff"/><stop offset=".7" stop-color="#1ec8ff"/><stop offset="1" stop-color="#9ff9ff"/></linearGradient>
+  <linearGradient id="adG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".18" stop-color="#fff" stop-opacity=".06"/><stop offset=".85" stop-color="#fff" stop-opacity=".04"/><stop offset="1" stop-color="#fff" stop-opacity=".4"/></linearGradient>
+  <radialGradient id="adN" cx=".5" cy=".55" r=".6"><stop offset="0" stop-color="#1ec8ff" stop-opacity=".55"/><stop offset=".6" stop-color="#ff5fd8" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  <clipPath id="adC"><path d="M33 40 L37 136 Q38 142 44 142 L72 142 Q78 142 79 136 L83 40 Z"/></clipPath></defs>
+  <ellipse cx="58" cy="92" rx="58" ry="64" fill="url(#adN)"/>
+  <g clip-path="url(#adC)"><rect x="30" y="52" width="56" height="92" fill="url(#adL)"/>
+    <path d="M30 80 Q44 74 58 80 T86 80 L86 84 Q72 90 58 84 T30 84 Z" fill="#7ff6ff" opacity=".35"/><path d="M30 112 Q44 106 58 112 T86 112 L86 115 Q72 120 58 115 T30 115 Z" fill="#3a6bff" opacity=".45"/>
+    <path d="M30 52 Q44 47 58 52 T86 52 L86 56 Q72 60 58 56 T30 56 Z" fill="#dffcff" opacity=".7"/>
+    <g fill="#e8feff" fill-opacity=".22" stroke="#e8feff" stroke-opacity=".8" stroke-width="1"><rect x="40" y="60" width="18" height="17" rx="3" transform="rotate(-12 49 68)"/><rect x="56" y="70" width="17" height="16" rx="3" transform="rotate(14 64 78)"/><rect x="42" y="88" width="16" height="15" rx="3" transform="rotate(8 50 95)"/></g>
+    <g fill="#fff"><circle cx="48" cy="138" r="1.6"><animate attributeName="cy" values="138;54" dur="3.1s" repeatCount="indefinite"/><animate attributeName="opacity" values=".9;0" dur="3.1s" repeatCount="indefinite"/></circle>
+      <circle cx="66" cy="138" r="1.2"><animate attributeName="cy" values="138;54" dur="2.4s" begin=".8s" repeatCount="indefinite"/><animate attributeName="opacity" values=".9;0" dur="2.4s" begin=".8s" repeatCount="indefinite"/></circle>
+      <circle cx="57" cy="138" r="2"><animate attributeName="cy" values="138;54" dur="3.8s" begin="1.6s" repeatCount="indefinite"/><animate attributeName="opacity" values=".8;0" dur="3.8s" begin="1.6s" repeatCount="indefinite"/></circle>
+      <circle cx="73" cy="138" r="1"><animate attributeName="cy" values="138;54" dur="2.8s" begin="2.2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".9;0" dur="2.8s" begin="2.2s" repeatCount="indefinite"/></circle>
+      <circle cx="41" cy="138" r="1.1"><animate attributeName="cy" values="138;54" dur="3.4s" begin="1.1s" repeatCount="indefinite"/><animate attributeName="opacity" values=".9;0" dur="3.4s" begin="1.1s" repeatCount="indefinite"/></circle></g></g>
+  <path d="M33 40 L37 136 Q38 142 44 142 L72 142 Q78 142 79 136 L83 40 Z" fill="url(#adG)" stroke="#bff8ff" stroke-width="1.6"/>
+  <path d="M38 46 L41 132" stroke="#fff" stroke-opacity=".7" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="58" cy="40" rx="25" ry="3.5" fill="none" stroke="#e8feff" stroke-width="1.4"/>
+  <line x1="66" y1="20" x2="57" y2="110" stroke="#ff5fd8" stroke-width="2.6" stroke-linecap="round"/>
+  <g transform="translate(82 40) rotate(-18)"><circle r="15" fill="#fff6b0" stroke="#ffe24a" stroke-width="2.4"/><circle r="11.5" fill="#ffe873"/>
+    <g stroke="#fff9d6" stroke-width="1.3"><line x1="-11" y1="0" x2="11" y2="0"/><line x1="-7.8" y1="-7.8" x2="7.8" y2="7.8"/><line x1="0" y1="-11" x2="0" y2="11"/><line x1="-7.8" y1="7.8" x2="7.8" y2="-7.8"/></g><circle r="2" fill="#fffbe6"/></g>
+  <ellipse cx="58" cy="144" rx="30" ry="3" fill="#1ec8ff" opacity=".5"/></svg>`;
+const tokyoNight = () => { try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tokyo' }).format(new Date(Date.now() - 6 * 36e5)); } catch { return new Date(Date.now() - 6 * 36e5).toISOString().slice(0, 10); } };
+function adiosItem() { // the real thing once a night; otherwise a snack, so a second scan is never a dead end
+  if (mem.adiosNight === tokyoNight()) return { ...BAR_SNACK };
+  mem.adiosNight = tokyoNight(); mem.collection = mem.collection || [];
+  if (!mem.collection.some(c => c.id === 'adios')) mem.collection.push({ id: 'adios', name: 'The Adios', first: Date.now() });
+  save(true); return { ...ADIOS };
+}
+let adiosWaiting = false;
+function adiosDrop() { // the bar's QR: no camera, the Gizmo opens straight into an official lock-on
+  if (egg.on) { adiosWaiting = true; whisper('A signal from Bar Adios is waiting for me. Hatch me first.', 6); return; }
+  if (between.mode !== 'out') { setTimeout(adiosDrop, 2000); return; }
+  if (vis.gallery) toggleGallery(false);
+  gzRun++; feedEl.classList.remove('on'); mbEl.className = 'mb'; gzEl.classList.remove('got', 'lock', 'implode'); gzEl.classList.add('on'); gzBusy = false; audio.resume(); track('item-adios');
+  document.getElementById('gzLock').textContent = '∞ SEEK'; gzSay('INCOMING TRANSMISSION'); [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => audio.bell(f, .14), i * 110));
+  const run = gzRun; setTimeout(() => { if (run === gzRun) gzGot(ADIOS_CODE); }, 1300);
+}
+const ADIOS_A = new THREE.Color('#04205e'), ADIOS_B = new THREE.Color('#1ec8ff'), ADIOS_C = new THREE.Color('#9ff9ff');
+const ADIOS_HIC = ['hic— in two universes at once.', 'hic— a blue one.', 'hic— sorry. Neon.', 'hic— …both of me apologise.'];
+const adiosK = () => env.adios > 0 ? smooth(Math.min((ADIOS_FX - env.adios) / 2.5, env.adios / 8)) : 0; // eases in over 2.5 s, out over the last 8 s
 let gzScanner = null, gzBusy = false, gzItem = null, gzRun = 0; // gzRun changes on every open and close, so stale timers stop
 const gzLoad = () => window.Html5Qrcode ? Promise.resolve() : new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js'; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
 const gzSay = (t, cur = true) => { gzRead.innerHTML = t + (cur ? '<span class="cur">_</span>' : ''); };
@@ -1946,16 +2036,18 @@ setInterval(() => { if (!gzEl.classList.contains('on')) return; document.getElem
 async function closeGizmo() { gzRun++; await gzStop(); gzEl.classList.remove('on'); mbEl.className = 'mb'; }
 function gzGot(code) {
   code = String(code).trim(); if (gzBusy || !code) return; gzBusy = true; const run = gzRun;
+  if (/^(https?:\/\/)?(www\.)?(lucidinstinct\.com\/qr\/adios|entity\.lucidinstinct\.com\/?\?(.*&)?item=adios)\b/i.test(code)) code = ADIOS_CODE; // the bar's own QR, scanned with the Gizmo itself
+  const bar = code === ADIOS_CODE;
   gzEl.classList.add('got', 'lock'); document.getElementById('gzLock').textContent = '∞ LOCK';
   [784, 988, 1175, 1568].forEach((f, i) => setTimeout(() => audio.bell(f, .35), i * 45)); [1, 2, 3, 4, 5, 6].forEach(i => setTimeout(() => audio.bell(400 + i * 260, .06), 420 + i * 40)); gzBuzz([18, 30, 18, 30, 70]);
-  const shown = code.slice(0, 24).replace(/[&<>"']/g, ch => '&#' + ch.charCodeAt(0) + ';'); // a QR can hold any text: never let it become markup
-  let n = 0; const typeIt = () => { n++; gzSay(`◉ ${shown.slice(0, n)}`, n < shown.length); if (n < shown.length) setTimeout(typeIt, 28); else setTimeout(() => gzSay('SIGNAL ACQUIRED ✓', false), 160); }; typeIt();
-  setTimeout(() => { if (run !== gzRun) return; gzEl.classList.add('implode'); audio.bell(98, .8); }, 900);
-  gzItem = foodFor(code); const again = mem.fed.some(f => f.sticker === 'scan:' + code); if (again) gzItem.power = +(gzItem.power / 2).toFixed(1);
+  const shown = bar ? 'OFFICIAL SIGNAL · BAR ADIOS · SHINJUKU' : code.slice(0, 24).replace(/[&<>"']/g, ch => '&#' + ch.charCodeAt(0) + ';'); // a QR can hold any text: never let it become markup
+  let n = 0; const typeIt = () => { n++; gzSay(`◉ ${shown.slice(0, n)}`, n < shown.length); if (n < shown.length) setTimeout(typeIt, 28); else setTimeout(() => gzSay('SIGNAL ACQUIRED ✓', false), bar ? 900 : 160); }; typeIt();
+  setTimeout(() => { if (run !== gzRun) return; gzEl.classList.add('implode'); audio.bell(98, .8); }, bar ? 1900 : 900);
+  gzItem = bar ? adiosItem() : foodFor(code); const again = !bar && mem.fed.some(f => f.sticker === 'scan:' + code); if (again) gzItem.power = +(gzItem.power / 2).toFixed(1);
   // a real product name, if Open Food Facts knows the barcode (only the digits are sent)
   if (/^\d{8,14}$/.test(code)) { const ac = new AbortController(); setTimeout(() => ac.abort(), 3200);
     fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=product_name,brands`, { signal: ac.signal }).then(r => r.json()).then(j => { const pn = j?.product?.product_name; if (pn) gzItem.from = `${pn}${j.product.brands ? ' · ' + j.product.brands.split(',')[0] : ''}`; }).catch(() => {}); }
-  setTimeout(async () => { if (run !== gzRun) return; await gzStop(); gzEl.classList.remove('lock', 'implode'); if (run === gzRun) mysteryBox(again); }, 1250);
+  setTimeout(async () => { if (run !== gzRun) return; await gzStop(); gzEl.classList.remove('lock', 'implode'); if (run === gzRun) mysteryBox(again); }, bar ? 2300 : 1250);
 }
 function mysteryBox(again) {
   const it = gzItem, cube = document.getElementById('mbCube'), run = gzRun; mbEl.style.setProperty('--rc', it.color + '88'); mbEl.style.setProperty('--rc2', it.color);
@@ -1963,18 +2055,20 @@ function mysteryBox(again) {
   // suspense: the box shivers harder and harder while the ticks climb
   setTimeout(() => { if (run === gzRun) mbEl.classList.add('charge'); }, 500);
   const orbit = document.getElementById('mbOrbit'), tier = document.getElementById('mbTier');
-  const pool = [...FOOD_ICON].sort(() => Math.random() - .5).filter(x => x !== it.icon).slice(0, 9); pool.splice(Math.floor(Math.random() * 10), 0, it.icon);
-  orbit.innerHTML = pool.map(ic => `<span style="--c:${RARITY[Math.floor(Math.random() * RARITY.length)][2]}">${ic}</span>`).join(''); const sil = [...orbit.children];
-  tier.className = 'mbTier'; tier.textContent = '?'; let ang = 0, lastT = performance.now(), nextTier = 0, ti = 0;
-  const t0 = performance.now(), dur = 3800; let tick = 0;
+  const pool = [...FOOD_ICON].sort(() => Math.random() - .5).filter(x => x !== it.icon).slice(0, it.bar ? 10 : 9); pool.splice(Math.floor(Math.random() * 10), 0, it.icon);
+  orbit.innerHTML = pool.map(ic => `<span style="--c:${ic === it.icon && it.mythic ? '#1ec8ff' : RARITY[Math.floor(Math.random() * RARITY.length)][2]}">${ic}</span>`).join(''); const sil = [...orbit.children];
+  tier.className = 'mbTier'; tier.textContent = '?'; delete tier.dataset.tease; let ang = 0, lastT = performance.now(), nextTier = 0, ti = 0;
+  const t0 = performance.now(), dur = it.mythic ? 6200 : 3800; let tick = 0; // a Mythic takes its time
   const step = () => { if (run !== gzRun) return; const now = performance.now(), k = Math.min(1, (now - t0) / dur), dt = (now - lastT) / 1000; lastT = now; mbEl.style.setProperty('--k', (k * k * 4).toFixed(2));
     if (now - t0 > tick * (260 - k * 200)) { tick++; audio.bell(220 + k * 880, .07); gzBuzz(8); }
     // the could-be prizes circle the box as dark silhouettes, faster and tighter as it charges
     ang += dt * (.7 + k * k * 11); const R = Math.min(innerWidth * .4, 150) * (1 - k * .25);
     sil.forEach((el, i) => { const a = ang + i / sil.length * 6.283, z = Math.sin(a); el.style.transform = `translate(-50%,-50%) translate(${Math.cos(a) * R}px,${z * R * .32}px) scale(${.75 + (z + 1) * .3})`; el.style.zIndex = z > 0 ? 3 : 0; el.style.opacity = .55 + (z + 1) * .2; });
     // the rarity roulette: fast at first, slowing, then it settles on what this really is
-    if (k < .9 && now >= nextTier) { const r = RARITY[ti++ % RARITY.length]; tier.textContent = r[1] + '?'; tier.style.setProperty('--tc', r[2]); nextTier = now + 60 + k * k * k * 420; audio.bell(880 + (ti % 5) * 110, .03); }
-    else if (k >= .9 && !tier.classList.contains('lock')) { tier.textContent = it.rarity; tier.style.setProperty('--tc', it.color); tier.classList.add('lock'); audio.bell(it.power >= 3 ? 1760 : 1320, .6); gzBuzz(40); }
+    if (it.mythic && k >= .74 && k < .9) { if (!tier.dataset.tease) { tier.dataset.tease = 1; tier.textContent = 'Legendary?'; tier.style.setProperty('--tc', '#ffd15c'); audio.bell(1175, .3); gzBuzz(20); } } // the tease: it seems to settle one short
+    else if (k < .9 && now >= nextTier) { const r = RARITY[ti++ % RARITY.length]; tier.textContent = r[1] + '?'; tier.style.setProperty('--tc', r[2]); nextTier = now + 60 + k * k * k * 420; audio.bell(880 + (ti % 5) * 110, .03); }
+    else if (k >= .9 && !tier.classList.contains('lock')) { tier.textContent = it.rarity; tier.style.setProperty('--tc', it.color); tier.classList.add('lock'); audio.bell(it.power >= 3 ? 1760 : 1320, .6); gzBuzz(40);
+      if (it.mythic) { [1319, 1760, 2093, 2637].forEach((f, i) => setTimeout(() => audio.bell(f, .7), i * 60)); setTimeout(() => audio.bell(65, 1.6), 120); gzBuzz([80, 40, 80, 40, 220]); } } // Mythic: the biggest chord and buzz
     document.getElementById('mbStatus').textContent = k < .45 ? 'DECODING MATTER…' : k < .8 ? 'STABILISING…' : 'IT IS OPENING';
     if (k < 1) requestAnimationFrame(step); else burst(); };
   setTimeout(() => requestAnimationFrame(step), 500);
@@ -1982,29 +2076,39 @@ function mysteryBox(again) {
     const fl = document.createElement('div'); fl.className = 'mbFlash'; document.body.appendChild(fl); setTimeout(() => fl.remove(), 800);
     mbEl.classList.remove('charge'); mbEl.classList.add('open'); sil.forEach(el => { el.style.transform = 'translate(-50%,-50%) scale(0)'; el.style.opacity = 0; }); gzBuzz([30, 40, 90]);
     [523, 659, 784, 1047, 1319].forEach((f, i) => setTimeout(() => audio.bell(f, .5), i * 70)); if (it.power >= 3) setTimeout(() => audio.giggle?.(), 500);
-    document.getElementById('mbRar').textContent = it.rarity; document.getElementById('mbOrb').textContent = it.icon; document.getElementById('mbName').textContent = it.name;
-    document.getElementById('mbFrom').textContent = it.from ? `decoded from: ${it.from}` : `barcode ${it.code}`;
-    document.getElementById('mbTaste').textContent = `Tastes like ${it.taste}.`;
+    const orb = document.getElementById('mbOrb'); orb.className = it.mythic ? 'mbOrb art' : 'mbOrb'; if (it.mythic) orb.innerHTML = ADIOS_ART; else orb.textContent = it.icon;
+    document.getElementById('mbRar').textContent = it.rarity; document.getElementById('mbName').textContent = it.name;
+    document.getElementById('mbFrom').textContent = it.where || (it.from ? `decoded from: ${it.from}` : `barcode ${it.code}`);
+    document.getElementById('mbTaste').textContent = `${it.note ? it.note + '. ' : ''}Tastes like ${it.taste}.`;
     document.getElementById('mbPow').textContent = `+${it.power} days of growth${again ? ' · scanned before, half strength' : ''}`;
     setTimeout(() => document.getElementById('mbFeed').focus(), 900); track('scan-' + it.rarity.toLowerCase());
+    if (it.mythic && !mem.regular) { mem.regular = Date.now(); save(true); track('being-regular'); setTimeout(() => whisper('Someone at the bar nods at you…', 5), 1800); gzItem.regularNew = true; } // The Regular is unlocked for good
   };
 }
 function gizmoFeed() {
   const it = gzItem; if (!it) return; closeGizmo();
-  mem.fed.push({ sticker: 'scan:' + it.code, what: it.name, p: it.power, at: Date.now() }); mem.touches += 25; save(true); track('feed');
+  mem.fed.push({ sticker: it.sticker || 'scan:' + it.code, what: it.name, p: it.power, at: Date.now() }); mem.touches += 25; save(true); track('feed');
   mood.flash = .8; mood.burst = 1; mood.fold = 1.3; chr.giggle = 2; chr.bounceV += 7; wave(new THREE.Vector3(), 5, colC); wave(new THREE.Vector3(), 3, colB);
   audio.resume(); audio.bell(392, .6); audio.bell(523, .5); setTimeout(() => audio.giggle?.(), 300);
   whisper(`${it.name}. ${it.rarity}! It tastes like ${it.taste}. I grew ${it.power} days on that.`, 7);
+  if (it.mythic) { // The Adios: Aeon turns electric blue, hiccups and sees double for a while, then comes back
+    env.adios = ADIOS_FX; env.adiosHic = 3; setTimeout(() => whisper('Whoa. Two of you. Both cute.', 5), 7600);
+    if (it.regularNew) setTimeout(() => { const d = document.createElement('button'); d.className = 'regToast'; d.textContent = '✦ The Regular joined your Beings · tap to meet';
+      d.onclick = () => { d.remove(); if (between.mode === 'out') { toggleGallery(true); galleryShow(VIS.findIndex(v => v.id === 'regular')); } }; document.body.appendChild(d); setTimeout(() => d.remove(), 12000); }, 14000);
+  }
 }
 document.getElementById('gzOff').onclick = closeGizmo; document.getElementById('mbFeed').onclick = gizmoFeed; document.getElementById('mbAgain').onclick = () => { mbEl.className = 'mb'; openGizmo(); };
 document.getElementById('gzKey').onclick = () => { const t = document.getElementById('gzType'); t.classList.toggle('on'); if (t.classList.contains('on')) document.getElementById('gzIn').focus(); };
-const gzManual = () => { const v = document.getElementById('gzIn').value.replace(/\s/g, ''); if (v.length >= 4) gzGot(v); };
+const gzManual = () => { const v = document.getElementById('gzIn').value.replace(/\s/g, ''); if (v.length >= 4 && !/^bar:/i.test(v)) gzGot(v); }; // bar items come only from the bar's signal
 document.getElementById('gzGo').onclick = gzManual; document.getElementById('gzIn').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') gzManual(); });
 addEventListener('keydown', e => { if (e.key === 'Escape' && gzEl.classList.contains('on')) closeGizmo(); });
 document.getElementById('feedGizmo').onclick = openGizmo; document.getElementById('bWord').onclick = () => openFeed(null);
 document.getElementById('gzWord').onclick = async () => { await closeGizmo(); openFeed(null); };
 gzSetConcept(gzConcept);
 if (params.has('gizmo')) setTimeout(() => { if (!egg.on) openGizmo(); }, 1500);
+if (params.get('item') === 'adios') { // the bar's QR; the address is cleaned so a reload does not drop it again
+  try { const u = new URL(location.href); u.searchParams.delete('item'); history.replaceState(history.state, '', u.pathname + u.search + u.hash); } catch {}
+  setTimeout(adiosDrop, 1500); }
 { const r = document.getElementById('bBright'), v = document.getElementById('bBrightV'); r.value = Math.round(BRIGHT.value * 100); v.textContent = r.value + '%';
   r.addEventListener('input', () => { BRIGHT.value = r.value / 100; v.textContent = r.value + '%'; try { localStorage.setItem('gizmo.bright', String(BRIGHT.value)); } catch {} }); r.addEventListener('keydown', e => e.stopPropagation()); }
 /* share: the phone's own share sheet where there is one (iPhone, Android), otherwise the link is copied */
@@ -2024,7 +2128,7 @@ eaEl.addEventListener('click', e => { if (e.target === eaEl) closeEA(); }); addE
 document.getElementById('eaInsta').addEventListener('click', () => track('instagram'));
 document.getElementById('bIntro').onclick = () => { const u = new URL('concepts/intro.html', location.href).href; try { (window.top || window).location.href = u; } catch { location.href = u; } };
 document.getElementById('sharePill').onclick = () => shareAeon(); document.getElementById('bShare').onclick = () => shareAeon(); document.getElementById('eaShare').onclick = () => shareAeon();
-document.getElementById('mbShare').onclick = () => { const it = gzItem; shareAeon(it ? `I scanned a barcode and decoded a ${it.rarity} ${it.name} ${it.icon} (it tastes like ${it.taste}). Scan yours:` : null, 'share-find'); };
+document.getElementById('mbShare').onclick = () => { const it = gzItem; if (it?.mythic) return shareAeon('I found the Mythic Adios at Bar Adios, Shinjuku 🍸 Find yours:', 'share-adios'); shareAeon(it ?`I scanned a barcode and decoded a ${it.rarity} ${it.name} ${it.icon} (it tastes like ${it.taste}). Scan yours:` : null, 'share-find'); };
 document.getElementById('eaEmail').addEventListener('keydown', e => e.stopPropagation());
 document.getElementById('eaList').addEventListener('submit', () => { track('waitlist'); mem.waitlist = true; save(); setTimeout(() => { const f = document.getElementById('eaList'); f.classList.add('done'); f.querySelector('.eaListH').textContent = 'You are on the list. Check the new tab to confirm.'; }, 300); }); document.getElementById('eaHome').addEventListener('click', () => track('home'));
 document.getElementById('bHome').onclick = () => { track('home'); open('https://lucidinstinct.com/?utm_source=aeon&utm_medium=entity&utm_campaign=home', '_blank', 'noopener'); };
@@ -2284,9 +2388,9 @@ const bulk = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMater
 bulk.frustumCulled = false; bScene.add(bulk);
 // the view seen through Aeon's opening pupil: the Lucid Instinct iris rings it, and surging streaks the light
 const bFinal = new ShaderPass(new THREE.ShaderMaterial({
-  uniforms: { tDiffuse: { value: null }, uBright: BRIGHT, uArt: { value: eyeArt }, uC: { value: EYE_ART.c }, uTime: { value: 0 }, uWarp: { value: 0 }, uOpen: { value: 0 }, uAspect: { value: 1 }, uFlash: { value: 0 }, uIris: { value: 1 }, uInvert: { value: 0 }, uPocket: { value: 0 }, uFov: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, uBright: BRIGHT, uArt: { value: eyeArt }, uC: { value: EYE_ART.c }, uTime: { value: 0 }, uWarp: { value: 0 }, uOpen: { value: 0 }, uAspect: { value: 1 }, uFlash: { value: 0 }, uIris: { value: 1 }, uInvert: { value: 0 }, uPocket: { value: 0 }, uFov: { value: 0 }, uGhost: { value: 0 } },
   vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-  fragmentShader: `uniform sampler2D tDiffuse, uArt; uniform vec2 uC; uniform float uTime, uWarp, uOpen, uAspect, uFlash, uIris, uInvert, uPocket, uFov, uBright; varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse, uArt; uniform vec2 uC; uniform float uTime, uWarp, uOpen, uAspect, uFlash, uIris, uInvert, uPocket, uFov, uBright, uGhost; varying vec2 vUv;
     const float PUP = ${EYE_ART.pup}, IRIS = ${EYE_ART.iris}, EDGE = ${EYE_ART.edge};
     float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
     void main(){
@@ -2294,6 +2398,8 @@ const bFinal = new ShaderPass(new THREE.ShaderMaterial({
       for (int i = 0; i < 8; i++){ vec2 o = c * (1. - uWarp * .11 * float(i) / 8.) * (1. - uFov * .15 * dot(c, c));
         col += vec3(texture2D(tDiffuse, .5 + o * (1. + ab)).r, texture2D(tDiffuse, .5 + o).g, texture2D(tDiffuse, .5 + o * (1. - ab)).b); }
       col /= 8.;
+      if (uGhost > .001){ vec2 go = vec2(.03, .012) * uGhost * (.6 + .4 * sin(uTime * 1.1)); // The Adios: every universe seen twice
+        col = mix(col, max(col, texture2D(tDiffuse, vUv + go).rgb * vec3(.5, .95, 1.15)), .65 * uGhost); }
       col *= 1. - dot(c, c) * .9;
       vec2 q = vec2(c.x * uAspect, c.y); float r = length(q), a = atan(q.y, q.x);
       float R0 = uOpen * uOpen * (3. - 2. * uOpen) * 1.35, W = .5;
@@ -2583,7 +2689,14 @@ const VIS = [
     mantra: 'In every universe, I am.' },
   { id: 'loom', name: 'the Lucid Loom', hue: 150,
     says: ['Every thread you pull, I weave back in. Nothing you have done is lost.', 'Over, under, over. You cannot find the front of me because there is no front. Only the weave.', 'You are a strand in this. Pull, and the whole pattern moves with you.'],
-    mantra: 'I am woven, not broken.' } ];
+    mantra: 'I am woven, not broken.' },
+  { id: 'regular', name: 'the Regular', hue: 195, bar: true, // Bar Adios exclusive: locked until The Adios is found at the bar; rare in the journey
+    says: ['Last call is just a doorway with a clock on it.', 'Everyone who walks in here was looking for something. Most of them find a friend.', 'The night is long. You are longer.',
+      'The trains stop at midnight. Good conversations don\'t.', 'I have polished this glass for eleven years. It was clean in the first minute. That was never the point.', 'Shinjuku has two million lights. One of them is on for you.',
+      'Nobody here knows your job title. Wonderful, isn\'t it?', 'Sit. The stool remembers you, even when you don\'t.', 'Rain on the alley roofs sounds like applause, if you let it.',
+      'You don\'t have to be interesting. You only have to be here.', 'The sun is coming. It always is. No rush.', 'Tomorrow\'s you is already glad you were kind tonight.'],
+    mantra: 'There is always a seat for me.' } ];
+const visLocked = V => V.bar && !mem.regular;
 const vis = { cur: null, k: 0, t: 0, next: 9, said: 0, log: [], gallery: false, gi: 0, ms: 0, slow: false, scale: 1, lag: 0, upT: 0 };
 const galBar = document.getElementById('galBar'), galName = document.getElementById('galName'), bBeings = document.getElementById('bBeings');
 bBeings.onclick = () => { if (between.mode === 'out') toggleGallery(); };
@@ -2593,7 +2706,7 @@ function toggleGallery(on = !vis.gallery) {
   vis.gallery = on; entsEl.classList.toggle('gallery', on); galBar.classList.toggle('on', on); bBeings.classList.toggle('on', on); bBeings.textContent = on ? 'close beings' : 'beings';
   if (on) { galleryShow(vis.gi); hud.classList.remove('dim'); } else { vis.cur = null; vis.k = 0; entsEl.classList.remove('on'); whisper('…and they fold away again.', 3); }
 }
-function galleryShow(i) { vis.gi = (i + VIS.length) % VIS.length; vis.cur = VIS[vis.gi]; galName.textContent = `${vis.cur.name[0].toUpperCase() + vis.cur.name.slice(1)} · ${vis.gi + 1} of ${VIS.length}`; vis.t = 3.6; vis.k = 0; vis.said = 0; audio.voice(vis.cur.id === 'jester' ? 'jester' : 'elf'); }
+function galleryShow(i) { vis.gi = (i + VIS.length) % VIS.length; vis.cur = VIS[vis.gi]; galName.textContent = visLocked(vis.cur) ? `??? · Found only in Shinjuku` : `${vis.cur.name[0].toUpperCase() + vis.cur.name.slice(1)} · ${vis.gi + 1} of ${VIS.length}`; vis.t = 3.6; vis.k = 0; vis.said = 0; audio.voice(vis.cur.id === 'jester' ? 'jester' : 'elf'); }
 // drawing helpers: radial symmetry, mirroring, neon strokes, gears, mandalas, feathers, eyes, sacred geometry
 const TAU = 6.28318;
 function sym(n, fn) { for (let i = 0; i < n; i++) { ec.save(); ec.rotate(i * TAU / n); fn(i); ec.restore(); } }
@@ -2744,6 +2857,48 @@ const VIS_DRAW = {
       ec.beginPath(); ec.rect(-L, -w / 2, L * 2, w); neon(b.ax === 0 ? 140 : b.ax === 1 ? 178 : 0, .5, a * .35, 70); ec.restore(); }
     ec.restore(); ec.globalCompositeOperation = 'lighter';
     sym(6, i => { ec.beginPath(); ec.moveTo(S * 1.05, 0); ec.lineTo(S * 1.2, 0); neon(h + i * 30, 1, a * .5); }); ring(S * 1.08, h + 40, .8, a * .4); },
+  regular(S, t, a, h, look) { // the Regular (Bar Adios exclusive): a tall shadow on a stool behind the counter, slowly polishing a glass under pink and cyan neon
+    const L = vis.locked, A = L ? a * .22 : a, nodP = t % 8.5, hy = -S * .5 + (nodP < 1 ? Math.sin(nodP * Math.PI) * S * .035 : 0), CT = S * .2; // the head (with an occasional nod) and the counter top
+    const glow = (x, y, r, hue, al, sat = 100) => { const g = ec.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `hsla(${hue},${sat}%,62%,${al})`); g.addColorStop(1, `hsla(${hue},${sat}%,50%,0)`); ec.fillStyle = g; ec.fillRect(x - r, y - r, r * 2, r * 2); };
+    if (!L) { // the neon behind: soft pools, a pink tube that sometimes stutters, a cyan bar, the back shelf with its vessels lit from inside, haze drifting through
+      glow(-S * .6, -S * .6, S, 322, a * .2); glow(S * .62, -S * .5, S * .85, 188, a * .2); glow(0, CT, S * .9, 260, a * .08);
+      const fl = Math.sin(t * .7) > .93 ? .35 + .65 * (Math.sin(t * 61) > 0) : 1;
+      ec.beginPath(); ec.arc(-S * .62, -S * .62, S * .24, .3, 5.6); neon(322, 2.4, a * fl); ec.beginPath(); ec.arc(-S * .62, -S * .62, S * .15, 3.5, 8.4); neon(300, 1.4, a * .7 * fl);
+      ec.beginPath(); ec.moveTo(S * .34, -S * .76); ec.lineTo(S * .95, -S * .76); neon(188, 2.2, a); ec.beginPath(); ec.moveTo(S * .44, -S * .66); ec.lineTo(S * .85, -S * .66); neon(176, 1.3, a * .75);
+      ec.beginPath(); ec.moveTo(-S * 1.05, -S * .08); ec.lineTo(S * 1.05, -S * .08); neon(h + 40, .8, a * .5);
+      [-.96, -.8, -.64, -.48, .48, .64, .8, .96].forEach((x, i) => { const bh = S * (.17 + (i * 37 % 7) * .02), bw = S * .055; ec.save(); ec.translate(x * S, -S * .08);
+        ec.beginPath(); ec.moveTo(-bw, 0); ec.lineTo(-bw, -bh * .6); ec.quadraticCurveTo(-bw, -bh * .78, -bw * .35, -bh * .82); ec.lineTo(-bw * .35, -bh); ec.lineTo(bw * .35, -bh); ec.lineTo(bw * .35, -bh * .82); ec.quadraticCurveTo(bw, -bh * .78, bw, -bh * .6); ec.lineTo(bw, 0); ec.closePath();
+        neon(h + i * 40, .8, a * .5); soft(h + i * 40, a); ec.beginPath(); ec.arc(0, -bh * .3, bw * .35 * (1 + .2 * Math.sin(t * 2 + i)), 0, TAU); ec.fillStyle = `hsla(${h + i * 40},100%,75%,${a * .5})`; ec.fill(); ec.restore(); });
+      for (let i = 0; i < 5; i++) glow(Math.sin(t * .05 + i * 1.7) * S * .9, -S * .3 + Math.sin(t * .07 + i) * S * .25, S * (.3 + i * .05), 280 - i * 20, a * .05, 60);
+    }
+    // the stool, seen faintly through the glass front of the counter
+    ec.beginPath(); ec.ellipse(0, S * .32, S * .17, S * .035, 0, 0, TAU); ec.moveTo(0, S * .355); ec.lineTo(0, S * .86); ec.moveTo(S * .1, S * .66); ec.ellipse(0, S * .66, S * .1, S * .02, 0, 0, TAU); ec.moveTo(S * .14, S * .88); ec.ellipse(0, S * .88, S * .14, S * .025, 0, 0, TAU); neon(h + 20, .9, A * .7);
+    // the figure: long, dark, a narrow-brimmed hat, rim-lit cyan on one side and pink on the other
+    const body = () => { ec.beginPath(); ec.moveTo(-S * .05, hy + S * .12); ec.lineTo(-S * .06, -S * .3); ec.quadraticCurveTo(-S * .26, -S * .3, -S * .29, -S * .2); ec.lineTo(-S * .25, S * .34); ec.lineTo(S * .25, S * .34); ec.lineTo(S * .29, -S * .2); ec.quadraticCurveTo(S * .26, -S * .3, S * .06, -S * .3); ec.lineTo(S * .05, hy + S * .12); ec.closePath();
+      ec.moveTo(S * .1, hy); ec.ellipse(0, hy, S * .1, S * .13, 0, 0, TAU); ec.moveTo(S * .19, hy - S * .08); ec.ellipse(0, hy - S * .08, S * .19, S * .03, 0, 0, TAU); ec.rect(-S * .1, hy - S * .22, S * .2, S * .14); };
+    const dark = al => { const g = ec.createLinearGradient(0, hy - S * .22, 0, S * .34); g.addColorStop(0, `rgba(12,9,30,${al})`); g.addColorStop(1, `rgba(2,1,8,${al})`); return g; };
+    ec.globalCompositeOperation = 'source-over'; body(); ec.fillStyle = dark(.94); ec.fill(); ec.globalCompositeOperation = 'lighter';
+    for (const [x, hue] of [[-S * 2, 188], [0, 322]]) { ec.save(); ec.beginPath(); ec.rect(x, -S * 2, S * 2, S * 4); ec.clip(); body(); neon(hue, 1, A * .55); ec.restore(); }
+    if (!L) { ec.save(); ec.translate(0, -S * .08); metatron(S * .1, h + 40, a * .3, t * .3); ec.restore(); ec.beginPath(); ec.moveTo(-S * .07, -S * .3); ec.lineTo(0, -S * .12); ec.lineTo(S * .07, -S * .3); neon(h + 120, .6, a * .45);
+      const bP = (t + 1.3) % 4.7; ec.save(); ec.translate(0, hy + S * .015); ec.scale(1, bP < .14 ? .12 : 1); vEye(-S * .042, 0, S * .034, 188, a, t, look); vEye(S * .042, 0, S * .034, 322, a, t, look); ec.restore(); } // the Lucid eyes, with a slow blink
+    // the arms, the glass turning in one hand and the cloth going round its rim in the other
+    const gx = S * .02, gy = S * .06, ca = t * 2.4, cx = gx + Math.cos(ca) * S * .03, cy = gy - S * .075 + Math.sin(ca) * S * .012;
+    const arms = () => { ec.beginPath(); ec.moveTo(-S * .25, -S * .22); ec.quadraticCurveTo(-S * .28, S * .1, gx - S * .04, gy + S * .07); ec.moveTo(S * .25, -S * .22); ec.quadraticCurveTo(S * .3, S * .02, cx + S * .03, cy); };
+    ec.globalCompositeOperation = 'source-over'; arms(); ec.lineWidth = S * .075; ec.strokeStyle = 'rgba(4,3,12,.96)'; ec.stroke(); ec.globalCompositeOperation = 'lighter'; arms(); neon(200, .5, A * .3);
+    ec.save(); ec.translate(gx, gy); ec.rotate(Math.sin(t * .6) * .1); const gw = S * .05, gh = S * .15, jig = Math.max(0, 1 - ((t + .35) % 2.6) / .3);
+    ec.beginPath(); ec.moveTo(-gw, -gh * .5); ec.lineTo(-gw * .85, gh * .5); ec.lineTo(gw * .85, gh * .5); ec.lineTo(gw, -gh * .5); neon(190, 1.2, A, 75); soft(190, A);
+    ec.beginPath(); ec.ellipse(0, -gh * .5, gw, gw * .22, 0, 0, TAU); neon(185, .8, A * .8, 80);
+    if (!L) { [[-.45, .1, .3], [.25, .22, -.4]].forEach(([x, y, r], i) => { ec.save(); ec.translate(gw * x + Math.sin(t * 40 + i) * jig * 1.5, gh * y); ec.rotate(r + jig * .2 * (i ? 1 : -1)); ec.beginPath(); ec.rect(-gw * .33, -gw * .33, gw * .66, gw * .66); neon(200, .7, a * .85, 85); ec.restore(); }); // ice, which jumps when it clinks
+      const u = (t * .45) % 1, px = lerp(gw, gw * .85, u), py = lerp(-gh * .5, gh * .5, u); glow(px, py, S * .035, 190, a * .9, 30); ec.beginPath(); ec.moveTo(px - S * .03, py); ec.lineTo(px + S * .03, py); ec.moveTo(px, py - S * .03); ec.lineTo(px, py + S * .03); neon(190, .5, a, 90); } // a glint travelling down the glass
+    ec.restore();
+    ec.globalCompositeOperation = 'source-over'; ec.beginPath(); ec.arc(gx - S * .03, gy + S * .07, S * .035, 0, TAU); ec.fillStyle = 'rgba(4,3,12,.96)'; ec.fill(); ec.globalCompositeOperation = 'lighter';
+    ec.beginPath(); ec.moveTo(cx - S * .04, cy - S * .02); ec.quadraticCurveTo(cx, cy - S * .06, cx + S * .05, cy - S * .01); ec.quadraticCurveTo(cx + S * .02, cy + S * .04, cx - S * .04, cy - S * .02); ec.fillStyle = `rgba(220,235,255,${A * .16})`; ec.fill(); neon(205, .6, A * .6, 85); // the cloth
+    // the counter, in front: tinted glass with a neon edge, slats, a lace of diamonds and the neon's reflection
+    ec.globalCompositeOperation = 'source-over'; ec.fillStyle = `rgba(5,3,14,${L ? .85 : .72})`; ec.fillRect(-S * 1.15, CT, S * 2.3, S * .9); ec.globalCompositeOperation = 'lighter';
+    ec.beginPath(); ec.moveTo(-S * 1.15, CT); ec.lineTo(S * 1.15, CT); neon(h, 1.8, A); ec.beginPath(); ec.moveTo(-S * 1.15, CT + S * .035); ec.lineTo(S * 1.15, CT + S * .035); neon(322, .8, A * .6);
+    if (!L) { for (let i = -11; i <= 11; i++) { ec.beginPath(); ec.moveTo(i * S * .1, CT + S * .07); ec.lineTo(i * S * .1, CT + S * .85); neon(h + 60, .4, a * .16); ec.save(); ec.translate(i * S * .1 + S * .05, CT + S * .017); ec.beginPath(); ec.moveTo(-S * .014, 0); ec.lineTo(0, -S * .01); ec.lineTo(S * .014, 0); ec.lineTo(0, S * .01); ec.closePath(); neon(h + 120, .5, a * (.4 + .3 * Math.sin(t * 3 + i * .7))); ec.restore(); }
+      glow(-S * .55, CT + S * .02, S * .3, 322, a * .12); glow(S * .6, CT + S * .02, S * .28, 188, a * .12); }
+  },
   net(S, t, a0, h, look) { const a = Math.min(1, a0 * 1.6); // the Net of Being: a lattice of interlocking faces, each a pair of eyes and a mouth, sharing eyes with its neighbours; one great face at the centre
     for (let y = -S * 1.1; y <= S * 1.1; y += S * .36) for (let x = -S * 1.8; x <= S * 1.8; x += S * .36) { const d = Math.hypot(x, y) / S; if (d < .5) continue; ec.save(); ec.translate(x, y); vEye(-S * .1, -S * .04, S * .085, h + d * 60, a, t + x, look); vEye(S * .1, -S * .04, S * .085, h + d * 60, a, t + y, look); ec.beginPath(); ec.moveTo(-S * .07, S * .09); ec.quadraticCurveTo(0, S * (.13 + .03 * Math.sin(t * 2 + x)), S * .07, S * .09); neon(h + 40, 1, a * .9); ec.beginPath(); ec.moveTo(-S * .18, -S * .18); ec.lineTo(S * .18, -S * .18); ec.lineTo(S * .18, S * .18); ec.lineTo(-S * .18, S * .18); ec.closePath(); neon(h + 90, .4, a * .25); ec.restore(); }
     vEye(-S * .22, -S * .1, S * .2, h, a, t, look); vEye(S * .22, -S * .1, S * .2, h, a, t, look); vEye(0, -S * .45, S * .13, h + 60, a, t * 1.3, look); mandala(S * .62, 18, h + 100, a * .8, t);
@@ -2774,12 +2929,14 @@ function visFrame(dt) {
   const B = between, inRoom = (B.mode === 'in' && B.phase === 3) || vis.gallery;
   if (vis.gallery && !vis.cur) galleryShow(vis.gi + 1);
   if (inRoom && !vis.gallery && !vis.cur && (vis.next -= dt) < 0) { // manifest one that has not visited lately
-    const recent = vis.log.slice(-4); const pool = VIS.filter(v => !recent.includes(v.id)); vis.cur = pick(pool.length ? pool : VIS); vis.t = 0; vis.said = 0; vis.log.push(vis.cur.id); vis.next = 18 + Math.random() * 8;
+    const recent = vis.log.slice(-4); const pool = VIS.filter(v => !recent.includes(v.id) && (!v.bar || (mem.regular && Math.random() < .25))); vis.cur = pick(pool.length ? pool : VIS.filter(v => !v.bar)); // the Regular: only once found at the bar, and rarely vis.t = 0; vis.said = 0; vis.log.push(vis.cur.id); vis.next = 18 + Math.random() * 8;
     if (B.ent) { B.ent.state = 'leaving'; B.ent.t = 0; } B.entNext = Math.max(B.entNext, 16); audio.voice('watchers'); }
   if (!vis.cur) { if (entsEl.classList.contains('on')) { entsEl.classList.remove('on'); } return; }
   const V = vis.cur; vis.t += dt; const life = vis.gallery ? 1e9 : 14, env = Math.min(1, vis.t / 3.5) * Math.min(1, (life - vis.t) / 3) * (inRoom ? 1 : 0);
   vis.k = lerp(vis.k, env, Math.min(1, dt * 2));
-  if (vis.said === 0 && vis.t > 3.5) { vis.said = 1; whisper(`${V.name[0].toUpperCase() + V.name.slice(1)}${vis.gallery ? ` (${vis.gi + 1} of ${VIS.length}, arrows to change)` : ''} says: ${pick(V.says)}`, 7); B.msg = { who: V.name, text: V.mantra }; audio.voice(V.id === 'jester' ? 'jester' : V.id === 'elves' ? 'elf' : V.id === 'mantis' ? 'mantis' : 'twins'); }
+  const locked = visLocked(V); vis.locked = locked;
+  if (vis.said === 0 && vis.t > 3.5 && locked) { vis.said = 2; whisper('??? · Found only in Shinjuku. Someone at Bar Adios is keeping a seat warm.', 7); audio.voice('watchers'); }
+  else if (vis.said === 0 && vis.t > 3.5) { vis.said = 1; whisper(`${V.name[0].toUpperCase() + V.name.slice(1)}${vis.gallery ? ` (${vis.gi + 1} of ${VIS.length}, arrows to change)` : ''} says: ${pick(V.says)}`, 7); B.msg = { who: V.name, text: V.mantra }; audio.voice(V.id === 'jester' ? 'jester' : V.id === 'elves' ? 'elf' : V.id === 'mantis' ? 'mantis' : 'twins'); }
   else if (vis.said === 1 && vis.t > 10.5) { vis.said = 2; whisper(`“${V.mantra}”`, 5); audio.giggle && V.id === 'jester' && audio.giggle(); }
   if (vis.t > life || (!inRoom && vis.k < .02)) { vis.cur = null; vis.k = 0; return; }
   entsEl.classList.add('on'); const W = innerWidth, H = innerHeight;
@@ -2798,9 +2955,10 @@ function visFrame(dt) {
   ec.save(); ec.translate(W / 2, H / 2); const S = Math.min(W, H) * .42 * (1 + .02 * Math.sin(t * 1.1)) * (.9 + vis.k * .1); ec.rotate(Math.sin(t * .3) * .02);
   ec.save(); ec.globalAlpha = .5; sym(6, () => { ec.beginPath(); ec.moveTo(S * .3, 0); ec.quadraticCurveTo(S * .9, -S * .3, S * 1.5, 0); neon(h + 180, 1, a * .3); }); ec.restore(); // the carpet behind it
   const look = { x: ptr.x, y: ptr.y };
-  const slow = perf.level > 0 || vis.slow; if (D.layers !== false) { if (!slow) cached('sub', S, () => subtle(S, t, a, h, look)); cached('nrv', S, () => nerves(S, t, a, h), 66); cached('orn', S, () => ornament(S, t, a, h)); }
-  if (!slow) cached('ech', S, () => { for (const [sc, rot, al] of [[.42, t * .25, .35], [.2, -t * .4, .25]]) { ec.save(); ec.rotate(rot); ec.scale(sc, sc); VIS_DRAW[V.id](S, t * 1.5, a * al, h + 120, look); ec.restore(); } }, 50); // the being within the being within the being: two more drawings of it, cached at 20 Hz (they cost as much as the being itself)
-  VIS_DRAW[V.id](S, t, a, h, look); if (D.hands !== false) hands(S, t, a, h, look); ec.restore();
+  const slow = perf.level > 0 || vis.slow; if (D.layers !== false && !locked) { if (!slow) cached('sub', S, () => subtle(S, t, a, h, look)); cached('nrv', S, () => nerves(S, t, a, h), 66); cached('orn', S, () => ornament(S, t, a, h)); }
+  if (!slow && !V.bar) cached('ech', S, () => { for (const [sc, rot, al] of [[.42, t * .25, .35], [.2, -t * .4, .25]]) { ec.save(); ec.rotate(rot); ec.scale(sc, sc); VIS_DRAW[V.id](S, t * 1.5, a * al, h + 120, look); ec.restore(); } }, 50); // the being within the being within the being: two more drawings of it, cached at 20 Hz (they cost as much as the being itself)
+  VIS_DRAW[V.id](S, t, a, h, look); if (D.hands !== false && !V.bar) hands(S, t, a, h, look); ec.restore();
+  if (V.id === 'regular' && !locked && vis.k > .5) { const c = Math.floor((t + .35) / 2.6); if (c !== vis.clink) { vis.clink = c; audio.bell(2637, .05); setTimeout(() => audio.bell(3520, .035), 70); } } // the ice clinks as the glass turns
   ec.globalCompositeOperation = 'source-over';
   // the layer's own budget: when drawing it takes too long, the eye lattice and the echoes are dropped and the Parallel Selves' tiles grow (hysteresis, so it does not flicker)
   vis.ms = lerp(vis.ms || 0, performance.now() - vt0, .1); if (vis.ms > 14) vis.slow = true; // the JavaScript side alone can also force the budget
@@ -3285,6 +3443,7 @@ function frame(now) {
   if (fpsCap && now - clock.last < 1000 / fpsCap - 1.5) return; // the cap: skipped frames accumulate into the next dt, so its clock keeps true time
   const raw = now - clock.last, dt = Math.min(.05, raw / 1000); clock.last = now; env.raw = raw;
   adapt(raw);
+  if (env.adios > 0) env.adios = Math.max(0, env.adios - dt); finalPass.uniforms.uGhost.value = bFinal.uniforms.uGhost.value = adiosK(); // The Adios: double vision, in the journey too
   const speedK = reduced ? .45 : 1;
   clock.t += dt * speedK; const t = clock.t;
   if (egg.on) { eggFrame(dt, t, now); return; } // sealed in the egg until you tap it open: Aeon itself is not drawn yet
@@ -3361,6 +3520,9 @@ function frame(now) {
 
   /* palette */
   paletteAt(g, mood);
+  { const k = adiosK(); if (k > 0) { colA.lerp(ADIOS_A, k * .85); colB.lerp(ADIOS_B, k * .9); colC.lerp(ADIOS_C, k * .85); // electric blue, then a smooth return
+    if (!taffy.on) { taffy.twT = Math.sin(t * 1.3) * .22 * k; taffy.sT = Math.sin(t * .8) * .05 * k; } // a gentle wobble, through the taffy pass
+    if ((env.adiosHic -= dt) < 0 && k > .5) { env.adiosHic = 4 + Math.random() * 5; chr.bounceV += 5; mood.blink = 1; chr.dbl = .15; audio.bell(1568, .08); if (Math.random() < .4) whisper(pick(ADIOS_HIC), 2); } } }
   sky.material.uniforms.uA.value.copy(colA); sky.material.uniforms.uB.value.copy(colB);
 
   /* camera */
