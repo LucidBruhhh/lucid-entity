@@ -61,6 +61,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 .themes button.on{outline:2px solid #fff;outline-offset:2px}
 .themes span{font:400 8px/1 "JetBrains Mono",monospace;letter-spacing:.2em;color:rgba(255,255,255,.55);text-transform:uppercase;margin-left:4px}
 .handoff .themes{display:none}
+.themes{display:none} /* the picker is retired now a theme is chosen */
 </style>
 </head>
 <body>
@@ -88,9 +89,9 @@ const THEMES = {
   solar: { name: 'Solar', m: '255,200,90', e: '255,250,235', r: '255,140,40', eh: '#ffe7a8', el: '255,240,200', rl: '255,220,170', core: '#ffffff', ui: '#fff1cc' },
   infrared: { name: 'Infrared', m: '255,45,149', e: '255,186,60', r: '150,50,255', eh: '#ffba3c', el: '255,225,170', rl: '235,190,255', core: '#fff3e0', ui: '#ffe0b8' },
 };
-let TH = THEMES[(() => { const q = new URLSearchParams(location.search).get('theme'); if (q && THEMES[q]) return q; try { return localStorage.getItem('intro.theme') || 'biolume'; } catch { return 'biolume'; } })()] || THEMES.biolume;
+let TH = THEMES[(() => { const q = new URLSearchParams(location.search).get('theme'); if (q && THEMES[q]) return q; return 'biolume'; /* the chosen theme (user, 1 Nov 2026); ?theme= still previews the others */ })()] || THEMES.biolume;
 function applyTheme(key) { TH = THEMES[key] || THEMES.biolume; const r = document.documentElement.style; r.setProperty('--e', TH.e); r.setProperty('--lime', TH.eh); r.setProperty('--el', TH.ui); r.setProperty('--c', TH.eh);
-  try { COLS[0] = TH.eh; } catch {} // COLS is declared further down; on the first call it is not there yet try { localStorage.setItem('intro.theme', key); } catch {}
+  try { COLS[0] = TH.eh; } catch {} // COLS is declared further down; on the first call it is not there yet 
   document.querySelectorAll('#themes button').forEach(b => b.classList.toggle('on', b.dataset.k === key)); const sp = document.querySelector('#themes span'); if (sp) sp.textContent = TH.name; }
 { const box = document.getElementById('themes'); for (const [k, t] of Object.entries(THEMES)) { const b = document.createElement('button'); b.dataset.k = k; b.title = t.name; b.style.background = `linear-gradient(135deg, rgb(${t.m}) 0 50%, rgb(${t.e}) 50% 100%)`; b.onclick = e => { e.stopPropagation(); applyTheme(k); }; box.appendChild(b); } box.appendChild(document.createElement('span')); }
 applyTheme(Object.keys(THEMES).find(k => THEMES[k] === TH));
