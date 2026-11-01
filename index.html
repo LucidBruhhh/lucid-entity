@@ -519,7 +519,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     </div>
   </div>
   <div class="hint" id="hint">move · click · hold · drag</div>
-  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.12</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
+  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.13</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
   <button class="morePill" id="dMore" title="More: sound, timeline, listen, veil, frame rate, stats" aria-label="More settings">&#8943;</button>
   <button class="sharePill" id="sharePill" title="Share Aeon with a friend">&#8599; share</button>
   <div class="eaNote">early access demo · limited features</div>
@@ -1393,8 +1393,8 @@ const EYE_CONST = `const float PUP=${EYE_ART.pup},IRIS=${EYE_ART.iris},GAP=${EYE
   vec2 lids(vec3 p){float o=1.-uBlink*1.04,c=.12*p.x*p.x,t=p.y+c-(o-uLidT+uTilt*p.x),b=c-p.y-(o-uLidB);
     return vec2(max(smoothstep(-.02,.02,t),smoothstep(-.02,.02,b)),min(abs(t),abs(b)));}`;
 const eyeU = { uTime: { value: 0 }, uDilate: { value: .3 }, uBlink: { value: 0 }, uLidT: { value: 0 }, uLidB: { value: 0 }, uTilt: { value: 0 }, uColB: { value: colB }, uColC: { value: colC }, uColA: { value: colA }, uGlow: { value: 1 }, uHeart: { value: 0 },
-  uTex: { value: eyeArt }, uC: { value: EYE_ART.c }, uView: { value: riftRT.texture }, uRes: { value: riftRes }, uMul: { value: 1 }, uSkin: { value: 0 } };
-const EYE_F = NOISE + `uniform float uSkin;float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+  uTex: { value: eyeArt }, uC: { value: EYE_ART.c }, uView: { value: riftRT.texture }, uRes: { value: riftRes }, uMul: { value: 1 }, uSkin: { value: 0 }, uLate: { value: 0 } };
+const EYE_F = NOISE + `uniform float uSkin,uLate;float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 uniform float uTime,uDilate,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,uTilt;uniform vec3 uColA,uColB,uColC;uniform sampler2D uTex,uView;uniform vec2 uC,uRes;varying vec3 vL,vN,vV;
   ${EYE_CONST}
   void main(){vec3 p=normalize(vL),n=normalize(vN),v=normalize(vV);
@@ -1440,6 +1440,47 @@ uniform float uTime,uDilate,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,uTilt;uniform v
         vec2 sp=p.xy*90.;float st=step(.93,h2(floor(sp)))*smoothstep(.45,0.,length(fract(sp)-.5)),neb=snoise(vec3(p.xy*6.,uTime*.15))*.5+.5;
         vec3 inside=vec3(.004,.002,.012)+uColB*neb*neb*.12+vec3(1.,.95,.85)*st*.9;
         col=mix(col,inside,pupil); col+=uColC*exp(-((sqrt(e)-1.)*6.)*((sqrt(e)-1.)*6.))*.45*(1.-pupil*.3); }
+    }
+    /* the final forms (2 November 2026): more obviously an eyeball, and more impossible. Contrast and structure, not light. */
+    if(uLate>.001&&p.z>0.){ float LT=uLate,pr=length(p.xy),pa=atan(p.y,p.x);
+      float irisP=uSkin>.5?sin(IRIS/EDGE*THMAX):.64, pupP=uSkin>.5?sin(PUP*mix(.8,1.3,uDilate)/EDGE*THMAX):.4;
+      // a sclera: pale, faintly Aeon-coloured, with branching veins that thicken toward the rim and pulse with the heart
+      float scl=smoothstep(irisP*1.02,irisP*1.14,pr);
+      vec3 sclC=mix(vec3(.36,.34,.44),uColC*.4+vec3(.14),.3)*(.4+.6*(1.-fr)); // pearl, not white
+      sclC+=(.5+.5*cos(6.2832*(fr*1.3+pr*.8+uTime*.02+vec3(0.,.33,.67))))*.07; // a thin-film sheen
+      vec2 sg=p.xy*70.;sclC+=vec3(.8,.85,1.)*step(.985,h2(floor(sg)))*smoothstep(.5,0.,length(fract(sg)-.5))*.45; // stars inside the white of the eye
+      float vn=0.;vec3 vq=vec3(pa*1.6,pr*9.,uTime*.02); // veins run from the rim toward the iris
+      for(int o=0;o<3;o++){float nz=snoise(vq);vn+=(1.-smoothstep(0.,.11/(1.+float(o)*.6),abs(nz)))*(.9/(1.+float(o)*.7));vq*=2.15;}
+      vn*=smoothstep(irisP*1.08,.9,pr)*.85+.15;
+      sclC=mix(sclC,mix(vec3(.3,.01,.16),uColB*.35,.3)*(.7+.5*uHeart),clamp(vn,0.,1.)*.92); // dark violet-crimson veins
+      col=mix(col,sclC,scl*LT*.85);
+      // the limbus: a thin spectral ring whose two fine combs beat against each other (moiré)
+      float lim=exp(-abs(pr-irisP)*70.),moi=.5+.5*sin(pa*120.+uTime*.5)*sin(pa*127.-uTime*.4);
+      col=mix(col,(.35+.4*cos(6.2832*(pa*.477+uTime*.05+vec3(0.,.33,.67))))*(.35+.65*moi),lim*.75*LT);
+      // the iris: two fibre fields at odd symmetries cross into a lace that never quite repeats
+      float ann=smoothstep(pupP*1.05,pupP*1.25,pr)*smoothstep(irisP,irisP*.93,pr);
+      float kal=abs(sin(pa*11.+pr*31.-uTime*.2))*abs(sin(pa*7.-pr*47.+uTime*.15))*abs(sin(pa*13.+pr*19.+uTime*.07));
+      col*=1.+(smoothstep(.15,.6,kal)-.3)*.95*LT*ann; col+=uColC*pow(kal,6.)*.22*LT*ann;
+      // polycoria: small pupils orbit inside the iris, each with a lit rim, as if other eyes were looking out through this one
+      float pk=smoothstep(.25,.6,LT),ring=mix(pupP,irisP,.6);
+      for(int j=0;j<7;j++){float fj=float(j),aj=fj*.8976+uTime*.09*(mod(fj,2.)*2.-1.)+sin(uTime*.3+fj)*.1;
+        float d=length(p.xy-ring*vec2(cos(aj),sin(aj)))/(irisP*(.06+.02*sin(uTime*1.1+fj*2.)));
+        col=mix(col,vec3(.004,.002,.012)+uColB*.08*d,smoothstep(1.,.75,d)*pk); col+=mix(uColC,vec3(.9,.5,1.),.4)*exp(-abs(d-1.)*12.)*.3*pk;}
+      // eyes within the eye: the pupil holds a smaller iris turning the other way, whose pupil holds another, then the dark
+      vec2 z=uSkin>.5?p.xy/pupP:vec2(p.x/mix(.06,.33,uDilate),p.y/mix(.42,.36,uDilate));
+      if(length(z)<1.){ vec3 deep=vec3(0.);float hit=0.,dk=1.;
+        for(int k=0;k<3;k++){ float zr=length(z),fk=float(k);
+          if(hit<.5&&zr>.4){ float za=atan(z.y,z.x)+uTime*(.16+fk*.11)*(mod(fk,2.)>.5?-1.:1.);
+            float fb=.5+.5*sin(za*(70.+fk*40.)+snoise(vec3(za*3.,zr*9.,fk+uTime*.1))*1.6); // radial fibres
+            float crypt=smoothstep(.35,.75,snoise(vec3(za*5.,zr*7.,fk*3.+uTime*.05))); // dark crypts between them
+            float coll=exp(-abs(zr-(.66+.025*sin(za*24.+fk)))*55.); // the collarette, a zig-zag ring
+            vec3 hue=.5+.5*cos(6.2832*(vec3(0.,.33,.67)+fk*.29+zr*.35+uTime*.03));
+            deep=mix(uColC,hue,.55)*(.15+.85*fb)*(1.-crypt*.7)*smoothstep(.99,.84,zr)*dk; deep+=mix(hue,vec3(1.),.35)*coll*.45*dk;
+            deep*=mix(.35,1.,smoothstep(.4,.55,zr)); deep+=mix(uColC,vec3(1.),.3)*exp(-abs(zr-.42)*70.)*.45*dk; hit=1.; } // shadowed toward its own pupil
+          if(hit<.5){ z=z/.4; dk*=.85; } }
+        col=mix(col,deep,hit*LT*smoothstep(1.,.93,length(uSkin>.5?p.xy/pupP:vec2(p.x/mix(.06,.33,uDilate),p.y/mix(.42,.36,uDilate))))); }
+      // a wet catchlight, as real eyes have: the one thing that says this is an eye
+      vec3 cl=normalize(vec3(-.4,.5,1.));col+=vec3(1.,.97,.92)*pow(max(dot(reflect(-v,n),cl),0.),90.)*.55*LT;
     }
     vec2 ld=lids(p);
     vec3 lidc=uColA*.35+uColB*pow(fr,2.)*.35;
@@ -3914,7 +3955,7 @@ function frame(now) {
   eye.lookAt(v3.copy(eye.position).add(eyeDir));
   for (const m of [eyeOver, eyeRing, eyeRingOver]) { m.position.copy(eye.position); m.quaternion.copy(eye.quaternion); m.scale.copy(eye.scale); }
   eyeRing.scale.multiplyScalar(RING_SCALE); eyeRingOver.scale.multiplyScalar(RING_SCALE);
-  eyeU.uTime.value = t; eyeU.uBlink.value = clamp(mood.blink); chr.near = lerp(chr.near, hoverCore && ptr.on ? 1 : 0, Math.min(1, dt * 3));
+  eyeU.uTime.value = t; eyeU.uBlink.value = clamp(mood.blink); eyeU.uLate.value = smooth((g - 60) / 440); // the eye grows stranger from Ascendant to Omega chr.near = lerp(chr.near, hoverCore && ptr.on ? 1 : 0, Math.min(1, dt * 3));
   eyeU.uDilate.value = clamp(mood.dilate + mood.breath * .05 + mood.heart * .04 + chr.near * .18 + bond() * .08 + env.micLvl * .25 - env.moving * .2 - env.riftFear * .25 + (chr.yawn > 1.3 ? .3 : 0) - mood.flash * .4 - chr.grumpy / 8 * .2); eyeU.uGlow.value = intro * (1 - mood.sleep * .5) * (1 + mood.heart * .12) * (life.hide > 0 ? .18 : 1); eyeU.uHeart.value = mood.heart;
 
   /* filaments */
@@ -4152,7 +4193,7 @@ function glance() {
   let sum = 0, white = 0, bright = 0; for (let i = 0; i < px.length; i += 16) { const l = (px[i] * .299 + px[i + 1] * .587 + px[i + 2] * .114); sum += l; if (l > 245) white++; if (l > 200) bright++; }
   const n = px.length / 16; return { mean: +(sum / n).toFixed(1), whitePct: +(white / n * 100).toFixed(2), brightPct: +(bright / n * 100).toFixed(2), gov: +(env.gov || 1).toFixed(2), bgov: +(between.gov || 1).toFixed(2) };
 }
-window.aeon = { egg, eggTap, bench, frame, glance, bTemporal, betweenAdapt, bAdapt, visCache, VIS_DRAW, pupilSeen, renderRiftView, setFpsCap, get fpsCap() { return fpsCap; }, clock, eye, eyeDir, vis, VIS, bScene, bComposer, bulk, BRAIN, relics, life, hideGlow, teachWord, env, feedKey, veilDraw, chr, bondLv, bondXP, bondUp, eyeU, eyeRing, mood, L, lapse, between, rifts, openRift, riftRT, riftRes, renderer, composer, camera, bulkU, BRANES, bBloom, bFinal, bCam, ptr, tendrilRib, polyRib, tFl, tReach, tGrow, get tFeedK() { return tFeedK; }, perf, adapt, universes, mem, get night() { return night; }, get growth() { return growthDays(); } }; // for inspection from the console
+window.aeon = { egg, eggTap, bench, frame, glance, bTemporal, betweenAdapt, bAdapt, visCache, VIS_DRAW, pupilSeen, renderRiftView, setFpsCap, get fpsCap() { return fpsCap; }, clock, eye, eyeDir, vis, VIS, bScene, bComposer, bulk, BRAIN, relics, life, hideGlow, teachWord, env, feedKey, veilDraw, chr, bondLv, bondXP, bondUp, eyeU, eyeRing, mood, L, lapse, between, rifts, openRift, riftRT, riftRes, renderer, composer, camera, bulkU, BRANES, bBloom, bFinal, bCam, ptr, tendrilRib, polyRib, tFl, tReach, tGrow, view, get tFeedK() { return tFeedK; }, perf, adapt, universes, mem, get night() { return night; }, get growth() { return growthDays(); } }; // for inspection from the console
 addEventListener('beforeunload', () => save(true));
 </script>
 <!-- the Lucid Instinct eye artwork (white lettering on black), embedded so it works from file:// and inside the dashboard -->
