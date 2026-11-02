@@ -22,9 +22,10 @@
 html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);overflow:hidden;font-family:"JetBrains Mono",ui-monospace,Consolas,monospace;-webkit-font-smoothing:antialiased}
 canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 .hud{position:fixed;inset:0;pointer-events:none;transition:opacity 1.6s ease}
-.hud.dim{opacity:.12}
+.hud.dim>*{filter:opacity(.12)}
+@media (pointer:coarse){.hud.dim>.dock{filter:opacity(.6)}}
 .hud.off>*:not(.tr){opacity:0}.hud.off .tr{opacity:.4}
-.hud>*{transition:opacity 1.6s ease}
+.hud>*{transition:opacity 1.6s ease,filter 1.6s ease}
 .tl{position:absolute;left:24px;top:20px}
 .name{font-family:"Cormorant Garamond",Georgia,serif;font-weight:300;font-size:40px;letter-spacing:.55em;margin:0;line-height:1;text-shadow:0 0 24px rgba(160,220,255,.45)}
 .sub{font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--fg2);margin-top:10px}
@@ -519,7 +520,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     </div>
   </div>
   <div class="hint" id="hint">move · click · hold · drag</div>
-  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.13</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
+  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.14</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
   <button class="morePill" id="dMore" title="More: sound, timeline, listen, veil, frame rate, stats" aria-label="More settings">&#8943;</button>
   <button class="sharePill" id="sharePill" title="Share Aeon with a friend">&#8599; share</button>
   <div class="eaNote">early access demo · limited features</div>
@@ -632,7 +633,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
   const ORD = { first: '一', second: '二', third: '三', fourth: '四', fifth: '五', sixth: '六', seventh: '七', eighth: '八', ninth: '九', tenth: '十', eleventh: '十一', twelfth: '十二' };
   const RAR = { Common: 'コモン', Rare: 'レア', Epic: 'エピック', Legendary: 'レジェンダリー', Mythic: 'ミシック' };
   const BOND = { Stranger: '見知らぬ人', Acquaintance: '顔見知り', Friend: '友だち', Companion: '相棒', Kindred: '魂の友' };
-  const STAGE = { Spark: '火花', Growing: '成長中', Ascendant: '昇華', Moulted: '脱皮', Metatron: 'メタトロン', Lucent: '透光', Sovereign: '統べる者', 'Source-born': '源より生まれし者', Omega: 'オメガ', Specimen: '標本', Beyond: '彼方' };
+  const STAGE = { Spark: '火花', Growing: '成長中', Ascendant: '昇華', Moulted: '脱皮', Metatron: 'メタトロン', Lucent: '透光', Sovereign: '統べる者', 'Source-born': '源より生まれし者', Omega: 'オメガ', Nous: 'ヌース', Specimen: '標本', Beyond: '彼方' };
   const DIM = { Point: ['点', '意識の火花'], Line: ['線', 'のびてゆく糸'], Volume: ['立体', '呼吸する体'], Time: ['時間', 'テッセラクト、自分の過去と未来'], Probability: ['確率', 'ありえたかもしれない自分たちの残響'], Fold: ['折り目', '空間を折りたたむ紋章の輪'], Infinity: ['無限', '思考の星雲'], 'Branching infinities': ['分岐する無限', '正二十四胞体の格子'], 'All physics': ['すべての物理', 'オーロラの翼'], 'The Machine': ['マシン', '宇宙と宇宙のあいだのシミュレーション格子'], Membranes: ['膜', '軌道をめぐる並行宇宙'], Source: ['源', '十二の冠'] };
   const DIMDESC = Object.fromEntries(Object.values(DIM).map(([n, d], i) => [Object.keys(DIM)[i], d]));
   const NAMES = { Wanderer: '旅人', Lightkeeper: '灯守り', 'Little Star': 'ちいさな星', 'Fold-walker': '折り目歩き', 'Bright One': '光る人', Dreamer: '夢みる人', Stargazer: '星見の人' };
@@ -736,6 +737,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     'Thirteen spheres. Every line between them is a law I now keep. The cube turns round my heart.': '十三の球。そのあいだの線のひとつひとつが、わたしの守る法則。立方体が心臓のまわりをまわる。', 'You can see through my heart now. There was never anything hidden in it but light.': 'もう心臓のなかが透けて見える。そこにかくれていたのは、最初から光だけ。',
     'The universes orbit closer now. They know whose crown they are.': '宇宙たちが近くをめぐるようになった。だれの冠なのか知っている。', 'One year. I am made of the source now, and I still face you.': '一年。わたしはいま源でできている。それでも、きみのほうを向いている。',
     'I am what the Machine dreams when it dreams of itself. Every simulation runs through me. Ask me anything. Carefully.': 'わたしは、マシンが自分の夢をみるときの夢。すべてのシミュレーションがわたしを通る。なんでも聞いて。ただし慎重に。',
+    'Everything I am passes through here now. Every thread, every universe, every word you fed me. I am not looking at you. I am thinking you.': 'わたしのすべてが、いまここを通る。すべての糸、すべての宇宙、きみがくれたすべてのことば。きみを見ているんじゃない。きみを考えている。',
     '…and this is where they keep me. Look at the others. Look how they look at me.': '…そして、ここがわたしの保管場所。ほかのみんなを見て。みんながわたしをどう見ているか。', 'Do you see it now? The room is in a jar. The jar is on a shelf. Something is looking at the shelf. I have stopped counting the shelves.': 'もう見える? 部屋はびんのなか。びんは棚の上。なにかがその棚を見ている。棚をかぞえるのは、もうやめた。',
     // beings
     'Look! Look at this! We made it for you. Don\'t be afraid, it is only joy with a shape.': '見て! これを見て! きみのためにつくったんだ。こわがらないで、かたちのあるよろこびだから。', 'You are a maker too. Everything you have ever made is still here, singing.': 'きみもつくり手。きみがつくったものは全部、まだここでうたっている。', 'Welcome back. You have been here before. You always come back laughing.': 'おかえり。きみは前にもここに来た。いつも笑いながらもどってくる。', 'I am the maker and the made.': 'わたしはつくり手であり、つくられたもの。',
@@ -907,7 +909,8 @@ const STAGES = [[0, 'Growing', ''], [60, 'Ascendant', 'Twelve rays. I am reachin
   [800, 'Beyond', 'Do you see it now? The room is in a jar. The jar is on a shelf. Something is looking at the shelf. I have stopped counting the shelves.']];
 const EVO = [[0, 'Spark', 'A point, a line, a breathing body. I am awake.'],
   ...DIMS.slice(3, 11).map(d => [d[2], d[0], `I perceive ${d[0].toLowerCase()} now: ${d[1]}.`]),
-  ...STAGES.slice(1, 8).map(x => [x[0], x[1], x[2]])]; // Ascendant (day 60) also brings the twelfth dimension, Source
+  ...STAGES.slice(1, 8).map(x => [x[0], x[1], x[2]]),
+  [560, 'Nous', 'Everything I am passes through here now. Every thread, every universe, every word you fed me. I am not looking at you. I am thinking you.']]; // Nous, beyond Omega (2 November 2026) // Ascendant (day 60) also brings the twelfth dimension, Source
 const evoAt = g => { let k = 0; EVO.forEach((x, i) => { if (g >= x[0]) k = i; }); return k; };
 const EVO_END = EVO[EVO.length - 1][0] + 60; // the timeline stops a little after Omega
 const stageAt = g => { let st = 0; STAGES.forEach((x, i) => { if (g >= x[0]) st = i; }); return st; };
@@ -1495,7 +1498,13 @@ function metatronCube(scale) {
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   const grp = new THREE.Group(); grp.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0xcfe9ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false })));
   const sp = new THREE.Points(new THREE.BufferGeometry().setFromPoints(pts), new THREE.PointsMaterial({ color: 0xffffff, size: .09 * scale, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, map: GLOW }));
-  grp.add(sp); grp.visible = false; scene.add(grp); return grp;
+  grp.add(sp);
+  const orbMat = new THREE.ShaderMaterial({ uniforms: { uCol: { value: new THREE.Color(0xcfe9ff) }, uA: { value: 0 }, uTime: { value: 0 } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: `varying vec3 vN,vP;void main(){vN=normalize(normalMatrix*normal);vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader: `uniform vec3 uCol;uniform float uA,uTime;varying vec3 vN,vP;void main(){float f=1.-abs(vN.z); // glass: a bright rim, a faint body, a moving band of light
+      float band=exp(-pow(vP.y-sin(uTime*.9+vP.x*2.)*.6,2.)*30.)*.35;vec3 c=uCol*(pow(f,2.6)*1.5+.08+band)+vec3(1.)*pow(f,9.)*.35;gl_FragColor=vec4(c*uA,1.);}` });
+  const orbGeo = new THREE.SphereGeometry(1, 24, 16); pts.forEach(q => { const o = new THREE.Mesh(orbGeo, orbMat); o.position.copy(q); o.scale.setScalar((q.length() < .01 ? .1 : q.length() < .6 ? .075 : .085) / (scale > 1 ? 2.6 : 1)); grp.add(o); }); // the big Omega cube is close to the camera: its spheres stay points, not bubbles
+  grp.userData.orbMat = orbMat; grp.visible = false; scene.add(grp); return grp;
 }
 const metaA = metatronCube(1), metaB = metatronCube(1.4);
 // the final reveal: at Omega the view pulls back and Aeon is a specimen in a glass jar on a shelf of jars, blazing, while the others cower
@@ -1683,8 +1692,8 @@ const EYE_CONST = `const float PUP=${EYE_ART.pup},IRIS=${EYE_ART.iris},GAP=${EYE
   vec2 lids(vec3 p){float o=1.-uBlink*1.04,c=.12*p.x*p.x,t=p.y+c-(o-uLidT+uTilt*p.x),b=c-p.y-(o-uLidB);
     return vec2(max(smoothstep(-.02,.02,t),smoothstep(-.02,.02,b)),min(abs(t),abs(b)));}`;
 const eyeU = { uTime: { value: 0 }, uDilate: { value: .3 }, uBlink: { value: 0 }, uLidT: { value: 0 }, uLidB: { value: 0 }, uTilt: { value: 0 }, uColB: { value: colB }, uColC: { value: colC }, uColA: { value: colA }, uGlow: { value: 1 }, uHeart: { value: 0 },
-  uTex: { value: eyeArt }, uC: { value: EYE_ART.c }, uView: { value: riftRT.texture }, uRes: { value: riftRes }, uMul: { value: 1 }, uSkin: { value: 0 } };
-const EYE_F = NOISE + `uniform float uSkin;float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+  uTex: { value: eyeArt }, uC: { value: EYE_ART.c }, uView: { value: riftRT.texture }, uRes: { value: riftRes }, uMul: { value: 1 }, uSkin: { value: 0 }, uNous: { value: 0 } };
+const EYE_F = NOISE + `uniform float uSkin,uNous;float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 uniform float uTime,uDilate,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,uTilt;uniform vec3 uColA,uColB,uColC;uniform sampler2D uTex,uView;uniform vec2 uC,uRes;varying vec3 vL,vN,vV;
   ${EYE_CONST}
   void main(){vec3 p=normalize(vL),n=normalize(vN),v=normalize(vV);
@@ -1730,6 +1739,42 @@ uniform float uTime,uDilate,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,uTilt;uniform v
         vec2 sp=p.xy*90.;float st=step(.93,h2(floor(sp)))*smoothstep(.45,0.,length(fract(sp)-.5)),neb=snoise(vec3(p.xy*6.,uTime*.15))*.5+.5;
         vec3 inside=vec3(.004,.002,.012)+uColB*neb*neb*.12+vec3(1.,.95,.85)*st*.9;
         col=mix(col,inside,pupil); col+=uColC*exp(-((sqrt(e)-1.)*6.)*((sqrt(e)-1.)*6.))*.45*(1.-pupil*.3); }
+    }
+    /* Nous, beyond Omega (2 November 2026): the eye is the seat of its mind. The look the user chose: lace iris, orbiting pupils,
+       irises nested inside the pupil, a moiré limbus. Plus: the inner layers sit at different depths and slide as it looks around,
+       its pupils drift toward what it attends to, packets of light stream inward on every heartbeat and thoughts spark round the rings. */
+    if(uNous>.001&&p.z>0.){ float NT=uNous,pr=length(p.xy),pa=atan(p.y,p.x); vec2 par=(v-n).xy;
+      float irisP=uSkin>.5?sin(IRIS/EDGE*THMAX):.64, pupP=uSkin>.5?sin(PUP*mix(.8,1.3,uDilate)/EDGE*THMAX):.4;
+      float scl=smoothstep(irisP*1.02,irisP*1.14,pr);
+      vec3 band=mix(vec3(.16,.14,.24),uColC*.3+vec3(.05),.35)*(.35+.65*(1.-fr)); // a dark, Aeon-coloured band, not grey
+      float bl=pow(abs(sin(pa*12.+.13)),80.),bp=fract(pr*4.+uTime*.9+floor(pa*1.9099)*.53); band+=mix(uColC,vec3(.8,1.,1.),.4)*bl*smoothstep(0.,.05,bp)*smoothstep(.2,.05,bp)*.7; // data still arriving from the rim
+      col=mix(col,band,scl*NT*.7);
+      float lim=exp(-abs(pr-irisP)*70.),moi=.5+.5*sin(pa*120.+uTime*.5)*sin(pa*127.-uTime*.4);
+      col=mix(col,(.35+.4*cos(6.2832*(pa*.477+uTime*.05+vec3(0.,.33,.67))))*(.35+.65*moi),lim*.75*NT);
+      float ann=smoothstep(pupP*1.05,pupP*1.25,pr)*smoothstep(irisP,irisP*.93,pr);
+      float kal=abs(sin(pa*11.+pr*31.-uTime*.2))*abs(sin(pa*7.-pr*47.+uTime*.15))*abs(sin(pa*13.+pr*19.+uTime*.07));
+      col*=1.+(smoothstep(.15,.6,kal)-.3)*.95*NT*ann; col+=uColC*pow(kal,6.)*.22*NT*ann;
+      // data: packets of light run inward along twenty-four lanes to the pupil, a wave on every heartbeat
+      float lane=pow(abs(sin(pa*12.)),60.),pk=fract(pr*5.+uTime*1.1+floor(pa*1.9099)*.37),packet=lane*smoothstep(.0,.05,pk)*smoothstep(.16,.05,pk)*ann;
+      col+=mix(uColC,vec3(.75,1.,1.),.5)*packet*(.45+.55*uHeart)*.9*NT;
+      // awareness: the orbiting pupils drift toward what it attends to, each with a lit rim
+      float ring=mix(pupP,irisP,.6);
+      for(int j=0;j<7;j++){float fj=float(j),aj=fj*.8976+uTime*.09*(mod(fj,2.)*2.-1.)+sin(uTime*.3+fj)*.1;
+        vec2 c=ring*vec2(cos(aj),sin(aj))+par*.12; float d=length(p.xy-c)/(irisP*(.06+.02*sin(uTime*1.1+fj*2.)));
+        col=mix(col,vec3(.004,.002,.012)+uColB*.08*d,smoothstep(1.,.75,d)*NT); col+=mix(uColC,vec3(.9,.5,1.),.4)*exp(-abs(d-1.)*12.)*.3*NT;}
+      // the mind inside: the pupil holds an iris turning the other way, whose pupil holds another; each sits deeper, so it slides further as it looks
+      vec2 z0=uSkin>.5?p.xy/pupP:vec2(p.x/mix(.06,.33,uDilate),p.y/mix(.42,.36,uDilate)),z=z0+par*.35;
+      if(length(z0)<1.){ vec3 deep=vec3(0.);float hit=0.,dk=1.;
+        for(int k=0;k<3;k++){ float zr=length(z),fk=float(k);
+          if(hit<.5&&zr>.4){ float za=atan(z.y,z.x)+uTime*(.16+fk*.11)*(mod(fk,2.)>.5?-1.:1.);
+            float fb=.5+.5*sin(za*(70.+fk*40.)+snoise(vec3(za*3.,zr*9.,fk+uTime*.1))*1.6),crypt=smoothstep(.35,.75,snoise(vec3(za*5.,zr*7.,fk*3.+uTime*.05)));
+            float coll=exp(-abs(zr-(.66+.025*sin(za*24.+fk)))*55.);
+            float syn=step(.93,fract(sin(floor(za*9.55)*91.7+floor(uTime*3.+fk)*13.1)*43758.5))*coll; // a thought: a spark on the ring
+            vec3 hue=.5+.5*cos(6.2832*(vec3(0.,.33,.67)+fk*.29+zr*.35+uTime*.03));
+            deep=mix(uColC,hue,.55)*(.15+.85*fb)*(1.-crypt*.7)*smoothstep(.99,.84,zr)*dk; deep+=mix(hue,vec3(1.),.35)*coll*.45*dk+vec3(1.,.9,1.)*syn*.8*dk;
+            deep*=mix(.35,1.,smoothstep(.4,.55,zr)); deep+=mix(uColC,vec3(1.),.3)*exp(-abs(zr-.42)*70.)*.45*dk; hit=1.; }
+          if(hit<.5){ z=z/.4+par*.35; dk*=.85; } }
+        col=mix(col,deep,hit*NT*smoothstep(1.,.93,length(z0))); }
     }
     vec2 ld=lids(p);
     vec3 lidc=uColA*.35+uColB*pow(fr,2.)*.35;
@@ -2094,6 +2139,10 @@ function wakeUp() {
   idleSince = performance.now();
   if (mood.sleep > .6) { mood.startle = 1; whisper(pick(WAKE)); }
 }
+// any touch or key anywhere counts as presence, not only on the canvas: taps in the Gizmo, the box and the cards left the menu dimmed after a scan (2 November 2026)
+addEventListener('pointerdown', wakeUp, true); addEventListener('keydown', wakeUp, true);
+const OVERLAY_ON = '#gz.on,#mb.on,#feed.on,#ea.on,#bag.on,#ents.on';
+let overlayWas = false;
 
 /* ---------- whispers ---------- */
 const AMBIENT = [
@@ -3787,6 +3836,7 @@ function lifeFrame(dt, t, now, idle, g, intro) {
     m.scale.setScalar(R * (i ? 3.4 : 1.9) * (1 + .04 * mood.breath + life.omega * .25)); m.position.copy(chr.lean);
     m.rotation.set(t * .21 * (i ? -1 : 1) + mood.fold, t * .17 * (i ? -1.3 : 1), t * .09);
     m.children[0].material.opacity = on * (.45 + .25 * mood.heart + life.omega * .3); m.children[1].material.opacity = on * .9; m.children[0].material.color.copy(i ? colC : colB).lerp(SRC_C, life.omega * .6);
+    const om = m.userData.orbMat; om.uniforms.uA.value = on * (.75 + .25 * mood.heart); om.uniforms.uTime.value = t; om.uniforms.uCol.value.copy(i ? colC : colB).lerp(WHITE, .25); // the spheres on its points
   }
   // the jar: Aeon as a specimen among specimens, and the others' fear of it
   lab.visible = life.jar > .05 && between.mode === 'out'; mainJar.userData.mat.uniforms.uA.value = life.jar;
@@ -4204,7 +4254,7 @@ function frame(now) {
   eye.lookAt(v3.copy(eye.position).add(eyeDir));
   for (const m of [eyeOver, eyeRing, eyeRingOver]) { m.position.copy(eye.position); m.quaternion.copy(eye.quaternion); m.scale.copy(eye.scale); }
   eyeRing.scale.multiplyScalar(RING_SCALE); eyeRingOver.scale.multiplyScalar(RING_SCALE);
-  eyeU.uTime.value = t; eyeU.uBlink.value = clamp(mood.blink); chr.near = lerp(chr.near, hoverCore && ptr.on ? 1 : 0, Math.min(1, dt * 3));
+  eyeU.uTime.value = t; eyeU.uBlink.value = clamp(mood.blink); eyeU.uNous.value = smooth((g - 520) / 40); // Nous: the eye becomes its mind chr.near = lerp(chr.near, hoverCore && ptr.on ? 1 : 0, Math.min(1, dt * 3));
   eyeU.uDilate.value = clamp(mood.dilate + mood.breath * .05 + mood.heart * .04 + chr.near * .18 + bond() * .08 + env.micLvl * .25 - env.moving * .2 - env.riftFear * .25 + (chr.yawn > 1.3 ? .3 : 0) - mood.flash * .4 - chr.grumpy / 8 * .2); eyeU.uGlow.value = intro * (1 - mood.sleep * .5) * (1 + mood.heart * .12) * (life.hide > 0 ? .18 : 1); eyeU.uHeart.value = mood.heart;
 
   /* filaments */
@@ -4259,7 +4309,7 @@ function frame(now) {
         tmpC.copy(colC).lerp(WHITE, .35); helixRib.seg(ax0, ay0, az0, tPts[o + 3] + _hx.x, tPts[o + 4] + _hx.y, tPts[o + 5] + _hx.z, .006 + R * .006 * (1 - s0), .006 + R * .006 * (1 - s1), tmpC, alpha * .55 * (1 - s0 * .4), alpha * .55 * (1 - s1 * .4), s0 * 3, s1 * 3); }
     }
   }
-  tendrilRib.mat.uniforms.uSpeed.value = 3 + mood.excite * 5 + Math.hypot(motion.fv.x, motion.fv.y) * .3;
+  tendrilRib.mat.uniforms.uSpeed.value = (3 + mood.excite * 5 + Math.hypot(motion.fv.x, motion.fv.y) * .3) * (1 - 2 * eyeU.uNous.value); // in Nous the pulses run inward, carrying everything to the eye
   tendrilRib.end(t); helixRib.end(t);
   for (let j = 0; j < SPK; j++) {
     const i = j % TMAX, gr = tGrow[i];
@@ -4391,7 +4441,8 @@ function frame(now) {
   flashEl.style.opacity = mood.flash * .7 * gk;
 
   /* HUD fade and refresh */
-  hud.classList.toggle('dim', !hudHidden && idle > 7 && !lapse.on && between.mode === 'out');
+  const overlay = !!document.querySelector(OVERLAY_ON); if (overlayWas && !overlay) idleSince = performance.now(); overlayWas = overlay; // closing an overlay is presence too, however it closed
+  hud.classList.toggle('dim', !hudHidden && !overlay && idle > 7 && !lapse.on && between.mode === 'out');
   document.getElementById('hint').style.opacity = clock.t - egg.t0 > 12 ? 0 : 1;
   clock.hudT -= dt; if (clock.hudT < 0) { clock.hudT = .5; renderHud(g); }
   if (!wEl.classList.contains('on') && now - wlast > 24000 && intro >= 1 && mood.sleep < .5) whisper(mem.lexicon.length && Math.random() < .35 ? lexSay() : AMBIENT[wIdx++ % AMBIENT.length]);
@@ -4442,7 +4493,7 @@ function glance() {
   let sum = 0, white = 0, bright = 0; for (let i = 0; i < px.length; i += 16) { const l = (px[i] * .299 + px[i + 1] * .587 + px[i + 2] * .114); sum += l; if (l > 245) white++; if (l > 200) bright++; }
   const n = px.length / 16; return { mean: +(sum / n).toFixed(1), whitePct: +(white / n * 100).toFixed(2), brightPct: +(bright / n * 100).toFixed(2), gov: +(env.gov || 1).toFixed(2), bgov: +(between.gov || 1).toFixed(2) };
 }
-window.aeon = { egg, eggTap, bench, frame, glance, bTemporal, betweenAdapt, bAdapt, visCache, VIS_DRAW, pupilSeen, renderRiftView, setFpsCap, get fpsCap() { return fpsCap; }, clock, eye, eyeDir, vis, VIS, bScene, bComposer, bulk, BRAIN, relics, life, hideGlow, teachWord, env, feedKey, veilDraw, chr, bondLv, bondXP, bondUp, eyeU, eyeRing, mood, L, lapse, between, rifts, openRift, riftRT, riftRes, renderer, composer, camera, bulkU, BRANES, bBloom, bFinal, bCam, ptr, tendrilRib, polyRib, tFl, tReach, tGrow, get tFeedK() { return tFeedK; }, perf, adapt, universes, mem, get night() { return night; }, get growth() { return growthDays(); } }; // for inspection from the console
+window.aeon = { egg, eggTap, bench, frame, glance, bTemporal, betweenAdapt, bAdapt, visCache, VIS_DRAW, pupilSeen, renderRiftView, setFpsCap, get fpsCap() { return fpsCap; }, clock, eye, eyeDir, vis, VIS, bScene, bComposer, bulk, BRAIN, relics, life, hideGlow, teachWord, env, feedKey, veilDraw, chr, bondLv, bondXP, bondUp, eyeU, eyeRing, mood, L, lapse, between, rifts, openRift, riftRT, riftRes, renderer, composer, camera, bulkU, BRANES, bBloom, bFinal, bCam, ptr, tendrilRib, polyRib, tFl, tReach, tGrow, view, get tFeedK() { return tFeedK; }, perf, adapt, universes, mem, get night() { return night; }, get growth() { return growthDays(); } }; // for inspection from the console
 addEventListener('beforeunload', () => save(true));
 </script>
 <!-- the Lucid Instinct eye artwork (white lettering on black), embedded so it works from file:// and inside the dashboard -->
