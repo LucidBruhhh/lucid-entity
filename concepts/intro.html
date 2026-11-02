@@ -73,13 +73,18 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 <div class="hud" id="hud">shapes found <b id="cnt">00</b> / 16<br>lines 78 · circles 13<br>metatron's cube</div>
 <div class="code" id="code"></div>
 <div class="say" id="say"></div>
-<div class="prompt" id="prompt"><b id="pr1">touch the cube</b><span id="pr2">drag it · feel it</span></div>
+<div class="prompt" id="prompt"><b id="pr1">hold the centre</b><span id="pr2">or spin it fast</span></div>
 <div class="tapcue" id="tapcue">tap the egg</div>
 <div class="final"><div class="logo">AEON</div><div class="sub">SCANNER GIZMO</div><a href="../" id="enter">enter</a></div>
 <div class="scan"></div><div class="vig"></div>
 <div class="flash" id="flash"></div>
 <script>
 /* AEON intro, after the "Count the Shapes" reel: a challenge, a drop, a shape on every beat, a twist, and a 17th shape, the egg. */
+// once per device (2 November 2026): new visitors are sent here first by the game; the QR and UTM parameters ride along to the game; ?replay=1 is the game's replay button
+const IQ = new URLSearchParams(location.search), REPLAY = IQ.has("replay"); IQ.delete("replay"); IQ.delete("theme");
+const PASS = IQ.toString(), GAME_URL = "../?" + (REPLAY ? "egg=1&" : "") + "from=intro" + (PASS ? "&" + PASS : ""); // no egg=1 for a first hatch: that mode does not save it
+const markSeen = () => { try { localStorage.setItem("gizmo.intro", "seen"); } catch {} };
+try { if (!REPLAY && localStorage.getItem("gizmo.intro") === "seen") location.replace("../" + (PASS ? "?" + PASS : "")); } catch {}
 
 /* ---------- colour themes: structure (the cube), energy (charge, sparks, highlights, interface), rain (the glyphs) ---------- */
 const THEMES = {
@@ -162,8 +167,8 @@ function found(item, kind) { S.found++; S.cur = { ...item, kind, col: COLS[(S.fo
   if (kind === 'solid') { S.shake = 1; osc(55, .6, 'sine', .5, 0, .5); noise(.4, .15, 0, 900, 200); } }
 // the beat drives the count
 let plan = [], gameFrame = null, gameReady = false;
-function preloadGame() { if (gameFrame) return; gameFrame = document.createElement('iframe'); gameFrame.id = 'game'; gameFrame.allow = 'camera; autoplay; fullscreen; clipboard-write; web-share'; gameFrame.src = '../?egg=1&from=intro'; gameFrame.onload = () => setTimeout(() => gameReady = true, 600); body.appendChild(gameFrame); }
-function handoff() { S.phase = 'handoff'; groove = 0; flash(1, 1200); body.classList.add('handoff'); osc(55, 2.4, 'sine', .6, 0, .5); buzz([40, 60, 160]); try { gameFrame.focus(); } catch {} }
+function preloadGame() { if (gameFrame) return; gameFrame = document.createElement('iframe'); gameFrame.id = 'game'; gameFrame.allow = 'camera; autoplay; fullscreen; clipboard-write; web-share'; gameFrame.src = GAME_URL; gameFrame.onload = () => setTimeout(() => gameReady = true, 600); body.appendChild(gameFrame); }
+function handoff() { markSeen(); try { history.replaceState(null, "", location.pathname); } catch {} S.phase = 'handoff'; groove = 0; flash(1, 1200); body.classList.add('handoff'); osc(55, 2.4, 'sine', .6, 0, .5); buzz([40, 60, 160]); try { gameFrame.focus(); } catch {} }
 function buildPlan() { plan = []; FLAT.forEach(f => plan.push(['flat', f])); plan.push(['look'], ['look2']); SOLIDS.forEach(s => plan.push(['solid', s], ['hold'])); plan.push(['fruit'], ['hold'], ['ask'], ['hold'], ['twist'], ['implode']); }
 function onBeat(b, at) { setTimeout(() => { if (S.phase !== 'count') return; const step = plan.shift(); if (!step) return; const [k, item] = step;
   if (k === 'flat') found(item, 'flat');
@@ -181,7 +186,7 @@ function onBeat(b, at) { setTimeout(() => { if (S.phase !== 'count') return; con
 function startCount() { if (S.phase !== 'ask') return; audio(); S.phase = 'riser'; body.classList.remove('asking'); buzz(20);
   noise(1.1, .35, 0, 300, 9000); osc(110, 1.1, 'sawtooth', .06, 0, 4);
   setTimeout(() => { flash(.9, 700); osc(55, 1, 'sine', .9, 0, .4); noise(.6, .3, 0, 2000); S.phase = 'count'; body.classList.add('counting'); buildPlan(); groove = 2; nextBeat = performance.now() / 1000 + .05; beatNo = 0; }, 1100); }
-$('skip').onclick = e => { e.stopPropagation(); location.href = '../'; };
+$('skip').onclick = e => { e.stopPropagation(); markSeen(); location.href = GAME_URL; };
 $('replay').onclick = e => { e.stopPropagation(); location.reload(); }; // while developing: watch it again from the top
 
 // the egg: tap it three times
@@ -222,7 +227,7 @@ function holoGlitch(t) { if (Math.random() < .045) { const n = 1 + (Math.random(
    so dragging turns it like a crystal; nodes chime under your finger; holding the centre fills the cube with energy until it wakes */
 const Z3 = [0, .55, -.55, .55, -.55, .55, -.55, -.32, .32, -.32, .32, -.32, .32];
 const LDIST = LINES.map(([a, b]) => Math.min(Math.hypot(...PTS[a]), Math.hypot(...PTS[b]))); // how far from the centre each line starts
-const C = { rx: 0, ry: 0, vx: 0, vy: 0, down: false, hold: false, charge: 0, touched: false, lx: 0, ly: 0, sx: 0, sy: 0, moved: 0, near: -1, flash: new Array(13).fill(0), chimeT: new Array(13).fill(-9), buzzT: 0, hum: null, proj: [] };
+const C = { rx: 0, ry: 0, vx: 0, vy: 0, down: false, hold: false, charge: 0, spinE: 0, spun: false, spinDir: 1, touched: false, lx: 0, ly: 0, sx: 0, sy: 0, moved: 0, near: -1, flash: new Array(13).fill(0), chimeT: new Array(13).fill(-9), buzzT: 0, hum: null, proj: [] };
 function project() { const cx = Math.cos(C.rx), sx = Math.sin(C.rx), cy = Math.cos(C.ry), sy = Math.sin(C.ry);
   C.proj = PTS.map(([px, py], i) => { const pz = Z3[i]; const x1 = px * cy + pz * sy, z1 = -px * sy + pz * cy; const y2 = py * cx - z1 * sx, z2 = py * sx + z1 * cx; const f = 3.2 / (3.2 - z2); return [CX + x1 * R * f, CY + y2 * R * f, z2, f]; }); return C.proj; }
 function humStart() { const a = audio(); if (!a || C.hum) return; const o = a.createOscillator(), o2 = a.createOscillator(), f = a.createBiquadFilter(), g = a.createGain(); o.type = 'sawtooth'; o2.type = 'sine'; f.type = 'lowpass'; f.frequency.value = 300; g.gain.value = 0; o.connect(f); o2.connect(f); f.connect(g).connect(out()); o.start(); o2.start(); C.hum = { o, o2, f, g }; }
@@ -233,23 +238,29 @@ function askTilt() { if (TILT.asked) return; TILT.asked = true; const go = () =>
   try { if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) DeviceOrientationEvent.requestPermission().then(r => r === 'granted' && go()).catch(() => {}); else go(); } catch {} }
 const RIPPLES_ = RIPPLES;
 function cubeDown(e) { RIPPLES.push({ x: e.clientX, y: e.clientY, t: S.t }); askTilt(); C.down = true; C.touched = true; C.sx = C.lx = e.clientX; C.sy = C.ly = e.clientY; C.moved = 0;
-  if (Math.hypot(e.clientX - CX, e.clientY - CY) < R * .3) { C.hold = true; body.classList.add('charging'); humStart(); osc(110, .5, 'sine', .3, 0, 1.5); buzz(15); }
+  if (Math.hypot(e.clientX - CX, e.clientY - CY) < R * .5) { C.hold = true; body.classList.add('charging'); humStart(); osc(110, .5, 'sine', .3, 0, 1.5); buzz(15); }
   promptFor(); }
 addEventListener('pointermove', e => { if (S.phase !== 'ask' || !C.down) return; const dx = e.clientX - C.lx, dy = e.clientY - C.ly; C.lx = e.clientX; C.ly = e.clientY; C.moved += Math.hypot(dx, dy);
   if (C.hold && C.moved > 26) { C.hold = false; body.classList.remove('charging'); } // a drag is a spin, not a hold
   if (!C.hold) { C.vy += dx * .0045; C.vx += dy * .0045; }
   C.proj.forEach(([px, py], i) => { if (Math.hypot(px - e.clientX, py - e.clientY) < 26 && S.t - C.chimeT[i] > .22) { C.chimeT[i] = S.t; C.flash[i] = 1; osc(PENT[(i * 3) % PENT.length], .9, 'sine', .09); osc(PENT[(i * 3) % PENT.length] * 2, .5, 'triangle', .025); buzz(6); } }); });
 addEventListener('pointerup', () => { if (!C.down) return; C.down = false; if (C.hold) { C.hold = false; body.classList.remove('charging'); if (C.charge > .08 && C.charge < 1) osc(220 * (1 + C.charge), .7, 'sine', .08, 0, .35); } promptFor(); });
-function promptFor() { const a = $('pr1'), b = $('pr2'); if (!C.touched) { a.textContent = 'touch the cube'; b.textContent = 'drag it · feel it'; } else if (C.hold) { a.textContent = 'keep holding'; b.textContent = 'it is waking up'; } else { a.textContent = 'hold the centre'; b.textContent = 'wake it'; } }
+function promptFor() { const a = $('pr1'), b = $('pr2'); if (C.spun) return; if (!C.touched) { a.textContent = 'hold the centre'; b.textContent = 'or spin it fast'; } else if (C.hold) { a.textContent = 'keep holding'; b.textContent = 'it is waking up'; } else if (C.spinE > .2) { a.textContent = 'keep spinning'; b.textContent = 'faster'; } else { a.textContent = 'hold the centre'; b.textContent = 'or spin it fast · wake it'; } }
 function holoCube(t, dt) {
   // physics: spin with inertia, then spring home; the charge fills while you hold the centre and drains when you let go
   C.ry += C.vy; C.rx += C.vx; C.vx *= .93; C.vy *= .93; if (!C.down) { C.ry = Math.atan2(Math.sin(C.ry), Math.cos(C.ry)); if (Math.abs(C.vy) < .02) { C.rx *= .965; C.ry *= .965; } } // after a flick it coasts, then settles home the short way C.rx = Math.max(-1.1, Math.min(1.1, C.rx));
-  if (C.hold) { C.charge = Math.min(1, C.charge + dt / 1.7); C.rx *= .9; C.ry *= .9; } else C.charge = Math.max(0, C.charge - dt * 1.1);
+  if (C.hold) { C.charge = Math.min(1, C.charge + dt / 1.7); C.rx *= .9; C.ry *= .9; } else C.charge = Math.max(0, C.charge - dt * .45);
   humSet(C.charge); if (!C.hold && C.charge <= 0) humStop();
+  // the other way in: spin it fast enough and it wakes by itself (a rotor sweep instead of the fill from the centre)
+  const spinning = Math.abs(C.vy) + Math.abs(C.vx);
+  if (!C.spun) C.spinE = spinning > .012 ? Math.min(1, C.spinE + spinning * dt * 3.2) : Math.max(0, C.spinE - dt * .25);
+  if (C.spinE >= 1 && !C.spun && S.phase === 'ask') { C.spun = true; C.spinDir = Math.sign(C.vy) || 1; humStop(); C.hold = false; C.down = false; body.classList.remove('charging'); $('pr1').textContent = 'it is awake'; $('pr2').textContent = 'hold on';
+    osc(220, .95, 'sawtooth', .08, 0, 4); noise(.9, .3, 0, 400, 9000); buzz([20, 30, 60]); setTimeout(() => { if (S.phase === 'ask') startCount(); }, 950); }
+  if (C.spun) { C.vy = C.spinDir * .34; C.vx *= .8; C.rx *= .9; }
   if (C.hold && S.t - C.buzzT > .26 - C.charge * .2) { C.buzzT = S.t; buzz(6 + C.charge * 22); osc(70 + C.charge * 40, .12, 'sine', .25); }
   if (C.charge >= 1 && S.phase === 'ask') { humStop(); C.rx = C.ry = 0; C.hold = false; C.down = false; body.classList.remove('charging'); startCount(); return; }
   C.rx += (TILT.x * .35 - C.rx) * (C.down ? 0 : .04); C.ry += (TILT.y * .45 - C.ry) * (C.down || Math.abs(C.vy) > .02 ? 0 : .04); // tilt, when the phone allows it
-  const pr = project(), ch = C.charge, front = ch * 1.25, idle = C.touched ? 0 : 1;
+  const pr = project(), ch = C.charge, front = ch * 1.25, idle = C.touched ? 0 : 1, se = C.spinE, sweep = t * (4 + se * 10);
   x.save(); x.globalCompositeOperation = 'lighter'; x.lineCap = 'round';
   // the 13 spheres, seen at an angle
   for (let i = 0; i < 13; i++) { const [px, py, z, f] = pr[i]; const lit = front > Math.hypot(...PTS[i]) ? 1 : 0, rgb = lit ? TH.e : TH.m, al = .14 + .12 * (z + 1) / 2 + lit * .3;
@@ -258,10 +269,11 @@ function holoCube(t, dt) {
     x.setLineDash([6, 22]); x.lineDashOffset = -(t * (30 + ch * 120) + i * 9) * (i % 2 ? 1 : -1); x.lineWidth = 1.8; x.strokeStyle = `rgba(${TH.el},${al * 1.6})`; x.stroke(); x.setLineDash([]); }
   // a halo of glyphs encircling the whole cube, lit where the charge has reached
   { const hr = R * 1.36, n = 48; x.font = '12px "JetBrains Mono", monospace'; x.textAlign = 'center'; x.textBaseline = 'middle';
-    for (let i = 0; i < n; i++) { const a = i / n * 6.283 + t * .08, gx = CX + Math.cos(a) * hr * Math.cos(C.ry * .5), gy = CY + Math.sin(a) * hr * Math.cos(C.rx * .5), lit = ch > (i / n) ? 1 : 0; x.fillStyle = `rgba(${lit ? TH.e : TH.m},${.18 + .2 * Math.max(0, Math.sin(t * 2 + i * .6)) + lit * .5})`; x.fillText(RUNE[(i * 5) % RUNE.length], gx, gy); } }
+    for (let i = 0; i < n; i++) { const a = i / n * 6.283 + t * .08, gx = CX + Math.cos(a) * hr * Math.cos(C.ry * .5), gy = CY + Math.sin(a) * hr * Math.cos(C.rx * .5), lit = Math.max(ch, se) > (i / n) ? 1 : 0; x.fillStyle = `rgba(${lit ? TH.e : TH.m},${.18 + .2 * Math.max(0, Math.sin(t * 2 + i * .6)) + lit * .5})`; x.fillText(RUNE[(i * 5) % RUNE.length], gx, gy); } }
   // the 78 lines: depth-shaded, lit by the charge front, with sparks racing along the lit ones
-  for (let i = 0; i < LINES.length; i++) { const [a, b] = LINES[i], A = pr[a], B = pr[b], dep = ((A[2] + B[2]) / 2 + 1) / 2, lit = Math.max(0, Math.min(1, (front - LDIST[i]) * 4));
+  for (let i = 0; i < LINES.length; i++) { const [a, b] = LINES[i], A = pr[a], B = pr[b], dep = ((A[2] + B[2]) / 2 + 1) / 2; let lit = Math.max(0, Math.min(1, (front - LDIST[i]) * 4));
     const wave = idle * Math.max(0, Math.sin(t * 1.4 - LDIST[i] * 5)) ** 6;
+    if (se > 0) { const ang = Math.atan2((A[1] + B[1]) / 2 - CY, (A[0] + B[0]) / 2 - CX), dA = Math.abs(Math.atan2(Math.sin(ang - sweep), Math.cos(ang - sweep))); lit = Math.max(lit, se * Math.max(0, 1 - dA / (.4 + se * 2.4))); } // the spin: a lit wedge sweeps round, widening until the whole cube burns
     plasma(A[0], A[1], B[0], B[1], i, t * (1 + ch * 1.5), lit > .3 ? TH.e : TH.m, .45 + .55 * dep + lit * 1.3 + wave * .8, .3 + lit * 1.4 + wave);
     if (lit > .5 || wave > .4) { const k = (t * (1.2 + ch * 2.5) + i * .37) % 1; x.fillStyle = `rgba(${TH.el},${.8 * Math.max(lit, wave)})`; x.beginPath(); x.arc(A[0] + (B[0] - A[0]) * k, A[1] + (B[1] - A[1]) * k, 1.6 + lit, 0, 7); x.fill(); } }
   // nodes: orbs that chime, flare and grow with the charge
@@ -270,12 +282,13 @@ function holoCube(t, dt) {
     x.fillStyle = TH.core; x.beginPath(); x.arc(px, py, r * .6, 0, 7); x.fill(); }
   // the centre: a pulsing target until touched, then the charge ring
   const [cx0, cy0] = pr[0], pulse = .5 + .5 * Math.sin(t * 3.4);
-  if (C.touched && !C.hold && ch < .02) { x.strokeStyle = `rgba(${TH.el},${.35 + .4 * pulse})`; x.lineWidth = 2; x.beginPath(); x.arc(cx0, cy0, R * (.2 + .04 * pulse), 0, 7); x.stroke(); }
+  if (!C.hold && ch < .02 && !C.spun) { x.strokeStyle = `rgba(${TH.el},${.35 + .4 * pulse})`; x.lineWidth = 2; x.beginPath(); x.arc(cx0, cy0, R * (.2 + .04 * pulse), 0, 7); x.stroke();
+    x.setLineDash([3, 9]); x.lineWidth = 1; x.strokeStyle = `rgba(${TH.el},${.2 + .18 * pulse})`; x.beginPath(); x.arc(cx0, cy0, R * .5, 0, 7); x.stroke(); x.setLineDash([]); } // the hold zone is shown from the first frame, not discovered
   if (ch > 0) { x.strokeStyle = `rgba(${TH.e},.25)`; x.lineWidth = 4; x.beginPath(); x.arc(cx0, cy0, R * .22, 0, 7); x.stroke(); x.strokeStyle = TH.core; x.shadowColor = TH.eh; x.shadowBlur = 18; x.lineWidth = 4; x.beginPath(); x.arc(cx0, cy0, R * .22, -Math.PI / 2, -Math.PI / 2 + ch * 6.283); x.stroke(); x.shadowBlur = 0;
     const cg = x.createRadialGradient(cx0, cy0, 0, cx0, cy0, R * (.3 + ch * .9)); cg.addColorStop(0, `rgba(${TH.el},${ch * .45})`); cg.addColorStop(1, `rgba(${TH.e},0)`); x.fillStyle = cg; x.beginPath(); x.arc(cx0, cy0, R * (.3 + ch * .9), 0, 7); x.fill(); }
   x.restore();
   x.save(); x.globalCompositeOperation = 'lighter'; for (let i = RIPPLES.length - 1; i >= 0; i--) { const r = RIPPLES[i], k = (S.t - r.t) / .9; if (k >= 1) { RIPPLES.splice(i, 1); continue; } for (const [w, a] of [[6, .12], [1.4, .7]]) { x.lineWidth = w; x.strokeStyle = `rgba(${TH.el},${a * (1 - k)})`; x.beginPath(); x.arc(r.x, r.y, 8 + k * 90, 0, 7); x.stroke(); } } x.restore();
-  S.shake = Math.max(S.shake, ch * ch * .5); S.punch = Math.max(S.punch, ch * .25);
+  S.shake = Math.max(S.shake, ch * ch * .5, se * se * .45); S.punch = Math.max(S.punch, ch * .25, C.spun ? .4 : 0);
 }
 const STARS = [...Array(170)].map(() => ({ x: Math.random(), y: Math.random(), z: .2 + Math.random() * .8, tw: Math.random() * 9 }));
 function smoke(t) { x.save(); x.globalCompositeOperation = 'lighter';
@@ -344,7 +357,7 @@ function draw(t, dt) {
     x.lineWidth = 1; for (let i = 0; i < LINES.length; i++) { const [a, b] = LINES[i]; const [ax, ay] = P(a), [bx, by] = P(b); x.strokeStyle = `rgba(${TH.m},${1 - e * .5})`; x.beginPath(); x.moveTo(ax + (CX - ax) * e, ay + (CY - ay) * e); x.lineTo(bx + (CX - bx) * e, by + (CY - by) * e); x.stroke(); }
     const pr = (3 + e * 10) * (k >= 1 ? 1 + .35 * Math.max(0, Math.sin(t * 7.3)) ** 6 : 1); x.fillStyle = '#fff'; x.shadowColor = TH.eh; x.shadowBlur = 30; x.beginPath(); x.arc(CX, CY, pr, 0, 7); x.fill(); x.shadowBlur = 0;
     if (k >= 1 && gameReady) { handoff(); }
-    else if (k >= 1 && t - S.collapseT > 12) { location.href = '../?egg=1&from=intro'; } // the game was slow: go to it directly
+    else if (k >= 1 && t - S.collapseT > 12) { markSeen(); location.href = GAME_URL; } // the game was slow: go to it directly
     else if (false) { S.phase = 'egg'; S.eggT = t; flash(.5, 500); decode($('q1'), 'SHAPE 17'); decode($('q2'), 'UNKNOWN', 500); setColour(TH.eh); say(''); $('tapcue').classList.add('on'); osc(55, 2, 'sine', .5); } }
   else if (S.phase === 'egg' || S.phase === 'open') {
     const grow = Math.min(1, (t - S.eggT) / .8), hb = Math.max(0, Math.sin(t * 7.3)) ** 8, cr = S.taps;
