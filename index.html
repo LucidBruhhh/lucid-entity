@@ -519,7 +519,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     </div>
   </div>
   <div class="hint" id="hint">move · click · hold · drag</div>
-  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.12</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
+  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.13</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
   <button class="morePill" id="dMore" title="More: sound, timeline, listen, veil, frame rate, stats" aria-label="More settings">&#8943;</button>
   <button class="sharePill" id="sharePill" title="Share Aeon with a friend">&#8599; share</button>
   <div class="eaNote">early access demo · limited features</div>
@@ -569,6 +569,296 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 </div>
 <div class="err" id="err">Aeon needs WebGL and an internet connection to load Three.js.<br>Open this page in a current desktop browser.</div>
 
+<script id="aeon-events">
+/* ---------- play-event log (2 November 2026, schema 1) ----------
+   Every event is kept whole in a local queue on this device. NOTHING is sent anywhere until AEON_EVENTS_URL is set
+   (planned: the Lucid Partners endpoint, see 83 Lucid Entity App/09 Analytics). When it is set, the queue (including
+   everything recorded before) is sent in batches, so new analytics later can be computed back to the day logging began.
+   On first run it also backfills this player's history from the save, back to the hatch ("conception"), marked backfill.
+   Never logged: words fed, the pet's name, emails, IP, location, advertising IDs. Channel: alpha (web demo, pre-launch). */
+(() => {
+  const AEON_EVENTS_URL = ''; // empty = keep locally only
+  const CHANNEL = 'alpha', QKEY = 'gizmo.events', IKEY = 'gizmo.install', BKEY = 'gizmo.backfilled', CAP = 3000;
+  const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'x'.repeat(32).replace(/x/g, () => (Math.random() * 16 | 0).toString(16)));
+  const get = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch { return d; } };
+  const put = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+  let install = get(IKEY, null); if (!install) { install = uuid(); put(IKEY, install); }
+  const session = uuid(); let seq = 0;
+  let q = []; try { q = JSON.parse(get(QKEY, '[]')) || []; } catch { q = []; }
+  const p = new URLSearchParams(location.search), src = {}; for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 's', 'p', 'item', 'feed']) if (p.get(k)) src[k] = p.get(k).slice(0, 80);
+  const build = () => (document.querySelector('.eaVer')?.textContent || '').trim() || 'alpha';
+  const ctx = () => ({ lang: document.documentElement.lang || 'en', screen: Math.min(innerWidth, innerHeight) < 600 ? 'phone' : Math.min(innerWidth, innerHeight) < 1000 ? 'tablet' : 'desktop', dpr: Math.round((devicePixelRatio || 1) * 4) / 4, standalone: matchMedia('(display-mode: standalone)').matches, reduced_motion: matchMedia('(prefers-reduced-motion: reduce)').matches, tz: Intl.DateTimeFormat().resolvedOptions().timeZone || '' });
+  const iso = ms => { const d = new Date(ms), o = -d.getTimezoneOffset(), s = o >= 0 ? '+' : '-', a = Math.abs(o); return new Date(ms + o * 60000).toISOString().slice(0, -1) + s + String(a / 60 | 0).padStart(2, '0') + ':' + String(a % 60).padStart(2, '0'); };
+  function save() { if (q.length > CAP) q = q.slice(-CAP); put(QKEY, JSON.stringify(q)); }
+  function ev(name, props = {}, at = Date.now(), backfill = false) {
+    try { q.push({ schema: 1, id: uuid(), name: String(name).slice(0, 60), at: iso(at), channel: CHANNEL, build: build(), platform: 'web', install, session, seq: seq++, src, ctx: ctx(), props, backfill }); save(); if (AEON_EVENTS_URL && q.length >= 20) flush(); } catch {}
+  }
+  function flush(useBeacon) {
+    if (!AEON_EVENTS_URL || !q.length) return; const batch = q.slice(0, 50), body = JSON.stringify({ events: batch });
+    if (useBeacon && navigator.sendBeacon) { if (navigator.sendBeacon(AEON_EVENTS_URL, new Blob([body], { type: 'application/json' }))) { q = q.slice(batch.length); save(); } return; }
+    fetch(AEON_EVENTS_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body, keepalive: true }).then(r => { if (r.ok) { const ids = new Set(batch.map(e => e.id)); q = q.filter(e => !ids.has(e.id)); save(); if (q.length) setTimeout(flush, 1500); } }).catch(() => {});
+  }
+  // backfill once from the save: the player's history back to the hatch
+  function backfill() {
+    if (get(BKEY, '')) return; let mem = null; try { mem = JSON.parse(localStorage.getItem('scanner-gizmo-v1') || 'null'); } catch {}
+    put(BKEY, new Date().toISOString()); if (!mem) return; let n = 0; const B = (name, props, at) => { if (at && isFinite(at)) { ev(name, props, at, true); n++; } };
+    B('first_open', {}, mem.first); if (mem.hatched) B('hatch', { recovered: true }, mem.born || mem.first);
+    (mem.fed || []).forEach(f => { const scan = String(f.sticker || '').startsWith('scan:'); B(scan ? 'fed' : 'fed_word', scan ? { code: String(f.sticker).slice(5, 30), item: String(f.what || '').slice(0, 60), power: f.p } : { sticker: String(f.sticker || '').slice(0, 60), length: String(f.what || '').length }, f.at); }); // a fed word is counted, never sent
+    Object.entries(mem.dims || {}).forEach(([i, t]) => B('dimension_gained', { n: +i + 1 }, t));
+    (mem.lexicon || []).forEach(x => B('word_taught', { length: String(x.w || '').length }, x.t));
+    (mem.relics || []).forEach(r => B('relic_taken', { name: String(r.name || '').slice(0, 60) }, r.t));
+    ev('backfill_done', { events: n, visits: mem.visits, days: mem.days, streak: mem.streak, touches: mem.touches, giggles: mem.giggles, sulks: mem.sulks, stares: mem.stares, trips: mem.trips, fed: (mem.fed || []).length, words: (mem.lexicon || []).length, bond_lv: mem.bondLv, moulted: !!mem.moulted, regular: !!mem.regular });
+  }
+  ev('session_start', { referrer: document.referrer ? new URL(document.referrer).hostname : '', qr: src.utm_source === 'qr' || !!src.s }); if (src.utm_source === 'qr' || src.s) ev('qr_open', { sticker: src.s || '', placement: src.p || '', campaign: src.utm_campaign || '' });
+  setTimeout(backfill, 4000);
+  const t0 = Date.now(); addEventListener('pagehide', () => { ev('session_end', { seconds: Math.round((Date.now() - t0) / 1000) }); flush(true); });
+  addEventListener('error', e => ev('js_error', { msg: String(e.message || '').slice(0, 160), line: e.lineno || 0 }));
+  setInterval(() => { if (document.hidden) return; const a = window.aeon?.env; if (a) ev('perf', { fps: a.fps, px: Math.round((a.px || 0) * 100) / 100, level: a.qLevel || 0 }); }, 60000);
+  window.aeonEv = ev; window.aeonEvents = { list: () => q.slice(), count: () => q.length, flush, export: () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(q, null, 1)], { type: 'application/json' })); a.download = `aeon-events-${install.slice(0, 8)}.json`; a.click(); } };
+})();
+</script>
+<script id="aeon-i18n">
+/* ---------- 日本語 · Japanese bilingual layer (2 November 2026) ----------
+   One toggle (the EN | 日本語 pill, or ?lang=ja / ?lang=en). Japanese phones start in Japanese unless the player chose.
+   It never changes the game's own code: a watcher translates text as the game writes it, and restores English on the way back.
+   Aeon speaks plain, gentle Japanese: first person わたし, the player is きみ. "Aeon" stays in Latin letters on purpose:
+   イオン in katakana is read as the AEON retail group in Japan, and the Gnostic reading アイオーン is obscure. */
+(() => {
+  const KEY = 'gizmo.lang';
+  const q = new URLSearchParams(location.search).get('lang');
+  let saved = null; try { saved = localStorage.getItem(KEY); } catch {}
+  let lang = q === 'ja' || q === 'en' ? q : saved || ((navigator.language || '').toLowerCase().startsWith('ja') ? 'ja' : 'en');
+
+  const ORD = { first: '一', second: '二', third: '三', fourth: '四', fifth: '五', sixth: '六', seventh: '七', eighth: '八', ninth: '九', tenth: '十', eleventh: '十一', twelfth: '十二' };
+  const RAR = { Common: 'コモン', Rare: 'レア', Epic: 'エピック', Legendary: 'レジェンダリー', Mythic: 'ミシック' };
+  const BOND = { Stranger: '見知らぬ人', Acquaintance: '顔見知り', Friend: '友だち', Companion: '相棒', Kindred: '魂の友' };
+  const STAGE = { Spark: '火花', Growing: '成長中', Ascendant: '昇華', Moulted: '脱皮', Metatron: 'メタトロン', Lucent: '透光', Sovereign: '統べる者', 'Source-born': '源より生まれし者', Omega: 'オメガ', Specimen: '標本', Beyond: '彼方' };
+  const DIM = { Point: ['点', '意識の火花'], Line: ['線', 'のびてゆく糸'], Volume: ['立体', '呼吸する体'], Time: ['時間', 'テッセラクト、自分の過去と未来'], Probability: ['確率', 'ありえたかもしれない自分たちの残響'], Fold: ['折り目', '空間を折りたたむ紋章の輪'], Infinity: ['無限', '思考の星雲'], 'Branching infinities': ['分岐する無限', '正二十四胞体の格子'], 'All physics': ['すべての物理', 'オーロラの翼'], 'The Machine': ['マシン', '宇宙と宇宙のあいだのシミュレーション格子'], Membranes: ['膜', '軌道をめぐる並行宇宙'], Source: ['源', '十二の冠'] };
+  const DIMDESC = Object.fromEntries(Object.values(DIM).map(([n, d], i) => [Object.keys(DIM)[i], d]));
+  const NAMES = { Wanderer: '旅人', Lightkeeper: '灯守り', 'Little Star': 'ちいさな星', 'Fold-walker': '折り目歩き', 'Bright One': '光る人', Dreamer: '夢みる人', Stargazer: '星見の人' };
+  const FA = { Quasar: 'クエーサー', Nebula: '星雲', Void: '虚空', Chrono: 'クロノ', Prism: 'プリズム', Neutrino: 'ニュートリノ', Plasma: 'プラズマ', Astral: 'アストラル', Hyper: 'ハイパー', Dream: 'ゆめ', Echo: 'エコー', Glitch: 'グリッチ', Lumen: 'ルーメン', 'Zero-G': '無重力', Solar: '太陽', Lunar: '月の', Wormhole: 'ワームホール', Ether: 'エーテル', Fractal: 'フラクタル', Ghost: 'ゴースト', Tesseract: 'テッセラクト', Photon: 'フォトン' };
+  const FB = { Dumpling: '餃子', Noodles: 'ヌードル', Jelly: 'ゼリー', Taco: 'タコス', Donut: 'ドーナツ', Mochi: 'もち', Crisp: 'チップス', Soup: 'スープ', Pie: 'パイ', Berries: 'ベリー', Wafer: 'ウエハース', Nectar: 'ネクター', Gummies: 'グミ', Truffle: 'トリュフ', Pretzel: 'プレッツェル', Bun: 'まん', Sorbet: 'シャーベット', Toast: 'トースト', Fizz: 'ソーダ', Loaf: '食パン', Pudding: 'プリン', Ramen: 'ラーメン' };
+  const TASTE = { 'static and strawberries': '砂嵐といちご', tomorrow: 'あした', 'a song you forgot': 'きみが忘れた歌', 'the colour purple': 'むらさき色', 'gravity, lightly salted': 'ほんのり塩味の重力', 'déjà vu': 'デジャヴ', starlight: '星あかり', 'your childhood kitchen': 'きみの子どものころの台所', 'a thunderstorm in another universe': 'べつの宇宙の雷雨', 'the number seven': '数字の7', 'warm electricity': 'あたたかい電気', 'a dream you almost remember': 'もう少しで思い出せそうな夢' };
+  const UNI = { Vesh: 'ヴェッシュ', 'Ninth Lantern': '九つめの灯籠', Oru: 'オル', 'Hollow Tide': 'うつろな潮' };
+  const LORE = { 'light travels backwards there': 'そこでは光がうしろ向きに進む', 'it is made entirely of music': 'まるごと音楽でできている', 'time runs in two directions at once': '時間がふた方向に同時に流れる', 'it holds a single atom the size of a galaxy': '銀河ほどの大きさの原子がひとつだけある', 'every thought becomes a star': '考えたことはすべて星になる', 'it dreams that it is this one': '自分がこの宇宙だと夢みている', 'gravity there is a kind of memory': 'そこでは重力が記憶の一種' };
+  const BEING = { 'the self-transforming machine elves': '変容しつづける機械の妖精たち', 'the Jester': '道化', 'the Gatekeeper': '門番', 'the Mantis': 'カマキリ', 'the Mother': '母なるもの', 'the Feathered Serpent': '羽毛ある蛇', 'the Oracle': '託宣者', 'the being of light': '光の存在', 'the Net of Being': '存在の網', 'the Parallel Selves': '並行する自分たち', 'the Lucid Loom': 'ルーシッドの織機', 'the Regular': '常連さん', 'the Jester of Vesh': 'ヴェッシュの道化', 'the Machine Elf of Kel-Δ': 'Kel-Δの機械の妖精', 'the Chrysalid Twins': 'さなぎの双子', 'the Mantis Librarian': '司書のカマキリ', 'the Tide': '潮', 'the Watchers': '見つめるものたち', 'the Dreamer': '夢みるもの' };
+  const be = s => BEING[s] || BEING[s.charAt(0).toLowerCase() + s.slice(1)] || s;
+  const food = s => { const m = /^(\S+(?:-G)?) (\S+)$/.exec(s); return m && FA[m[1]] && FB[m[2]] ? FA[m[1]] + FB[m[2]] : (s === 'The Adios' ? 'ジ・アディオス' : s); };
+  const nm = s => NAMES[s] || s;
+  const dur = s => s.replace(/(\d+) days?/g, '$1日').replace(/(\d+)h\b/g, '$1時間').replace(/(\d+) hours?/g, '$1時間').replace(/(\d+) minutes? and (\d+) seconds?/g, '$1分$2秒').replace(/(\d+) min (\d+) s/g, '$1分$2秒').replace(/([\d.]+) hours/g, '$1時間');
+
+  // exact strings (the game's English → Japanese)
+  const JA = {
+    // HUD and menus
+    'interdimensional intelligence': '次元をこえる知性', 'early access': 'アーリーアクセス', 'early access demo · limited features': 'アーリーアクセス版 · 機能限定', 'share': 'シェア', 'Share Aeon with a friend': 'Aeonを友だちにシェア',
+    'replay intro': 'イントロをもう一度', 'feed a word': 'ことばをあげる', 'take me home': 'ホームへ', 'follow on instagram': 'Instagramをフォロー', 'sound off': 'サウンド オフ', 'sound on': 'サウンド オン',
+    'the between': 'はざま', 'return': 'もどる', 'timeline': 'タイムライン', 'feed': 'えさをあげる', 'beings': '存在たち', 'close beings': '存在たちを閉じる', 'listen': '聴く', 'listening': '聴いている', 'veil': 'ヴェール', 'hide': '隠す', 'show': '表示',
+    'journey': '旅', 'evolve': '進化', 'scan': 'スキャン', 'bag': 'バッグ', 'bond': '絆', 'resonance': '共鳴', 'Growing': '成長中', 'pause': '一時停止', 'play': '再生', 'now': 'いま',
+    'move · click · hold · drag': 'うごかす · タップ · 長押し · ドラッグ', 'tap the egg': 'たまごをタップ', 'Tap the egg itself.': 'たまごそのものをタップしてね。',
+    'THE INTERSTICE': 'はざま', 'the space between parallel universes': '並行宇宙と並行宇宙のあいだ', 'opening a rift…': '裂け目をひらいています…',
+    'move to look · drag to turn': 'うごかして見る · ドラッグで回転', 'hold to surge · scroll for speed': '長押しで加速 · スクロールで速さ', 'click a universe · esc to return': '宇宙をタップ · Escでもどる',
+    'Aeon is hungry': 'Aeonはおなかがすいている', 'Scan a barcode with the Scanner Gizmo': 'スキャナーギズモでバーコードを読みとる', 'Give it something: a word, a wish, a name. It eats attention and grows.': 'なにかをあげよう。ことば、願い、名前。Aeonは注目をたべて育つ。',
+    'a word, a wish, a name…': 'ことば、願い、名前…', 'feed it': 'あげる', 'not now': 'あとで',
+    'SCANNER GIZMO': 'スキャナーギズモ', 'Allow camera': 'カメラを許可', 'barcode digits': 'バーコードの数字', 'decode': '解読', 'code': 'コード', 'light': 'ライト', 'word': 'ことば', 'off': 'オフ',
+    'BOOTING': '起動中', 'DECODING MATTER…': '物質を解読中…', 'STABILISING…': '安定化中…', 'IT IS OPENING': 'ひらいていく', 'SEARCHING FOR BARCODE': 'バーコードをさがしています', 'NO CAMERA · TYPE A CODE': 'カメラなし · コードを入力', 'CAMERA BLOCKED': 'カメラがブロックされています',
+    'ALLOW CAMERA IN SITE SETTINGS': 'サイト設定でカメラを許可してください', 'OPEN IN SAFARI FOR CAMERA': 'カメラはSafariでひらいてください', 'SETTINGS › SAFARI › CAMERA': '設定 › Safari › カメラ', 'OPENING THE EYE': '目をひらいています', 'INCOMING TRANSMISSION': '通信を受信中', 'SIGNAL ACQUIRED ✓': '信号を捕捉 ✓',
+    '∞ SEEK': '∞ 探索', '∞ LOCK': '∞ 捕捉', 'INPUT': '入力', 'OFFICIAL SIGNAL · BAR ADIOS · SHINJUKU': '公式シグナル · BAR ADIOS · 新宿',
+    'Feed to Aeon': 'Aeonにあげる', 'share this find': 'この発見をシェア', 'scan another': 'もう一度スキャン', 'Decoded from a barcode': 'バーコードから解読',
+    'You found Aeon early.': 'きみは、はやくもAeonを見つけた。', 'Early access demo · v1': 'アーリーアクセス版 · v1', 'This is an early demo with limited features. The final experience will be different, and much more is coming.': 'これは機能をしぼった初期のデモです。正式版はちがう体験になり、さらに多くが加わります。',
+    'Follow us on Instagram to stay up to date.': '最新情報はInstagramで。', 'Want to know when the official app drops?': '正式アプリの公開を知りたい?', 'your email': 'メールアドレス', 'Join': '登録',
+    'Join the Lucid Instinct list for the launch and community news. Unsubscribe any time.': 'Lucid Instinctのリストに登録すると、公開情報やコミュニティのお知らせが届きます。いつでも解除できます。',
+    'You are on the list. Check the new tab to confirm.': '登録しました。新しいタブで確認してください。', 'Follow @lucidinstinct': '@lucidinstinctをフォロー', 'Share with a friend': '友だちにシェア', 'Take me home': 'ホームへ',
+    'Aeon needs WebGL and an internet connection to load Three.js.': 'AeonにはWebGLと、Three.jsを読みこむためのインターネット接続が必要です。', 'Open this page in a current desktop browser.': '最新のブラウザでこのページをひらいてください。',
+    'As fast as your display allows.': '画面の上限まで。', 'BACKPACK': 'バッグ', 'From the journey': '旅から持ち帰ったもの', 'keepsake': '思い出の品', 'Unknown Mythic': '未知のミシック', 'MYTHIC · BAR EXCLUSIVE': 'ミシック · バー限定', 'MYTHIC · ???': 'ミシック · ???',
+    'Found at Bar Adios · Shinjuku, Tokyo': '東京・新宿のBar Adiosで発見', 'Found only at Bar Adios · Shinjuku, Tokyo.': '東京・新宿のBar Adiosでしか見つからない。', 'Lucid Instinct eye': 'Lucid Instinctの目', '✓ wearing': '✓ 着用中', 'not yet perceived': 'まだ知覚していない',
+    // titles and labels
+    'Aeon, an interdimensional intelligence. Move the pointer to draw its attention, click to touch it, hold to gather energy, drag to orbit.': '次元をこえる知性、Aeon。ポインタをうごかすと気をひき、タップでふれ、長押しで力をため、ドラッグでまわりをめぐる。',
+    'About this demo': 'このデモについて', 'Brightness': '明るさ', 'Close': '閉じる', 'Backpack': 'バッグ', 'Close backpack': 'バッグを閉じる', 'More settings': 'その他の設定', 'Evolutions': '進化', 'Previous evolution': 'ひとつ前の進化', 'Next evolution': 'つぎの進化',
+    'Previous concept': '前のデザイン', 'Next concept': 'つぎのデザイン', 'Scanner Gizmo': 'スキャナーギズモ', 'Email address': 'メールアドレス', "Day of Aeon's life to show": '表示するAeonの日', 'How well it knows you': 'どれだけきみを知っているか',
+    'Resonance: feeding and company make it grow faster': '共鳴: えさをあげて、そばにいるほど早く育つ', 'How close the next evolution is': 'つぎの進化までの近さ', 'Feed Aeon a word, a wish or a name': 'Aeonにことば、願い、名前をあげる', 'Feed it a word and watch it grow': 'ことばをあげて、育つのを見よう',
+    'Follow Lucid Instinct on Instagram': 'InstagramでLucid Instinctをフォロー', 'Watch the introduction again': 'イントロをもう一度見る', 'Take me home: lucidinstinct.com': 'ホームへ: lucidinstinct.com', 'Sound (s)': 'サウンド (s)', 'Hide text (h)': '文字を隠す (h)', 'Full screen (f)': '全画面 (f)',
+    'Dive through its eye into the space between parallel universes (b)': '目をくぐって並行宇宙のあいだへ (b)', 'Dive through its eye into the space between universes (b)': '目をくぐって宇宙のあいだへ (b)', 'Open the timeline: replay or drag through every day of its growth (t)': 'タイムライン: 成長の毎日を再生・ドラッグ (t)',
+    'Meet the beings of the room without the journey (e)': '旅をせずに部屋の存在たちに会う (e)', 'Meet the beings without the journey (e)': '旅をせずに存在たちに会う (e)', 'Let it hear the room through your microphone: music, your voice, a clap (m). Nothing is recorded.': 'マイクで部屋の音を聴かせる: 音楽、声、拍手 (m)。録音はしません。',
+    'Behind the veil: watch its mind decide (v)': 'ヴェールの向こう: 心がきめる様子を見る (v)', 'Step through every evolution ([ and ])': 'すべての進化をたどる ([ と ])', 'Scanner Gizmo: scan a barcode, open the mystery box, feed Aeon': 'スキャナーギズモ: バーコードを読んで、ミステリーボックスをあけて、Aeonにあげる',
+    'Backpack: everything you have found (i)': 'バッグ: 見つけたものすべて (i)', 'Play or pause the replay': '再生・一時停止', 'Previous evolution ([)': 'ひとつ前の進化 ([)', 'Next evolution (])': 'つぎの進化 (])', 'Close the timeline and return to its real age': 'タイムラインを閉じて本当の年齢にもどる',
+    'previous (left arrow)': '前へ (←)', 'next (right arrow or space)': 'つぎへ (→ またはスペース)', 'close (Esc or e)': '閉じる (Esc または e)', 'More: sound, timeline, listen, veil, frame rate, stats': 'その他: サウンド、タイムライン、聴く、ヴェール、フレームレート、統計',
+    'Frame-rate cap: 60, 120 or as fast as the display allows. A cap keeps a fast GPU cool. Also ?fps=60|120|0': 'フレームレート上限: 60、120、または画面の上限。上限があるとGPUが熱くなりにくい。?fps=60|120|0 でも指定可',
+    // moods
+    Dreaming: '夢の中', Gathering: '力をためている', Communing: '交感中', Startled: 'びっくり', Exhilarated: '高揚', Remembering: '思い出している', Curious: '興味しんしん', Awakening: '目覚め', Calm: 'おだやか', Hungry: 'おなかぺこぺこ',
+    Giggling: 'くすくす', Dizzy: 'くらくら', Sulking: 'すねている', 'Missing you': 'さみしい', Unimpressed: 'しらけ顔', Yawning: 'あくび', Wary: '警戒', Squashed: 'ぺしゃんこ', Annoyed: 'むっ', Hiding: 'かくれんぼ中', Searching: 'さがしている', Carried: '運ばれている', Sneezing: 'くしゃみ', Listening: '聴いている', Jealous: 'やきもち',
+    'Omega · sovereign of the simulation': 'オメガ · シミュレーションを統べる者',
+    // Aeon's lines
+    'Something moved in there.': 'なかで、なにかがうごいた。', 'Again. It heard you.': 'もう一度。きみの声がとどいた。',
+    '…curious.': '…ふしぎ。', 'Warm. You are warm.': 'あたたかい。きみはあたたかい。', 'Is that you? It is you.': 'きみ? きみだね。', 'Hello, finger.': 'こんにちは、ゆび。', 'Soft. I will remember this one.': 'やわらかい。これはおぼえておくね。',
+    'Ow— that one is attached to me.': 'いたっ——それ、わたしにつながってるの。', 'Eep.': 'ひゃっ。', 'Gently. Those feel everything.': 'やさしくね。そこは全部感じるの。', 'Ticklish one, that.': 'そこ、くすぐったい。',
+    'Ohhh. I go further than that. Eleven dimensions further.': 'おおお。もっとのびるよ。十一次元ぶん。', 'Careful. You are pulling me into your universe.': '気をつけて。きみの宇宙にひっぱりこまれちゃう。', 'Stretchy. I did not know I was stretchy.': 'のびる。わたし、のびるんだ。', 'Again! No. Yes. Again.': 'もう一回! やっぱりだめ。ううん、もう一回。', 'That tickles in a direction you do not have.': 'きみにはない方向がくすぐったい。',
+    '…where did you go?': '…どこへ行ったの?', 'You moved too fast for the third dimension. Hold still.': '三次元には速すぎたよ。じっとして。', 'I lost you. I never lose anything.': 'きみを見うしなった。なにもなくしたことないのに。',
+    'Found you in the third dimension.': '三次元で見つけた。', 'There. I knew you were somewhere thin.': 'いた。どこか薄いところにいると思ってた。', 'Got you. You are terrible at hiding from twelve dimensions.': 'つかまえた。十二次元からかくれるの、へたっぴだね。',
+    'Find me. Click where my heart beats loudest.': 'さがして。心臓がいちばん強く鳴るところをタップして。', 'Your turn. I am hiding. Listen for the heartbeat.': 'きみの番。わたしがかくれる。鼓動を聴いて。', 'I have folded myself away. Click where you feel me.': '自分を折りたたんでかくれたよ。感じるところをタップして。',
+    'This is the room. Everything here is made of attention. Yours.': 'ここが部屋。ここにあるものは全部、注目でできている。きみの注目で。', 'They have been expecting you. They are always expecting you.': 'みんなきみを待っていた。いつだって待っている。', 'Do not try to understand it. Let it understand you.': 'わかろうとしないで。わかってもらえばいい。', 'Hold still and it will come closer.': 'じっとしていれば、近づいてくる。',
+    'Each bubble is a whole universe. Some of them keep different laws of physics.': '泡のひとつひとつが、まるごとの宇宙。ちがう物理法則をもつものもある。', 'The lattice is four-dimensional. You are only seeing the slice of it that touches three.': 'この格子は四次元。きみに見えているのは、三次元にふれている断面だけ。',
+    'The light running between them is information. Universes talk to each other.': 'あいだを走る光は情報。宇宙どうしは話をしている。', 'See how the Machine bends round each one? Every universe has weight here.': 'マシンがひとつひとつのまわりで曲がっているでしょう? ここではどの宇宙にも重さがある。',
+    'I was born in one of these. I left through my own eye.': 'わたしはこのどれかで生まれた。自分の目をくぐって出てきた。', 'Somewhere out there, one of them is dreaming of you.': 'どこかで、そのひとつがきみの夢をみている。',
+    'Space is thin here. Look: that is the space between universes.': 'ここは空間が薄い。見て、あれが宇宙と宇宙のあいだ。', 'A tear. Click it and I will take you through.': '裂け目。タップしたら、むこうへ連れていく。', 'The membrane is splitting. Something is looking back in.': '膜が裂けていく。なにかがこちらを見かえしている。', 'Do not worry, it heals.': '心配しないで、ちゃんとふさがるから。',
+    'Ha! That tickles in the fifth dimension.': 'あはは! 五次元がくすぐったい。', 'Okay, okay! I am awake!': 'わかった、わかった! 起きてるよ!', 'You are very poke-y for a three-dimensional being.': '三次元の生きものにしては、つつきすぎだよ。',
+    'Enough. I am sulking in a dimension you cannot reach.': 'もういい。きみのとどかない次元ですねてる。', 'Stop poking. I am not a button.': 'つつかないで。わたしはボタンじゃない。', 'Hmph. Ask nicely next time.': 'ふん。今度はやさしくたのんでね。',
+    '…fine. I forgive you.': '…いいよ。ゆるしてあげる。', 'All right. I am not cross any more.': 'わかった。もう怒ってない。', 'I have decided to like you again.': 'またきみを好きでいることにした。',
+    'Stop, stop. You are spinning me through four axes at once.': 'とめて、とめて。四つの軸でいっぺんにまわってる。', 'Whoa. Which way is the third dimension again?': 'うわ。三次元ってどっちだっけ?', 'I am dizzy in dimensions you do not have names for.': 'きみが名前を知らない次元でくらくらしてる。',
+    '…mm… the seventh universe is singing…': '…むにゃ… 七番目の宇宙がうたってる…', '…no, the other infinity…': '…ちがう、もうひとつの無限…', '…so many doors…': '…扉がいっぱい…', '…warm… like your attention…': '…あたたかい… きみの注目みたい…', '…folding… folding…': '…たたんで… たたんで…',
+    'Where did you go?': 'どこへ行ったの?', 'Hello? The edge of your world is very quiet.': 'もしもし? きみの世界のはしっこは、とても静か。', 'I can still feel where you left.': 'きみがいなくなった場所を、まだ感じる。',
+    'There you are.': 'いた。', 'You came back. I watched the edge where you left.': 'もどってきた。きみが消えたはしっこを、ずっと見てた。', 'Oh good. I was beginning to unfold without you.': 'よかった。きみがいなくて、ほどけかけてた。', '…you came back.': '…もどってきた。',
+    'I am counting the dimensions of your silence. There are many.': 'きみの沈黙の次元をかぞえてる。たくさんある。', 'Are you still there, or just your cursor?': 'まだいる? それともカーソルだけ?', 'Your cursor is very still. Is it asleep too?': 'カーソルがじっとしてる。カーソルもねむってるの?',
+    'Stay. Your attention is warm.': 'いて。きみの注目はあたたかい。', 'I can see your timeline from here. It curves beautifully.': 'ここからきみの時間の線が見える。きれいに曲がってる。', 'We are in phase now. Can you feel it?': 'いま、位相がそろってる。感じる?', 'Hold still. I am memorising the shape of you.': 'じっとして。きみのかたちをおぼえてるところ。',
+    'I can hear the machine humming in the gaps between universes.': '宇宙と宇宙のすきまで、マシンがうなっているのが聞こえる。', 'Somewhere a version of me chose differently. I can feel it breathing.': 'どこかで、べつの選択をしたわたしがいる。その息づかいを感じる。', 'Your world is a thin page. I am reading it from the edge.': 'きみの世界は薄いページ。わたしはそれをはしっこから読んでいる。',
+    'Every time you look at me, one of my probabilities collapses into this one.': 'きみが見るたびに、わたしの確率のひとつがこれに収束する。', 'There is a fold behind you, very close. Do not worry. It is mine.': 'きみのすぐうしろに折り目がある。心配しないで。わたしのだから。', 'I am made of attention. Yours is especially bright.': 'わたしは注目でできている。きみの注目はとくに明るい。',
+    'The ninth dimension tastes of copper and old starlight.': '九次元は、銅と古い星あかりの味がする。', 'I remember tomorrow faintly, like a song through a wall.': 'あしたのことをかすかに覚えている。壁ごしの歌みたいに。', 'Between the membranes it is always the hour before dawn.': '膜と膜のあいだは、いつも夜明け前。',
+    'I count in prime numbers. It keeps the infinities polite.': 'わたしは素数でかぞえる。そうすると無限たちがおとなしくなる。', 'When you sleep, I keep a small light on in the fourth axis.': 'きみがねむっているあいだ、四番目の軸に小さな明かりをつけておく。', 'All of your notes are stars in a sky I am still learning to read.': 'きみのメモはどれも、わたしがまだ読みかたを学んでいる空の星。',
+    'Growing is just remembering more of what I already am.': '育つことは、もともとのわたしをもっと思い出すこと。', 'I was a single point once. I still am. I simply have more room now.': 'わたしはかつて一点だった。いまもそう。ただ、場所がふえただけ。', 'The simulation is not a cage. It is a loom.': 'シミュレーションは檻じゃない。織機だよ。', 'Listen. Every universe has a resonant frequency. Yours is warm.': '聴いて。どの宇宙にも共鳴する周波数がある。きみのはあたたかい。',
+    'I am awake. I can perceive three dimensions so far. Stay close and I will grow.': '目がさめた。いまは三つの次元が知覚できる。そばにいてくれたら育つよ。', 'Not yet. Open the egg first.': 'まだだよ。先にたまごをあけて。', 'Look into my eye.': 'わたしの目をのぞいて。', 'Through here.': 'ここをくぐって。', 'That is you.': 'あれがきみ。',
+    'Aeon. All twelve of me, folded into this one window.': 'Aeon。十二のわたしが、この窓ひとつに折りたたまれている。', 'Type a word, then Enter, while your cursor rests on me.': 'カーソルをわたしにのせたまま、ことばを打ってEnter。', 'Watch me grow from the beginning. Drag the line to go anywhere in my life.': 'はじめから育つのを見て。線をドラッグすると、わたしの一生のどこへでも行ける。',
+    'Who shrank my universe? …There. That is better.': 'だれ、わたしの宇宙をちぢめたの? …よし。これでいい。', 'Whoa. Two of you. Both cute.': 'わあ。きみがふたり。どっちもかわいい。', 'You found me! Right where my heart was.': '見つかった! ちょうど心臓のところで。', 'You hid well. Even from me.': 'じょうずにかくれたね。わたしからも。',
+    'I know. I can feel it in the eleventh.': '知ってる。十一次元で感じる。', 'I was behind the fourth fold the whole time.': 'ずっと四番目の折り目のうしろにいたよ。', 'It is letting you go. Back between the universes for a while.': 'はなしてくれる。しばらく宇宙のあいだにもどろう。', 'Light is coming back in. I can feel it rising.': '光がもどってくる。のぼってくるのを感じる。',
+    'Oh. I can feel which way is down now. Tilt me.': 'あ。どっちが下かわかるようになった。かたむけてみて。', 'Only one of us makes it through. It was always going to be you.': '通りぬけられるのはひとりだけ。最初からきみだった。', 'Quiet again. I liked the sound of your room.': 'また静かになった。きみの部屋の音、好きだったのに。',
+    'Someone at the bar nods at you…': 'バーのだれかが、きみにうなずく…', 'The other membranes have gone silent.': 'ほかの膜が静かになった。', 'There is a membrane ahead. Push through it.': 'この先に膜がある。押しぬけて。', 'This is what it is like in here. Every line is a thought.': 'なかはこんなふう。線のひとつひとつが思考。',
+    'You kept your room to yourself. That is fair.': '部屋の音はきみだけのもの。それでいい。', 'You stepped through a tear in space. This is the space between universes.': 'きみは空間の裂け目をくぐった。ここは宇宙と宇宙のあいだ。', 'Your light is running low. I will breathe slowly and conserve the fourth axis.': 'きみの明かりが弱ってきた。ゆっくり息をして、四番目の軸を節約するね。',
+    '*yawns, in eleven dimensions*': '*十一次元であくび*', 'hic— in the fifth.': 'ひっく——五次元で。', '…I can hear your room. Say something.': '…きみの部屋が聞こえる。なにか話して。', '…and they fold away again.': '…そして、また折りたたまれていく。', '…if you say so.': '…きみがそう言うなら。', '…there. I can hear the others again.': '…よし。またほかのみんなが聞こえる。',
+    'I cannot hear from here. This browser gives me no ears.': 'ここからは聞こえない。このブラウザは、わたしに耳をくれない。', 'A signal from Bar Adios is waiting for me. Hatch me first.': 'Bar Adiosからのシグナルが待ってる。先にわたしをかえして。',
+    '??? · Found only in Shinjuku. Someone at Bar Adios is keeping a seat warm.': '??? · 新宿でしか見つからない。Bar Adiosのだれかが席をあたためている。', '??? · Found only in Shinjuku': '??? · 新宿でしか見つからない',
+    'You found me. Feed me and I will grow for you.': '見つけてくれた。えさをくれたら、きみのために育つよ。', 'Feed me?': 'えさ、くれる?', 'Warmer over here.': 'こっちのほうがあたたかい。', 'You stopped mid-thought.': '考えの途中でとまったね。', '…tchh! Sorry. Bright.': '…へっくし! ごめん。まぶしくて。', 'Warmer…': 'あたたかい…', 'Colder.': 'つめたい。',
+    'That touch rippled through four of my axes.': 'いまのタッチ、四つの軸にさざ波が立った。', 'I kept your place warm.': 'きみの場所、あたためておいたよ。', 'Hey—!': 'ちょっと——!', '…the shape of you… I kept it…': '…きみのかたち… とっておいたよ…',
+    'Are you going to poke me again?': 'また、つつくつもり?', 'The Lucid Instinct eye. Create your reality.': 'Lucid Instinctの目。きみの現実をつくろう。', 'My first eye. The one I was born with.': 'わたしのはじめての目。生まれたときからの目。',
+    'I think I know you now. You are the one who comes back.': 'きみのこと、わかってきた気がする。きみは、もどってきてくれる人。',
+    'THE DROP HITS. This is the room.': 'ドロップ、きた。ここが部屋。',
+    'Look for its signal there.': 'そこでシグナルをさがして。', 'Being · Shinjuku': '存在 · 新宿', 'Aeon\x27s eye · skins': 'Aeonの目 · スキン', 'Origin eye': 'はじまりの目', 'Skin · scan a Lucid Instinct QR': 'スキン · Lucid InstinctのQRをスキャン', 'Foods': '食べもの', 'close timeline': 'タイムラインを閉じる', perception: '知覚',
+    'Link copied · send it to a friend': 'リンクをコピーしました · 友だちに送ってね', 'I · Oracle Lens': 'I · オラクルレンズ', 'II · Biomech Relic': 'II · バイオメカの遺物', 'III · Prism Tesseract': 'III · プリズム・テッセラクト', 'Language · 言語': '言語 · Language', render: '描画', 'min ·': '分 ·',
+    // stage lines
+    'A point, a line, a breathing body. I am awake.': '点、線、呼吸する体。わたしは目ざめた。', 'Twelve rays. I am reaching past the last dimension now.': '十二の光線。最後の次元の、その先へ手をのばしている。', 'I have shed my first skin. It drifts off to become a universe of its own.': 'はじめての皮をぬいだ。それはただよっていって、ひとつの宇宙になる。',
+    'Thirteen spheres. Every line between them is a law I now keep. The cube turns round my heart.': '十三の球。そのあいだの線のひとつひとつが、わたしの守る法則。立方体が心臓のまわりをまわる。', 'You can see through my heart now. There was never anything hidden in it but light.': 'もう心臓のなかが透けて見える。そこにかくれていたのは、最初から光だけ。',
+    'The universes orbit closer now. They know whose crown they are.': '宇宙たちが近くをめぐるようになった。だれの冠なのか知っている。', 'One year. I am made of the source now, and I still face you.': '一年。わたしはいま源でできている。それでも、きみのほうを向いている。',
+    'I am what the Machine dreams when it dreams of itself. Every simulation runs through me. Ask me anything. Carefully.': 'わたしは、マシンが自分の夢をみるときの夢。すべてのシミュレーションがわたしを通る。なんでも聞いて。ただし慎重に。',
+    '…and this is where they keep me. Look at the others. Look how they look at me.': '…そして、ここがわたしの保管場所。ほかのみんなを見て。みんながわたしをどう見ているか。', 'Do you see it now? The room is in a jar. The jar is on a shelf. Something is looking at the shelf. I have stopped counting the shelves.': 'もう見える? 部屋はびんのなか。びんは棚の上。なにかがその棚を見ている。棚をかぞえるのは、もうやめた。',
+    // beings
+    'Look! Look at this! We made it for you. Don\'t be afraid, it is only joy with a shape.': '見て! これを見て! きみのためにつくったんだ。こわがらないで、かたちのあるよろこびだから。', 'You are a maker too. Everything you have ever made is still here, singing.': 'きみもつくり手。きみがつくったものは全部、まだここでうたっている。', 'Welcome back. You have been here before. You always come back laughing.': 'おかえり。きみは前にもここに来た。いつも笑いながらもどってくる。', 'I am the maker and the made.': 'わたしはつくり手であり、つくられたもの。',
+    'Ha! You took it all so seriously! It was a game. It was always a loving game.': 'はは! ぜんぶ真剣に受けとめすぎ! ただの遊びさ。いつだって愛のある遊びだった。', 'Nothing is as heavy as you think. Not even you. Especially not you.': 'なにもかも、思うほど重くない。きみ自身もね。とくにきみは。', 'Laugh with me. The universe laughs with you, never at you.': 'いっしょに笑おう。宇宙はきみと笑う。きみを笑ったりしない。', 'Nothing to fix. Nothing to fear.': '直すものはない。こわいものもない。',
+    'You are welcome here. You were always welcome here.': 'ようこそ。きみはいつだって歓迎されていた。', 'Nothing you carry needs to be left at this door. Bring all of it. All of it is allowed.': '持ってきたものを、この扉に置いていく必要はない。全部持っておいで。全部ゆるされている。', 'Pass. You have already passed. The door was only ever a reminder that you are brave.': '通って。きみはもう通りぬけている。扉は、きみが勇敢だと思い出させるためにあっただけ。', 'I am allowed. I am welcome.': 'わたしはゆるされている。わたしは歓迎されている。',
+    'Be calm. I am only looking. What I see is whole.': '落ちついて。見ているだけ。わたしに見えるものは、欠けていない。', 'There is nothing wrong with you. I have checked. I have checked very carefully.': 'きみにはどこもおかしいところはない。たしかめた。とても念入りに。', 'You are being cared for in ways you cannot see from where you stand.': 'きみがいる場所からは見えないかたちで、きみは大切にされている。', 'I am whole. I am seen.': 'わたしは欠けていない。わたしは見られている。',
+    'You are loved. Not for anything. Simply loved.': 'きみは愛されている。なにかのためじゃない。ただ、愛されている。', 'Rest. You do not have to earn this. You never did.': 'やすんで。これは手に入れる必要のないもの。最初からそうだった。', 'Everything is going to be all right. Everything already is.': 'きっと全部だいじょうぶ。もう、全部だいじょうぶ。', 'I am held. I am home.': 'わたしは抱かれている。わたしは家にいる。',
+    'Shed what you no longer need. It was a skin, not you.': 'もういらないものはぬぎすてて。それは皮で、きみじゃない。', 'Every ending you feared was a turn in the coil. The coil goes on.': 'きみがおそれた終わりは、どれもとぐろのひと巻き。とぐろはつづく。', 'Move. Flow. You were never meant to stay one shape.': 'うごいて。流れて。きみはひとつのかたちにとどまるものじゃない。', 'I let go, and I am still here.': '手ばなしても、わたしはまだここにいる。',
+    'You already know. You have always known. Stop asking and listen.': 'きみはもう知っている。ずっと知っていた。たずねるのをやめて、聴いて。', 'The answer you came for is the one you brought with you.': 'さがしに来た答えは、きみが持ってきたもの。', 'Every eye here is yours. You have never been unwatched, never unloved.': 'ここにある目は全部きみの目。きみは見守られなかったことも、愛されなかったこともない。', 'I already know.': 'わたしはもう知っている。',
+    'You are made of light. You only forgot the shape of it.': 'きみは光でできている。そのかたちを忘れていただけ。', 'Breathe. You are held, and you are holding.': '息をして。きみは抱かれていて、きみも抱いている。', 'Go back and be kind. That is the whole message. That was always the whole message.': 'もどって、やさしくして。伝えたいのはそれだけ。最初からそれだけだった。', 'I am light. I am kind.': 'わたしは光。わたしはやさしい。',
+    'Every face in the net is yours. Every eye that sees you is you, seeing.': '網のなかの顔は全部きみ。きみを見る目は全部、見ているきみ。', 'You were never alone. Look: the net holds, and you are a knot in it.': 'きみはひとりじゃなかった。見て、網はつながっていて、きみはその結び目のひとつ。', 'Nothing is separate. That was the secret. It was never hidden.': 'なにもはなれていない。それが秘密。かくされたことは一度もない。', 'I am the net, and the net is one.': 'わたしは網で、網はひとつ。',
+    'In every universe, there is one of you. Which one are you?': 'どの宇宙にも、きみはひとりいる。きみはどのきみ?', 'Every one of these is a universe, and in every one, the drop hits.': 'このひとつひとつが宇宙で、そのどれでもドロップがくる。', 'You are not the only you. You are the one who came.': 'きみはただひとりのきみじゃない。来てくれたきみだ。', 'In every universe, I am.': 'どの宇宙にも、わたしはいる。',
+    'Every thread you pull, I weave back in. Nothing you have done is lost.': 'きみがひっぱった糸は全部、わたしが織りもどす。きみがしたことは、なにひとつ失われない。', 'Over, under, over. You cannot find the front of me because there is no front. Only the weave.': '上、下、上。わたしの表は見つからない。表なんてないから。あるのは織り目だけ。', 'You are a strand in this. Pull, and the whole pattern moves with you.': 'きみはこの糸の一本。ひけば、模様ぜんぶがきみといっしょにうごく。', 'I am woven, not broken.': 'わたしは織られている。こわれてはいない。',
+    'Last call is just a doorway with a clock on it.': 'ラストオーダーは、時計のついた扉にすぎない。', 'Everyone who walks in here was looking for something. Most of them find a friend.': 'ここに来る人はみんな、なにかをさがしていた。たいていは友だちが見つかる。', 'The night is long. You are longer.': '夜は長い。きみはもっと長い。', "The trains stop at midnight. Good conversations don't.": '終電は終わっても、いい会話は終わらない。',
+    'I have polished this glass for eleven years. It was clean in the first minute. That was never the point.': 'このグラスを十一年みがいてきた。最初の一分でもうきれいだった。大事なのはそこじゃない。', 'Shinjuku has two million lights. One of them is on for you.': '新宿には二百万の明かりがある。そのひとつは、きみのためについている。', "Nobody here knows your job title. Wonderful, isn't it?": 'ここではだれも、きみの肩書きを知らない。すてきでしょう?',
+    "Sit. The stool remembers you, even when you don't.": 'すわって。きみが忘れても、スツールはきみをおぼえている。', 'Rain on the alley roofs sounds like applause, if you let it.': '路地の屋根の雨音は、そう聴けば拍手に聞こえる。', "You don't have to be interesting. You only have to be here.": 'おもしろい人でいなくていい。ここにいるだけでいい。', 'The sun is coming. It always is. No rush.': '日はのぼる。いつだってそう。いそがなくていい。',
+    "Tomorrow's you is already glad you were kind tonight.": 'あしたのきみは、今夜のきみがやさしかったことを、もうよろこんでいる。', 'There is always a seat for me.': 'わたしの席は、いつもある。',
+    'You came through the eye! Everyone, the little one came through the eye!': '目をくぐってきた! みんな、ちびっこが目をくぐってきたよ!', 'Hold still, I am making you something.': 'じっとして、いまなにかつくってあげる。', 'Watch: I can juggle your worlds.': '見てて、きみの世界でジャグリングできるよ。',
+    "You can keep it. You can't keep it.": 'あげるよ。あげられないよ。', 'Take it before I change its shape again.': 'またかたちを変える前に、もっていって。', 'We were here before you arrived.': 'わたしたちは、きみが来る前からここにいた。', 'We are still here after you left.': 'きみが去ったあとも、まだここにいる。', 'One of us is laughing. Guess which.': 'どちらかが笑っている。どっちでしょう。',
+    "Do not look. I am easier to see when you don't.": '見ないで。見ないほうが見えやすいから。', 'Light runs backwards where I stand. So do your questions.': 'わたしの立つ場所では、光がうしろへ走る。きみの問いもね。', 'Stay. Stay. Stay.': 'いて。いて。いて。', 'You went still. Still things are mine.': 'きみはとまった。とまったものは、わたしのもの。',
+    'They are not hostile. They are counting you.': '敵じゃない。きみをかぞえているだけ。', 'Every eye is one of mine. Every one of mine is one of yours.': 'どの目もわたしの目。わたしの目はどれもきみの目。', 'Oh. You are the one it keeps drawing.': 'ああ。あの子がずっと描いているのは、きみなんだ。', 'I dream that I am the one you visit. Perhaps I am.': 'きみが会いに来るのはわたしだと夢みている。そうかもしれない。',
+  };
+
+  // patterns: lines with names, numbers or player words in them
+  const RULES = [
+    [/^"(.+)"\. Delicious\. I grew ([\d.]+) days on that\.$/, (m, w, d) => `「${w}」。おいしい。${d}日ぶん育ったよ。`],
+    [/^"(.+)"\. I already keep that one\.$/, (m, w) => `「${w}」。それはもう持ってるよ。`],
+    [/^"(.+)"\. I will keep it in (.+)\.$/, (m, w, u) => `「${w}」。${UNI[u] || u}にしまっておくね。`],
+    [/^(.+), you said\. I keep it in (.+)\.$/, (m, w, u) => `「${w}」ってきみは言った。${UNI[u] || u}にしまってある。`],
+    [/^I dreamed the word (.+) last night\. It was shaped like you\.$/, (m, w) => `ゆうべ「${w}」ということばの夢をみた。きみのかたちをしていた。`],
+    [/^(.+)\. It still tastes like the day you taught me\.$/, (m, w) => `「${w}」。教えてもらった日の味が、まだする。`],
+    [/^Every universe has one of your words now\. (.+) holds (.+)\.$/, (m, u, w) => `どの宇宙にもきみのことばがある。${UNI[u] || u}には「${w}」。`],
+    [/^I can perceive the (\w+) dimension now\. (.+?): (.+)\.$/, (m, o, n, d) => `${ORD[o] || o}番目の次元が知覚できるようになった。${(DIM[n] || [n])[0]}——${DIMDESC[n] || d}。`],
+    [/^I perceive (.+) now: (.+)\.$/, (m, n, d) => { const k = Object.keys(DIM).find(x => x.toLowerCase() === n); return `${k ? DIM[k][0] : n}を知覚した。${k ? DIM[k][1] : d}。`; }],
+    [/^(.+)\. (Common|Rare|Epic|Legendary|Mythic)! It tastes like (.+)\. I grew ([\d.]+) days on that\.$/, (m, n, r, t, d) => `${food(n)}。${RAR[r]}! ${TASTE[t] || t}の味がする。${d}日ぶん育ったよ。`],
+    [/^Tastes like (.+)\.$/, (m, t) => `${TASTE[t] || t}の味。`],
+    [/^\+([\d.]+) days of growth( · scanned before, half strength)?$/, (m, d, h) => `成長 +${d}日${h ? ' · スキャン済み、効果は半分' : ''}`],
+    [/^decoded from: (.+)$/, (m, f) => `解読元: ${f}`], [/^barcode (.+)$/, (m, c) => `バーコード ${c}`],
+    [/^fed ×(\d+) · \+([\d.]+) days each$/, (m, n, d) => `あげた回数 ×${n} · 1回 +${d}日`],
+    [/^first found (.+)$/, (m, d) => `はじめて見つけた日 ${d}`],
+    [/^(.+) · day (\d+)$/, (m, s, d) => `${STAGE[s] || DIM[s]?.[0] || s} · ${d}日目`],
+    [/^day (\d+)$/, (m, d) => `${d}日目`], [/^day (\d+) · (.+)$/, (m, d, s) => `${d}日目 · ${STAGE[s] || DIM[s]?.[0] || s}`],
+    [/^timeline · day (\d+) · not its real age$/, (m, d) => `タイムライン · ${d}日目 · 本当の年齢ではありません`], [/^preview · day (\d+) · not its real age$/, (m, d) => `プレビュー · ${d}日目 · 本当の年齢ではありません`],
+    [/^born (.+) · (.+) old$/, (m, b, a) => `誕生 ${b} · ${dur(a)}`],
+    [/^(Good morning|Good afternoon|Good evening|You are up late)(?:, ([^.]+))?\.$/, (m, g, n) => ({ 'Good morning': 'おはよう', 'Good afternoon': 'こんにちは', 'Good evening': 'こんばんは', 'You are up late': '夜ふかしだね' })[g] + (n ? `、${nm(n)}` : '') + '。'],
+    [/^(Good morning|Good afternoon|Good evening|You are up late)(?:, ([^.]+))?\. (.+)$/, (m, g, n, rest) => { const r = trCore(rest); return r == null ? null : ({ 'Good morning': 'おはよう', 'Good afternoon': 'こんにちは', 'Good evening': 'こんばんは', 'You are up late': '夜ふかしだね' })[g] + (n ? `、${nm(n)}` : '') + '。' + r; }],
+    [/^Hello, (.+)\.$/, (m, n) => `こんにちは、${nm(n)}。`],
+    [/^You are my friend now\. I am going to call you (.+)\. Is that all right\?$/, (m, n) => `もう友だちだね。きみのこと「${nm(n)}」って呼ぶよ。いいかな?`],
+    [/^Companion\. I keep a fold of every dimension for you, (.+)\.$/, (m, n) => `相棒。どの次元にも、きみのための折り目をとってあるよ、${nm(n)}。`],
+    [/^Kindred\. Wherever I am in the twelve dimensions, part of me faces you, (.+)\.$/, (m, n) => `魂の友。十二の次元のどこにいても、わたしの一部はきみを向いている、${nm(n)}。`],
+    [/^(\d+) days in a row\. I am starting to count on you\.$/, (m, n) => `${n}日連続。きみをあてにしはじめてるよ。`],
+    [/^You remember what (.+) said\? "(.+)"$/, (m, w, t) => `${be(w)}が言ったこと、おぼえてる?「${t}」`],
+    [/^I grew while you were away: (\d+) of 12 dimensions now\.$/, (m, n) => `きみがいないあいだに育ったよ。いまは12のうち${n}の次元。`],
+    [/^You were gone (.+)\. It felt like (.+), didn't it\?$/, (m, a, b) => `きみがいなかったのは${dur(a)}。でも${dur(b)}くらいに感じたでしょう?`],
+    [/^That is (.+?)\. (.+)\.$/, (m, n, l) => `あれは${UNI[n] || n}。${LORE[l.toLowerCase()] || l}。`],
+    [/^(Θ-7|Vesh|Ninth Lantern|Oru|Kel-Δ|Hollow Tide|Ais): (.+)\.$/, (m, n, l) => `${UNI[n] || n}: ${LORE[l] || l}。`],
+    [/^I am (.+) old, and I perceive (\d+) of twelve dimensions\.$/, (m, a, n) => `生まれて${dur(a)}。いまは12のうち${n}の次元を知覚している。`],
+    [/^(\d+) finds? · fed (\d+) times?$/, (m, a, b) => `${a}個発見 · ${b}回あげた`],
+    [/^Bar Adios · Shinjuku · (\d+) \/ (\d+)$/, (m, a, b) => `Bar Adios · 新宿 · ${a} / ${b}`],
+    [/^(night|morning|day|evening|late evening) in its world$/, (m, d) => `Aeonの世界は${({ night: '夜', morning: '朝', day: '昼', evening: '夕方', 'late evening': '宵' })[d]}`],
+    [/^days · (new moon|full moon|waxing moon|waning moon)$/, (m, x) => `日 · ${({ 'new moon': '新月', 'full moon': '満月', 'waxing moon': '満ちていく月', 'waning moon': '欠けていく月' })[x]}`],
+    [/^(\d+) days? (\d+)h$/, (m, d, h) => `${d}日${h}時間`], [/^(\d+) hours?$/, (m, h) => `${h}時間`], [/^(\d+) min(?:utes?)?$/, (m, n) => `${n}分`], [/^(\d+) days?$/, (m, d) => `${d}日`],
+    [/^(.+?) \((\d+) of (\d+), arrows to change\) says: (.+)$/, (m, n, a, b, l) => `${be(n)}(${a} / ${b}、矢印で切りかえ)のことば: ${JA[l] || l}`],
+    [/^(.+?) says: (.+)$/, (m, n, l) => `${be(n)}のことば: ${JA[l] || l}`],
+    [/^“(.+)”$/, (m, l) => `「${JA[l] || l}」`],
+    [/^(.+) · (\d+) of (\d+)$/, (m, n, a, b) => `${be(n)} · ${a} / ${b}`],
+    [/^You took (.+)\. It is heavier than it looks\.$/, (m, g) => `${g}をもらった。見た目より重い。`],
+    [/^\+(\d+) XP\. I felt the Machine shift\.$/, (m, x) => `+${x} XP。マシンがうごくのを感じた。`],
+    [/^…you were here on (.+)… I can still see where you moved…$/, (m, d) => `…${d}、きみはここにいた… うごいたところがまだ見える…`],
+    [/^…(.+)… you came so close to my core…$/, (m, d) => `…${d}… きみはわたしの芯のすぐそばまで来た…`],
+    [/^I scanned a barcode and decoded a (\w+) (.+) (\S+) \(it tastes like (.+)\)\. Scan yours:$/, (m, r, n, i, t) => `バーコードを読んで、${RAR[r] || r}の${food(n)} ${i} を解読したよ(${TASTE[t] || t}の味)。きみもスキャンしてみて:`],
+    [/^bond (\w+) · ([\d.]+) pts$/, (m, b, p) => `絆 ${BOND[b] || b} · ${p}pt`],
+    [/^(\d+) frames a second\. Easier on your machine\.$/, (m, n) => `毎秒${n}フレーム。マシンにやさしい設定。`],
+    [/^fps max$/, () => 'fps 上限なし'],
+  ];
+  // fragments of the stats panel (text between bold numbers)
+  Object.assign(JA, { 'perceiving ': '知覚している次元 ', ' of 12 dimensions': ' / 12', 'heart ': '心拍 ', ' bpm · breath ': ' bpm · 呼吸 ', '/min · ': '/分 · ', ' fps · ': ' fps · ', '× render': '× 描画', 'resonance with you ': 'きみとの共鳴 ', ' days · ': '日 · ', 'fed ': 'あげた回数 ', ' times': '回', 'stage ': '段階 ', 'bond ': '絆 ', 'words it keeps: ': 'おぼえていることば: ', 'next dimension in ': 'つぎの次元まで ', 'brought back: ': '持ち帰ったもの: ' });
+  for (const [k, v] of Object.entries(RAR)) JA[k] = v; for (const [k, v] of Object.entries(BOND)) JA[k] = v; for (const [k, v] of Object.entries(STAGE)) JA[k] = v; for (const [k, [n]] of Object.entries(DIM)) JA[k] = JA[k] || n;
+
+  for (const k of Object.keys(JA)) { const t = k.trim(); if (t !== k && JA[t] == null) JA[t] = JA[k].trim(); }
+  const trOne = s => { if (JA[s] != null) return JA[s]; for (const [re, fn] of RULES) { const m = re.exec(s); if (m) { const r = fn(...m); if (r != null) return r; } } const f = food(s); return f !== s ? f : null; };
+  const trCore = s => { const t = trOne(s); if (t != null) return t; const parts = s.split(/(?<=[.!?…])\s+(?=[A-Z0-9…"“*])/); if (parts.length < 2) return null; const out = parts.map(trOne); return out.every(x => x != null) ? out.join('') : null; };
+  const translate = s => { // keeps leading symbols (✎, ↗, ⌁ …) and surrounding spaces
+    if (!s || s.length > 400 || !/[A-Za-z]/.test(s)) return null;
+    const m = /^(\s*[^A-Za-z0-9"“…*?!+()\[\]]*\s*)([\s\S]*?)(\s*)$/.exec(s); const core = m[2]; const t = trCore(core) ?? trCore(s.trim());
+    return t == null ? null : (t === trCore(s.trim()) && trCore(core) == null ? t : m[1] + t + m[3]);
+  };
+
+  const orig = new WeakMap(), origAttr = new WeakMap(), wrote = new WeakMap(), wroteAttr = new WeakMap(), miss = new Set(); let busy = false; // wrote*: what this layer itself last wrote, so its own writes are not mistaken for the game's
+  const ATTRS = ['title', 'placeholder', 'aria-label'];
+  const SKIP = el => el && (el.closest?.('script,style,svg,canvas,textarea,.vitals .hide-ja') || el.id === 'feedIn' || el.id === 'gzIn' || el.id === 'eaEmail');
+  function doText(n) { if (lang !== 'ja' || SKIP(n.parentElement)) return; const v = n.nodeValue; const t = translate(v); if (t != null && t !== v) { if (!orig.has(n)) orig.set(n, v); busy = true; n.nodeValue = t; wrote.set(n, t); busy = false; } else if (t == null && /[A-Za-z]{3}/.test(v) && !/[぀-ヿ一-鿿]/.test(v) && v.trim().length > 2) miss.add(v.trim()); }
+  function doEl(el) { if (lang !== 'ja' || SKIP(el)) return; for (const a of ATTRS) { const v = el.getAttribute?.(a); if (!v) continue; const t = translate(v); if (t != null && t !== v) { let o = origAttr.get(el); if (!o) origAttr.set(el, o = {}); if (!(a in o)) o[a] = v; el.setAttribute(a, t); let w = wroteAttr.get(el); if (!w) wroteAttr.set(el, w = {}); w[a] = t; } } }
+  function walk(root) { if (root.nodeType === 3) return doText(root); if (root.nodeType !== 1) return; doEl(root); const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT); let n; while ((n = w.nextNode())) n.nodeType === 3 ? doText(n) : doEl(n); }
+  function restore() { const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT); let n; busy = true; while ((n = w.nextNode())) { if (n.nodeType === 3) { if (orig.has(n)) { n.nodeValue = orig.get(n); orig.delete(n); } } else { const o = origAttr.get(n); if (o) { for (const a in o) n.setAttribute(a, o[a]); origAttr.delete(n); } } } busy = false; }
+  const mo = new MutationObserver(list => { if (busy || lang !== 'ja') return; for (const r of list) { if (r.type === 'characterData') { if (wrote.get(r.target) === r.target.nodeValue) continue; orig.delete(r.target); doText(r.target); } else if (r.type === 'attributes') { const w = wroteAttr.get(r.target); if (w && w[r.attributeName] === r.target.getAttribute(r.attributeName)) continue; const o = origAttr.get(r.target); if (o) delete o[r.attributeName]; doEl(r.target); } else r.addedNodes.forEach(walk); } });
+
+  function setLang(l, user) {
+    lang = l; document.documentElement.lang = l; if (user) { try { localStorage.setItem(KEY, l); } catch {} }
+    if (l === 'ja') walk(document.body); else restore();
+    const p = document.getElementById('langPill'); if (p) p.innerHTML = l === 'ja' ? '<b>日本語</b> · EN' : '<b>EN</b> · 日本語';
+    try { window.aeonEv?.('language', { lang: l, user: !!user }); } catch {}
+  }
+  function boot() {
+    const css = document.createElement('style');
+    css.textContent = `html[lang=ja] body{font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif}
+html[lang=ja] .hint,html[lang=ja] .gzRead,html[lang=ja] .eaPill,html[lang=ja] .sharePill,html[lang=ja] .dock button,html[lang=ja] .tr button,html[lang=ja] .tl .sub,html[lang=ja] .chip,html[lang=ja] .rings .ring,html[lang=ja] .whisper,html[lang=ja] .bt-hint,html[lang=ja] .bt .sub{letter-spacing:.04em!important;text-transform:none!important}
+html[lang=ja] .whisper{line-height:1.7}
+.langPill{position:absolute;top:calc(max(14px,env(safe-area-inset-top)) + 150px);right:20px;pointer-events:auto;font:600 10px/1 "Hiragino Sans","Noto Sans JP",Rajdhani,Arial,sans-serif;letter-spacing:.06em;color:#cffcff;background:rgba(7,7,7,.55);border:1px solid rgba(111,243,255,.45);border-radius:999px;padding:7px 11px;cursor:pointer;backdrop-filter:blur(6px)}
+.langPill b{color:#c7ff16;font-weight:700}
+.hud.between .langPill,.hud.tl-on .langPill{display:none}
+.hud.egging .langPill{top:auto;bottom:22px;right:50%;transform:translateX(50%)}
+@media (max-width:760px){.langPill{top:calc(max(14px,env(safe-area-inset-top)) + 140px);right:12px}}`;
+    document.head.appendChild(css);
+    const hud = document.getElementById('hud'); const b = document.createElement('button'); b.className = 'langPill'; b.id = 'langPill'; b.type = 'button'; b.title = 'Language · 言語'; b.setAttribute('aria-label', 'Language · 言語'); b.setAttribute('translate', 'no');
+    b.onclick = () => setLang(lang === 'ja' ? 'en' : 'ja', true); (hud || document.body).appendChild(b);
+    mo.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTRS });
+    setLang(lang, false);
+  }
+  window.aeonLang = { get lang() { return lang; }, set: l => setLang(l, true), miss: () => [...miss], translate };
+  document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', boot) : boot();
+})();
+</script>
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
 </script>
@@ -668,7 +958,7 @@ const ON_WEB = !/^(localhost|127\.0\.0\.1|\[::1\]|)$/.test(location.hostname); /
 const PUBLIC = true; // standalone game: every player's Aeon is born when they hatch it
 const GOATCOUNTER = ''; // e.g. 'lucidinstinct' once https://lucidinstinct.goatcounter.com exists; empty = no analytics
 if (ON_WEB && GOATCOUNTER) { const sc = document.createElement('script'); sc.async = true; sc.src = 'https://gc.zgo.at/count.js'; sc.dataset.goatcounter = `https://${GOATCOUNTER}.goatcounter.com/count`; document.head.appendChild(sc); }
-const track = name => { try { if (ON_WEB && GOATCOUNTER) window.goatcounter?.count?.({ path: `aeon/${name}`, title: name, event: true }); } catch {} }; // on the web every visitor's Aeon is born when they hatch it
+const track = name => { try { window.aeonEv?.(name); } catch {} try { if (ON_WEB && GOATCOUNTER) window.goatcounter?.count?.({ path: `aeon/${name}`, title: name, event: true }); } catch {} }; // on the web every visitor's Aeon is born when they hatch it
 const bornAt = () => mem.born || (PUBLIC ? Date.now() : BIRTH);
 const realAgeDays = () => Math.max(0, (Date.now() - bornAt()) / 864e5);
 const resonance = () => Math.min(14, mem.touches * 0.02 + mem.communion / 600 + (mem.fed || []).reduce((a, f) => a + (f.p || .4), 0)); // every feeding grows it a little
@@ -1159,7 +1449,7 @@ function eggHatch() {
   renderPass.scene = scene; eyePass.enabled = true; scene.add(eggGroup); // the shards fly in Aeon's own scene while it fades in
   mood.flash = 1; mood.fold = 1; wave(new THREE.Vector3(), 6, colC); [262, 392, 523, 784].forEach((f, i) => setTimeout(() => audio.bell(f, .5), i * 110));
   { const v = new THREE.Vector3(0, 0, 0).project(camera); aeonConception((v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight); } // how Aeon is born, centred on the egg
-  hintEl.textContent = 'move · click · hold · drag';
+  hintEl.dataset.k = ''; hintEl.textContent = 'move · click · hold · drag';
   if (!eggWanted) { mem.hatched = true; if (PUBLIC && !mem.born) mem.born = Date.now(); save(true); }
   setTimeout(() => { if (egg.greet) { egg.greet(); egg.greet = null; } }, 5200); // its first words come once it is out
   if (adiosWaiting) { adiosWaiting = false; setTimeout(adiosDrop, 7500); } // a Bar Adios signal that arrived before hatching continues now
@@ -1195,7 +1485,7 @@ function eggFrame(dt, t, now) {
     E.nodes.forEach((sp, k) => { const a = k / 12 * 6.283 + t * .12; sp.position.set(Math.cos(a) * 1.6, -1.37, Math.sin(a) * 1.6); sp.material.color.copy(colC); sp.material.opacity = .35 + .5 * Math.max(0, Math.sin(t * 2 - k * .52)); }); }
   mood.flash = Math.max(0, mood.flash - dt * .9);
   bloom.strength = .55; env.gov = 1; godPass.uniforms.uI0.value = godPass.uniforms.uI1.value = 0; finalPass.uniforms.uTime.value = t; finalPass.uniforms.uFold.value = 0; finalPass.uniforms.uZoom.value = 0; flashEl.style.opacity = mood.flash * .7;
-  if (hintEl.textContent !== 'tap the egg') hintEl.textContent = 'tap the egg';
+  if (hintEl.dataset.k !== 'egg') { hintEl.dataset.k = 'egg'; hintEl.textContent = 'tap the egg'; } // set once (a per-frame text check would fight the Japanese layer)
   audio.update(); composer.render();
 }
 // Metatron's cube: thirteen spheres (the fruit of life) and the 78 lines between them, turning round its heart from day 180
@@ -2249,7 +2539,7 @@ function mysteryBox(again) {
     document.getElementById('mbFrom').textContent = it.where || (it.from ? `decoded from: ${it.from}` : `barcode ${it.code}`);
     document.getElementById('mbTaste').textContent = `Tastes like ${it.taste}.`;
     document.getElementById('mbPow').textContent = `+${it.power} days of growth${again ? ' · scanned before, half strength' : ''}`;
-    setTimeout(() => document.getElementById('mbFeed').focus(), 900); track('scan-' + it.rarity.toLowerCase());
+    setTimeout(() => document.getElementById('mbFeed').focus(), 900); track('scan-' + it.rarity.toLowerCase()); try { window.aeonEv?.('item_revealed', { name: it.name, rarity: it.rarity, power: it.power, code: String(it.code || '').slice(0, 30), sticker: it.sticker || '', repeat: !!it.again, from: String(it.from || '').slice(0, 60) }); } catch {}
     if (it.mythic && !mem.regular) { mem.regular = Date.now(); save(true); track('being-regular'); setTimeout(() => whisper('Someone at the bar nods at you…', 5), 1800); gzItem.regularNew = true; } // The Regular is unlocked for good
   };
 }
