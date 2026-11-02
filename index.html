@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>/* first contact (2 November 2026): a new visitor sees the Metatron intro once before the egg, QR arrivals too; the query (item, utm, lang) rides along. Not for hatched players, previews, reduced motion, or the game inside the intro. */
+(() => { try { const p = new URLSearchParams(location.search); if (window.top !== window || ["from", "age", "egg", "beings", "gizmo", "fps"].some(k => p.has(k))) return;
+  if (localStorage.getItem("gizmo.intro") === "seen" || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  for (const k of ["scanner-gizmo-v1", "lucid-aeon-v1"]) { const m = JSON.parse(localStorage.getItem(k) || "null"); if (m && m.hatched) return; }
+  location.replace("concepts/intro.html" + location.search); } catch {} })();</script>
 <title>Scanner Gizmo · Lucid Aeon · Lucid Instinct</title>
 <meta name="generator" content="Scanner Gizmo v1 (standalone game, forked from Lucid Aeon on 1 November 2026)">
 <meta name="description" content="Hatch an interdimensional entity. Feed it, stretch it, watch it evolve through sixteen forms. By Lucid Instinct.">
@@ -520,7 +525,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     </div>
   </div>
   <div class="hint" id="hint">move · click · hold · drag</div>
-  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.14</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
+  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.15</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
   <button class="morePill" id="dMore" title="More: sound, timeline, listen, veil, frame rate, stats" aria-label="More settings">&#8943;</button>
   <button class="sharePill" id="sharePill" title="Share Aeon with a friend">&#8599; share</button>
   <div class="eaNote">early access demo · limited features</div>
@@ -2704,7 +2709,7 @@ function closeEA() { eaEl.classList.remove('on'); }
 document.getElementById('eaPill').onclick = openEA; document.getElementById('eaX').onclick = closeEA;
 eaEl.addEventListener('click', e => { if (e.target === eaEl) closeEA(); }); addEventListener('keydown', e => { if (e.key === 'Escape' && eaEl.classList.contains('on')) closeEA(); });
 document.getElementById('eaInsta').addEventListener('click', () => track('instagram'));
-document.getElementById('bIntro').onclick = () => { const u = new URL('concepts/intro.html', location.href).href; try { (window.top || window).location.href = u; } catch { location.href = u; } };
+document.getElementById('bIntro').onclick = () => { const u = new URL('concepts/intro.html?replay=1', location.href).href; try { (window.top || window).location.href = u; } catch { location.href = u; } };
 document.getElementById('sharePill').onclick = () => shareAeon(); document.getElementById('bShare').onclick = () => shareAeon(); document.getElementById('eaShare').onclick = () => shareAeon();
 document.getElementById('mbShare').onclick = () => { const it = gzItem; if (it?.mythic) return shareAeon('I found the Mythic Adios at Bar Adios, Shinjuku 🍸 Find yours:', 'share-adios'); shareAeon(it ?`I scanned a barcode and decoded a ${it.rarity} ${it.name} ${it.icon} (it tastes like ${it.taste}). Scan yours:` : null, 'share-find'); };
 document.getElementById('eaEmail').addEventListener('keydown', e => e.stopPropagation());
