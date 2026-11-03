@@ -525,7 +525,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     </div>
   </div>
   <div class="hint" id="hint">move · click · hold · drag</div>
-  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.15</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
+  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.16</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
   <button class="morePill" id="dMore" title="More: sound, timeline, listen, veil, frame rate, stats" aria-label="More settings">&#8943;</button>
   <button class="sharePill" id="sharePill" title="Share Aeon with a friend">&#8599; share</button>
   <div class="eaNote">early access demo · limited features</div>
@@ -983,7 +983,7 @@ const canvas = document.getElementById('c');
 let renderer;
 try { renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' }); }
 catch (e) { document.getElementById('err').style.display = 'grid'; throw e; }
-const basePx = () => Math.min(devicePixelRatio || 1, 3, Math.max(1.75, Math.sqrt(2.6e6 / Math.max(1, innerWidth * innerHeight)))); // about 2.5× on a 3× phone, 1.75× on laptops
+const basePx = () => Math.min(devicePixelRatio || 1, 1.5, Math.max(1, Math.sqrt(1e6 / Math.max(1, innerWidth * innerHeight)))); // 1.5× on phones (about 0.75M pixels), 1× on laptops and desktops (3 November 2026: 2.8× on phones and 1.75× on laptops made them lag)
 renderer.setPixelRatio(basePx());
 // a GPU reset or laptop sleep can drop the WebGL context; say so instead of freezing black, and restart when it returns
 canvas.addEventListener('webglcontextlost', e => {
@@ -3747,11 +3747,11 @@ const env = { sx: window.screenX || 0, sy: window.screenY || 0, moving: 0, moved
   mic: null, micLvl: 0, micLow: 0, onset: 0, quiet: 0, online: navigator.onLine !== false, lowPower: false, charging: null, powerSaid: false,
   moonFull: 0, moonName: '', after: 0, fps: 0, fpsAcc: 0, fpsN: 0, hiccupT: 60 + Math.random() * 200, sneeze: 0, sneezed: false, riftFear: 0, riftDir: new THREE.Vector3(),
   gravity: new THREE.Vector3(), leanAdd: new THREE.Vector3(), veil: false, why: '', area: innerWidth * innerHeight, heartLog: [], breathLog: [] };
-const perf = { sum: 0, n: 0, level: 0, wait: 6000 };
-const PERF_PX = [1, .8, .6]; // the governor's levels, as a share of the base render size (it used to jump to 1× then 0.75× absolute, which is a quarter of a 3× phone)
+const perf = { sum: 0, n: 0, t: 0, min: 1e9, level: 0, wait: 4000, good: 0, upAt: -1e9, fails: 0 };
+const PERF_PX = [1, .8, .65, .5], PX_FLOOR = .75; // the governor's levels, as a share of the base render size, never below 0.75×
 function resize() {
   const w = innerWidth, h = innerHeight, area = w * h;
-  renderer.setPixelRatio(basePx() * PERF_PX[perf.level]); env.px = renderer.getPixelRatio(); env.qLevel = perf.level; finalPass.uniforms.uGrain.value = env.px >= 1.5 ? .028 : .016;
+  renderer.setPixelRatio(Math.max(Math.min(basePx(), PX_FLOOR), basePx() * PERF_PX[perf.level])); env.px = renderer.getPixelRatio(); env.qLevel = perf.level; finalPass.uniforms.uGrain.value = env.px >= 1.5 ? .028 : .016;
   if (env.area) { // squeezed or stretched (the first size does not count)
     if (area < env.area * .65) { env.squeeze = 1; if (performance.now() - env.squeezeSaid > 30000) { env.squeezeSaid = performance.now(); env.pop = 8; env.popPhase = -1; } }
     else if (area > env.area * 1.5) env.stretch = true;
@@ -3768,16 +3768,19 @@ addEventListener('resize', resize); resize();
 
 /* ---------- adaptive quality: a slow GPU gets a lighter render instead of a stutter ---------- */
 function adapt(ms) {
-  if (ms > 250 || document.hidden) return; // a paused or hidden tab is not a slow GPU
+  if (ms > 250 || document.hidden || env.bench) return; // a paused or hidden tab is not a slow GPU
   perf.wait -= ms; if (perf.wait > 0) return; // let the intro and shader compiles settle first
-  perf.sum += ms; perf.n++; if (perf.n < 180) return;
-  const avg = perf.sum / perf.n; perf.sum = perf.n = 0;
-  if (avg > 26 && perf.level < 2) {
-    perf.level++; bAdapt.i = Math.min(bAdapt.i, perf.level === 1 ? 1 : 0); between.scale = bAdapt.steps[bAdapt.i]; resize(); perf.wait = 3000; // the Interstice's ceiling drops with it
-    console.info(`Aeon: frames averaged ${avg.toFixed(0)} ms, so resolution was lowered (level ${perf.level}, ${env.px.toFixed(2)}×).`);
-  } else if (avg < 11 && perf.level > 0) { // quick again for 180 frames: one step back up, then a long wait so it cannot see-saw
-    perf.level--; resize(); perf.wait = 8000; console.info(`Aeon: frames averaged ${avg.toFixed(0)} ms, resolution restored (level ${perf.level}, ${env.px.toFixed(2)}×).`);
-  }
+  perf.sum += ms; perf.n++; perf.t += ms; perf.min = Math.min(perf.min, ms); if (perf.t < 2000) return;
+  const avg = perf.sum / perf.n, target = fpsCap ? 1000 / fpsCap : Math.max(6.9, perf.min), now = performance.now(); // target: the cap, or the display's own frame time
+  perf.sum = perf.n = perf.t = 0; perf.min = 1e9;
+  if (avg > target * 1.25 && perf.level < PERF_PX.length - 1 && env.px > PX_FLOOR + .01) { // 2 s slower than the display: one step down
+    if (now - perf.upAt < 10000) perf.fails++; // it had just stepped up: that level is too much for this device
+    perf.level++; perf.good = 0; bAdapt.i = Math.min(bAdapt.i, perf.level === 1 ? 1 : 0); between.scale = bAdapt.steps[bAdapt.i]; resize(); perf.wait = 1000; // the Interstice's ceiling drops with it
+    console.info(`Aeon: frames averaged ${avg.toFixed(0)} ms (target ${target.toFixed(0)}), so resolution was lowered (level ${perf.level}, ${env.px.toFixed(2)}×).`);
+  } else if (avg < target * 1.1 && perf.level > 0 && perf.fails < 2) { // smooth: after 15 s (longer after a failed try) one step back up
+    perf.good += 2000; if (perf.good < 15000 * (1 + perf.fails)) return;
+    perf.level--; perf.good = 0; perf.upAt = now; resize(); perf.wait = 2000; console.info(`Aeon: frames averaged ${avg.toFixed(0)} ms, resolution restored (level ${perf.level}, ${env.px.toFixed(2)}×).`);
+  } else perf.good = 0;
 }
 
 /* ---------- the life loop ---------- */
@@ -4052,6 +4055,7 @@ const firstVisit = mem.visits === 1;
 
 function frame(now) {
   if (!env.bench) requestAnimationFrame(frame); // the bench drives frames by hand
+  if (window.aeonHold) { clock.last = now; return; } // loaded behind the cube intro and waiting for its hand-off: no rendering, the clock does not run
   if (fpsCap && now - clock.last < 1000 / fpsCap - 1.5) return; // the cap: skipped frames accumulate into the next dt, so its clock keeps true time
   const raw = now - clock.last, dt = Math.min(.05, raw / 1000); clock.last = now; env.raw = raw;
   adapt(raw);
