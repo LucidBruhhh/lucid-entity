@@ -147,7 +147,7 @@ const BASS = [55, 55, 65.4, 49, 55, 73.4, 65.4, 49];
 // the beat runs on the page clock, so the show goes on even when sound is muted or blocked; the audio follows it
 function scheduler() { const now = performance.now() / 1000; if (groove || S.phase === 'count') { if (nextBeat < now - .5) nextBeat = now; while (nextBeat < now + .12) { const at = Math.max(0, nextBeat - now), b = beatNo;
     if (groove) { kick(at); hat(at + BEAT / 2); if (groove > 1 && b % 2 === 1) clap(at); if (groove > 1) osc(BASS[b % 8], BEAT * .9, 'sawtooth', .12, at + BEAT / 2); if (groove > 2) osc(BASS[b % 8] * 4, .15, 'square', .03, at + BEAT * .75); }
-    onBeat(b, at); beatNo++; nextBeat += BEAT; } } requestAnimationFrame(scheduler); }
+    onBeat(b, at); beatNo++; nextBeat += BEAT; } } if (S.phase !== 'handoff') requestAnimationFrame(scheduler); } /* the game has taken over: the beat stops */
 requestAnimationFrame(scheduler);
 const buzz = p => { try { if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(p); } catch {} };
 const PENT = [261.6, 293.7, 329.6, 392, 440, 523.3, 587.3, 659.3, 784, 880, 1046.5, 1174.7, 1318.5, 1568, 1760, 2093];
@@ -167,8 +167,8 @@ function found(item, kind) { S.found++; S.cur = { ...item, kind, col: COLS[(S.fo
   if (kind === 'solid') { S.shake = 1; osc(55, .6, 'sine', .5, 0, .5); noise(.4, .15, 0, 900, 200); } }
 // the beat drives the count
 let plan = [], gameFrame = null, gameReady = false;
-function preloadGame() { if (gameFrame) return; gameFrame = document.createElement('iframe'); gameFrame.id = 'game'; gameFrame.allow = 'camera; autoplay; fullscreen; clipboard-write; web-share'; gameFrame.src = GAME_URL; gameFrame.onload = () => setTimeout(() => gameReady = true, 600); body.appendChild(gameFrame); }
-function handoff() { markSeen(); try { history.replaceState(null, "", location.pathname); } catch {} S.phase = 'handoff'; groove = 0; flash(1, 1200); body.classList.add('handoff'); osc(55, 2.4, 'sine', .6, 0, .5); buzz([40, 60, 160]); try { gameFrame.focus(); } catch {} }
+function preloadGame() { if (gameFrame) return; gameFrame = document.createElement('iframe'); gameFrame.id = 'game'; gameFrame.allow = 'camera; autoplay; fullscreen; clipboard-write; web-share'; gameFrame.src = GAME_URL; gameFrame.onload = () => setTimeout(() => { gameReady = true; try { gameFrame.contentWindow.aeonHold = true; } catch {} }, 600); /* it rendered once (shaders compiled); now it waits instead of rendering unseen */ body.appendChild(gameFrame); }
+function handoff() { markSeen(); try { history.replaceState(null, "", location.pathname); } catch {} S.phase = 'handoff'; S.offT = S.t; try { gameFrame.contentWindow.aeonHold = false; } catch {} groove = 0; flash(1, 1200); body.classList.add('handoff'); osc(55, 2.4, 'sine', .6, 0, .5); buzz([40, 60, 160]); try { gameFrame.focus(); } catch {} }
 function buildPlan() { plan = []; FLAT.forEach(f => plan.push(['flat', f])); plan.push(['look'], ['look2']); SOLIDS.forEach(s => plan.push(['solid', s], ['hold'])); plan.push(['fruit'], ['hold'], ['ask'], ['hold'], ['twist'], ['implode']); }
 function onBeat(b, at) { setTimeout(() => { if (S.phase !== 'count') return; const step = plan.shift(); if (!step) return; const [k, item] = step;
   if (k === 'flat') found(item, 'flat');
@@ -333,7 +333,7 @@ function egg(cx, cy, r, t, glow, cracks) {
   x.strokeStyle = TH.eh; x.shadowColor = TH.eh; x.shadowBlur = 24; x.lineWidth = 1.8; path(); x.stroke(); x.shadowBlur = 0; x.restore(); }
 
 let last = performance.now();
-function frame(now) { requestAnimationFrame(frame); const dt = Math.min(.05, (now - last) / 1000); last = now; S.t += dt; const t = S.t;
+function frame(now) { if (S.phase === 'handoff' && S.t - S.offT > 2) { cv.style.display = 'none'; return; } requestAnimationFrame(frame); /* after the hand-off flash the intro stops drawing */ const dt = Math.min(.05, (now - last) / 1000); last = now; S.t += dt; const t = S.t;
   try { draw(t, dt); } catch (e) { console.warn(e); } }
 function draw(t, dt) {
   if (S.phase === 'handoff') { x.fillStyle = '#000'; x.fillRect(0, 0, W, H); return; }
