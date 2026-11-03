@@ -147,7 +147,7 @@ const BASS = [55, 55, 65.4, 49, 55, 73.4, 65.4, 49];
 // the beat runs on the page clock, so the show goes on even when sound is muted or blocked; the audio follows it
 function scheduler() { const now = performance.now() / 1000; if (groove || S.phase === 'count') { if (nextBeat < now - .5) nextBeat = now; while (nextBeat < now + .12) { const at = Math.max(0, nextBeat - now), b = beatNo;
     if (groove) { kick(at); hat(at + BEAT / 2); if (groove > 1 && b % 2 === 1) clap(at); if (groove > 1) osc(BASS[b % 8], BEAT * .9, 'sawtooth', .12, at + BEAT / 2); if (groove > 2) osc(BASS[b % 8] * 4, .15, 'square', .03, at + BEAT * .75); }
-    onBeat(b, at); beatNo++; nextBeat += BEAT; } } if (S.phase !== 'handoff') requestAnimationFrame(scheduler); } /* the game has taken over: the beat stops */
+    onBeat(b, at); if (S.phase === 'count') onBeat(b, at + BEAT / 2); beatNo++; /* the count runs at double tempo */ nextBeat += BEAT; } } if (S.phase !== 'handoff') requestAnimationFrame(scheduler); } /* the game has taken over: the beat stops */
 requestAnimationFrame(scheduler);
 const buzz = p => { try { if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(p); } catch {} };
 const PENT = [261.6, 293.7, 329.6, 392, 440, 523.3, 587.3, 659.3, 784, 880, 1046.5, 1174.7, 1318.5, 1568, 1760, 2093];
@@ -169,7 +169,7 @@ function found(item, kind) { S.found++; S.cur = { ...item, kind, col: COLS[(S.fo
 let plan = [], gameFrame = null, gameReady = false;
 function preloadGame() { if (gameFrame) return; gameFrame = document.createElement('iframe'); gameFrame.id = 'game'; gameFrame.allow = 'camera; autoplay; fullscreen; clipboard-write; web-share'; gameFrame.src = GAME_URL; gameFrame.onload = () => setTimeout(() => { gameReady = true; try { gameFrame.contentWindow.aeonHold = true; } catch {} }, 600); /* it rendered once (shaders compiled); now it waits instead of rendering unseen */ body.appendChild(gameFrame); }
 function handoff() { markSeen(); try { history.replaceState(null, "", location.pathname); } catch {} S.phase = 'handoff'; S.offT = S.t; try { gameFrame.contentWindow.aeonHold = false; } catch {} groove = 0; flash(1, 1200); body.classList.add('handoff'); osc(55, 2.4, 'sine', .6, 0, .5); buzz([40, 60, 160]); try { gameFrame.focus(); } catch {} }
-function buildPlan() { plan = []; FLAT.forEach(f => plan.push(['flat', f])); plan.push(['look'], ['look2']); SOLIDS.forEach(s => plan.push(['solid', s], ['hold'])); plan.push(['fruit'], ['hold'], ['ask'], ['hold'], ['twist'], ['implode']); }
+function buildPlan() { plan = []; [0, 2, 3, 6].forEach(i => FLAT[i] && plan.push(['flat', FLAT[i]])); plan.push(['look2']); SOLIDS.slice(0, 2).forEach(s => plan.push(['solid', s], ['hold'])); plan.push(['fruit'], ['twist'], ['implode']); } // a short burst (was all 10 flat shapes, 5 solids, look and ask: 28 beats)
 function onBeat(b, at) { setTimeout(() => { if (S.phase !== 'count') return; const step = plan.shift(); if (!step) return; const [k, item] = step;
   if (k === 'flat') found(item, 'flat');
   else if (k === 'solid') found(item, 'solid');
@@ -178,14 +178,14 @@ function onBeat(b, at) { setTimeout(() => { if (S.phase !== 'count') return; con
   else if (k === 'fruit') { preloadGame(); S.look = 0; found({ name: 'FRUIT OF LIFE' }, 'fruit'); [261.6, 329.6, 392, 523.3].forEach((f, i) => osc(f, 1.6, 'sine', .07, i * .04)); groove = 3; }
   else if (k === 'ask') { S.cur = null; setColour('#ffffff'); $('q1').textContent = ''; decode($('q1'), 'HOW MANY DID YOU SPOT?'); $('q2').textContent = ''; decode($('q2'), `${S.found}`, 400); $('code').textContent = ''; }
   else if (k === 'twist') { groove = 0; S.phase = 'twist'; say(`You found all ${S.found}…`); decode($('q1'), ''); $('q2').textContent = ''; $('q1').textContent = '';
-    setTimeout(() => { say('…and one more.'); osc(40, 2.5, 'sine', .5, 0, .8); setTimeout(() => { S.phase = 'implode'; S.collapseT = S.t; noise(1.2, .4, 0, 200, 4000); osc(400, 1.2, 'sawtooth', .08, 0, .1); }, 1300); }, 1700); }
+    setTimeout(() => { say('…and one more.'); osc(40, 2.5, 'sine', .5, 0, .8); setTimeout(() => { S.phase = 'implode'; S.collapseT = S.t; noise(1.2, .4, 0, 200, 4000); osc(400, 1.2, 'sawtooth', .08, 0, .1); }, 800); }, 900); }
 }, Math.max(0, at * 1000)); }
 
 // the guess starts everything: it unlocks sound on an iPhone and commits the player to the challenge
 
 function startCount() { if (S.phase !== 'ask') return; audio(); S.phase = 'riser'; body.classList.remove('asking'); buzz(20);
   noise(1.1, .35, 0, 300, 9000); osc(110, 1.1, 'sawtooth', .06, 0, 4);
-  setTimeout(() => { flash(.9, 700); osc(55, 1, 'sine', .9, 0, .4); noise(.6, .3, 0, 2000); S.phase = 'count'; body.classList.add('counting'); buildPlan(); groove = 2; nextBeat = performance.now() / 1000 + .05; beatNo = 0; }, 1100); }
+  setTimeout(() => { flash(.9, 700); osc(55, 1, 'sine', .9, 0, .4); noise(.6, .3, 0, 2000); S.phase = 'count'; body.classList.add('counting'); buildPlan(); groove = 2; nextBeat = performance.now() / 1000 + .05; beatNo = 0; }, 500); }
 $('skip').onclick = e => { e.stopPropagation(); markSeen(); location.href = GAME_URL; };
 $('replay').onclick = e => { e.stopPropagation(); location.reload(); }; // while developing: watch it again from the top
 
@@ -244,18 +244,18 @@ addEventListener('pointermove', e => { if (S.phase !== 'ask' || !C.down) return;
   if (C.hold && C.moved > 26) { C.hold = false; body.classList.remove('charging'); } // a drag is a spin, not a hold
   if (!C.hold) { C.vy += dx * .0045; C.vx += dy * .0045; }
   C.proj.forEach(([px, py], i) => { if (Math.hypot(px - e.clientX, py - e.clientY) < 26 && S.t - C.chimeT[i] > .22) { C.chimeT[i] = S.t; C.flash[i] = 1; osc(PENT[(i * 3) % PENT.length], .9, 'sine', .09); osc(PENT[(i * 3) % PENT.length] * 2, .5, 'triangle', .025); buzz(6); } }); });
-addEventListener('pointerup', () => { if (!C.down) return; C.down = false; if (C.hold) { C.hold = false; body.classList.remove('charging'); if (C.charge > .08 && C.charge < 1) osc(220 * (1 + C.charge), .7, 'sine', .08, 0, .35); } promptFor(); });
+addEventListener('pointerup', () => { if (!C.down) return; C.down = false; if (S.phase === 'ask' && C.moved < 26 && C.charge < .5) C.tapped = true; /* a plain tap wakes it too */ if (C.hold) { C.hold = false; body.classList.remove('charging'); if (C.charge > .08 && C.charge < 1) osc(220 * (1 + C.charge), .7, 'sine', .08, 0, .35); } promptFor(); });
 function promptFor() { const a = $('pr1'), b = $('pr2'); if (C.spun) return; if (!C.touched) { a.textContent = 'hold the centre'; b.textContent = 'or spin it fast'; } else if (C.hold) { a.textContent = 'keep holding'; b.textContent = 'it is waking up'; } else if (C.spinE > .2) { a.textContent = 'keep spinning'; b.textContent = 'faster'; } else { a.textContent = 'hold the centre'; b.textContent = 'or spin it fast · wake it'; } }
 function holoCube(t, dt) {
   // physics: spin with inertia, then spring home; the charge fills while you hold the centre and drains when you let go
   C.ry += C.vy; C.rx += C.vx; C.vx *= .93; C.vy *= .93; if (!C.down) { C.ry = Math.atan2(Math.sin(C.ry), Math.cos(C.ry)); if (Math.abs(C.vy) < .02) { C.rx *= .965; C.ry *= .965; } } // after a flick it coasts, then settles home the short way C.rx = Math.max(-1.1, Math.min(1.1, C.rx));
-  if (C.hold) { C.charge = Math.min(1, C.charge + dt / 1.7); C.rx *= .9; C.ry *= .9; } else C.charge = Math.max(0, C.charge - dt * .45);
+  if (C.hold) { C.charge = Math.min(1, C.charge + dt / .9); C.rx *= .9; C.ry *= .9; } else C.charge = Math.max(0, C.charge - dt * .45);
   humSet(C.charge); if (!C.hold && C.charge <= 0) humStop();
   // the other way in: spin it fast enough and it wakes by itself (a rotor sweep instead of the fill from the centre)
   const spinning = Math.abs(C.vy) + Math.abs(C.vx);
   if (!C.spun) C.spinE = spinning > .012 ? Math.min(1, C.spinE + spinning * dt * 3.2) : Math.max(0, C.spinE - dt * .25);
-  if (C.spinE >= 1 && !C.spun && S.phase === 'ask') { C.spun = true; C.spinDir = Math.sign(C.vy) || 1; humStop(); C.hold = false; C.down = false; body.classList.remove('charging'); $('pr1').textContent = 'it is awake'; $('pr2').textContent = 'hold on';
-    osc(220, .95, 'sawtooth', .08, 0, 4); noise(.9, .3, 0, 400, 9000); buzz([20, 30, 60]); setTimeout(() => { if (S.phase === 'ask') startCount(); }, 950); }
+  if (!C.spun && S.phase === 'ask' && !C.down && (C.tapped || S.t - S.askT > 2.5)) { C.spinE = 1; C.vy = C.vy || .05; } /* a tap anywhere, or 2.5 s of nothing, wakes it the spin way: new players never wait */ if (C.spinE >= 1 && !C.spun && S.phase === 'ask') { C.spun = true; C.spinDir = Math.sign(C.vy) || 1; humStop(); C.hold = false; C.down = false; body.classList.remove('charging'); $('pr1').textContent = 'it is awake'; $('pr2').textContent = 'hold on';
+    osc(220, .95, 'sawtooth', .08, 0, 4); noise(.9, .3, 0, 400, 9000); buzz([20, 30, 60]); setTimeout(() => { if (S.phase === 'ask') startCount(); }, 450); }
   if (C.spun) { C.vy = C.spinDir * .34; C.vx *= .8; C.rx *= .9; }
   if (C.hold && S.t - C.buzzT > .26 - C.charge * .2) { C.buzzT = S.t; buzz(6 + C.charge * 22); osc(70 + C.charge * 40, .12, 'sine', .25); }
   if (C.charge >= 1 && S.phase === 'ask') { humStop(); C.rx = C.ry = 0; C.hold = false; C.down = false; body.classList.remove('charging'); startCount(); return; }
@@ -342,7 +342,7 @@ function draw(t, dt) {
   x.globalAlpha = .9 + .1 * Math.sin(t * 53) * Math.sin(t * 17); // hologram flicker
   S.punch = Math.max(0, S.punch - dt * 4); S.shake = Math.max(0, S.shake - dt * 3);
   x.save(); const z = 1 + S.punch * .035, sh = S.shake * 6; x.translate(CX + (Math.random() - .5) * sh, CY + (Math.random() - .5) * sh); x.scale(z, z); x.translate(-CX, -CY);
-  if (S.phase === 'draw') { S.draw = Math.min(1, S.draw + dt * .55); cubeLines(.75, S.draw, t); if (S.draw >= 1) { S.phase = 'ask'; body.classList.add('asking'); promptFor(); } }
+  if (S.phase === 'draw') { S.draw = Math.min(1, S.draw + dt * .9); cubeLines(.75, S.draw, t); if (S.draw >= 1) { S.phase = 'ask'; S.askT = t; body.classList.add('asking'); promptFor(); } }
   else if (S.phase === 'ask') { holoCube(t, dt); }
   else if (S.phase === 'riser') { cubeLines(.75, 1, t, 2); }
   else if (S.phase === 'count' || S.phase === 'twist') {
@@ -372,7 +372,7 @@ function draw(t, dt) {
   for (const s of S.shards) { s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 700 * dt; s.r += dt * 5; x.save(); x.translate(s.x, s.y); x.rotate(s.r); x.fillStyle = 'rgba(30,24,50,.9)'; x.strokeStyle = TH.eh; x.beginPath(); x.moveTo(-s.s / 2, -s.s / 3); x.lineTo(s.s / 2, -s.s / 4); x.lineTo(0, s.s / 2); x.closePath(); x.fill(); x.stroke(); x.restore(); }
 }
 const ease = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
-body.classList.add('show'); setColour(TH.eh); requestAnimationFrame(frame);
+body.classList.add('show'); setColour(TH.eh); requestAnimationFrame(frame); preloadGame(); /* the game loads from the first frame (held once it has drawn), so the hand-off is instant */
 
 // test hook: jump ahead in a hidden tab
 window.intro = { S, C, cubeDown, startCount, eggTap, preloadGame, get ready() { return gameReady; }, beat() { onBeat(beatNo++, 0); }, step(sec) { for (let i = 0; i < sec * 30; i++) { S.t += 1 / 30; draw(S.t, 1 / 30); } } };
