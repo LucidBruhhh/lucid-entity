@@ -525,7 +525,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     </div>
   </div>
   <div class="hint" id="hint">move · click · hold · drag</div>
-  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.16</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
+  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.17</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
   <button class="morePill" id="dMore" title="More: sound, timeline, listen, veil, frame rate, stats" aria-label="More settings">&#8943;</button>
   <button class="sharePill" id="sharePill" title="Share Aeon with a friend">&#8599; share</button>
   <div class="eaNote">early access demo · limited features</div>
@@ -649,7 +649,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
   const LORE = { 'light travels backwards there': 'そこでは光がうしろ向きに進む', 'it is made entirely of music': 'まるごと音楽でできている', 'time runs in two directions at once': '時間がふた方向に同時に流れる', 'it holds a single atom the size of a galaxy': '銀河ほどの大きさの原子がひとつだけある', 'every thought becomes a star': '考えたことはすべて星になる', 'it dreams that it is this one': '自分がこの宇宙だと夢みている', 'gravity there is a kind of memory': 'そこでは重力が記憶の一種' };
   const BEING = { 'the self-transforming machine elves': '変容しつづける機械の妖精たち', 'the Jester': '道化', 'the Gatekeeper': '門番', 'the Mantis': 'カマキリ', 'the Mother': '母なるもの', 'the Feathered Serpent': '羽毛ある蛇', 'the Oracle': '託宣者', 'the being of light': '光の存在', 'the Net of Being': '存在の網', 'the Parallel Selves': '並行する自分たち', 'the Lucid Loom': 'ルーシッドの織機', 'the Regular': '常連さん', 'the Jester of Vesh': 'ヴェッシュの道化', 'the Machine Elf of Kel-Δ': 'Kel-Δの機械の妖精', 'the Chrysalid Twins': 'さなぎの双子', 'the Mantis Librarian': '司書のカマキリ', 'the Tide': '潮', 'the Watchers': '見つめるものたち', 'the Dreamer': '夢みるもの' };
   const be = s => BEING[s] || BEING[s.charAt(0).toLowerCase() + s.slice(1)] || s;
-  const food = s => { const m = /^(\S+(?:-G)?) (\S+)$/.exec(s); return m && FA[m[1]] && FB[m[2]] ? FA[m[1]] + FB[m[2]] : (s === 'The Adios' ? 'ジ・アディオス' : s); };
+  const food = s => { const m = /^(\S+(?:-G)?) (\S+)$/.exec(s); return m && FA[m[1]] && FB[m[2]] ? FA[m[1]] + FB[m[2]] : (s === 'Adios Dream Elixir' || s === 'Adios Elixir' || s === 'The Adios' ? 'アディオス・\u200bドリーム・\u200bエリクサー' : s); };
   const nm = s => NAMES[s] || s;
   const dur = s => s.replace(/(\d+) days?/g, '$1日').replace(/(\d+)h\b/g, '$1時間').replace(/(\d+) hours?/g, '$1時間').replace(/(\d+) minutes? and (\d+) seconds?/g, '$1分$2秒').replace(/(\d+) min (\d+) s/g, '$1分$2秒').replace(/([\d.]+) hours/g, '$1時間');
 
@@ -851,6 +851,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     css.textContent = `html[lang=ja] body{font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif}
 html[lang=ja] .hint,html[lang=ja] .gzRead,html[lang=ja] .eaPill,html[lang=ja] .sharePill,html[lang=ja] .dock button,html[lang=ja] .tr button,html[lang=ja] .tl .sub,html[lang=ja] .chip,html[lang=ja] .rings .ring,html[lang=ja] .whisper,html[lang=ja] .bt-hint,html[lang=ja] .bt .sub{letter-spacing:.04em!important;text-transform:none!important}
 html[lang=ja] .whisper{line-height:1.7}
+html[lang=ja] #mbName,html[lang=ja] .bagM h3,html[lang=ja] .bagDet h3{font-size:24px;line-height:1.3;word-break:keep-all;overflow-wrap:anywhere} /* long katakana item names break at their dots, not mid-word (Adios Dream Elixir, 3 Nov 2026) */
 .langPill{position:absolute;top:calc(max(14px,env(safe-area-inset-top)) + 150px);right:20px;pointer-events:auto;font:600 10px/1 "Hiragino Sans","Noto Sans JP",Rajdhani,Arial,sans-serif;letter-spacing:.06em;color:#cffcff;background:rgba(7,7,7,.55);border:1px solid rgba(111,243,255,.45);border-radius:999px;padding:7px 11px;cursor:pointer;backdrop-filter:blur(6px)}
 .langPill b{color:#c7ff16;font-weight:700}
 .hud.between .langPill,.hud.tl-on .langPill{display:none}
@@ -940,6 +941,7 @@ try { if (!localStorage.getItem(KEY) && localStorage.getItem('lucid-aeon-v1') &&
 const mem = { first: Date.now(), visits: 0, touches: 0, communion: 0, seenDim: 0, lastVisit: 0,
   days: 0, lastDay: '', streak: 0, dreams: [], lexicon: [], moulted: false, stage: 0, relics: [], messages: [], trips: 0, fed: [], present: 0, giggles: 0, sulks: 0, sulkVisit: 0, stares: 0, bondLv: 0, name: '', hatched: false };
 try { Object.assign(mem, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch {}
+for (const f of mem.fed || []) if (f.what === 'The Adios' || f.what === 'Adios Elixir') f.what = 'Adios Dream Elixir'; for (const c of mem.collection || []) if (c.id === 'adios') c.name = 'Adios Dream Elixir'; // renamed 3 Nov 2026: older saves show the new name
 const awayHours = mem.lastVisit ? (Date.now() - mem.lastVisit) / 36e5 : -1;
 mem.visits++; mem.lastVisit = Date.now();
 let saveAt = 0;
@@ -2454,8 +2456,8 @@ function foodFor(code) { // the same barcode always becomes the same food
 /* Bar Adios exclusives (1 Nov 2026): the bar's QR (lucidinstinct.com/qr/adios → ?item=adios) drops The Adios, a Mythic found only there.
    Once per device per Tokyo night (the night turns at 6:00 Asia/Tokyo); a repeat gets a small bar snack. The effects happen to Aeon, never to the player. */
 const ADIOS_CODE = 'bar:adios', ADIOS_FX = 90; // seconds of blue, hiccups and double vision
-const ADIOS = { code: ADIOS_CODE, sticker: 'bar:adios', bar: true, mythic: true, name: 'The Adios', icon: '🍸', taste: 'neon rain and a promise you won\'t keep', rarity: 'Mythic', color: '#1ec8ff', power: 6, where: 'Found at Bar Adios · Shinjuku, Tokyo' };
-const BAR_SNACK = { code: 'bar:snack', sticker: 'bar:snack', bar: true, name: 'Neon Bar Nuts', icon: '🥜', taste: 'salt, good company and the last train home', rarity: 'Common', color: '#ff5fd8', power: .4, where: 'You already tasted The Adios tonight · a little something from Bar Adios, on the house' };
+const ADIOS = { code: ADIOS_CODE, sticker: 'bar:adios', bar: true, mythic: true, name: 'Adios Dream Elixir', icon: '🍸', taste: 'neon rain and a promise you won\'t keep', rarity: 'Mythic', color: '#1ec8ff', power: 6, where: 'Found at Bar Adios · Shinjuku, Tokyo' };
+const BAR_SNACK = { code: 'bar:snack', sticker: 'bar:snack', bar: true, name: 'Neon Bar Nuts', icon: '🥜', taste: 'salt, good company and the last train home', rarity: 'Common', color: '#ff5fd8', power: .4, where: 'You already tasted the Adios Dream Elixir tonight · a little something from Bar Adios, on the house' };
 const ADIOS_ART = `<svg viewBox="0 0 116 150" aria-hidden="true"><defs>
   <linearGradient id="adL" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#03135e"/><stop offset=".35" stop-color="#0a4dff"/><stop offset=".7" stop-color="#1ec8ff"/><stop offset="1" stop-color="#9ff9ff"/></linearGradient>
   <linearGradient id="adG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".18" stop-color="#fff" stop-opacity=".06"/><stop offset=".85" stop-color="#fff" stop-opacity=".04"/><stop offset="1" stop-color="#fff" stop-opacity=".4"/></linearGradient>
@@ -2483,7 +2485,7 @@ const tokyoNight = () => { try { return new Intl.DateTimeFormat('en-CA', { timeZ
 function adiosItem() { // the real thing once a night; otherwise a snack, so a second scan is never a dead end
   if (mem.adiosNight === tokyoNight()) return { ...BAR_SNACK };
   mem.adiosNight = tokyoNight(); mem.collection = mem.collection || [];
-  if (!mem.collection.some(c => c.id === 'adios')) mem.collection.push({ id: 'adios', name: 'The Adios', first: Date.now() });
+  if (!mem.collection.some(c => c.id === 'adios')) mem.collection.push({ id: 'adios', name: 'Adios Dream Elixir', first: Date.now() });
   save(true); return { ...ADIOS };
 }
 let adiosWaiting = false;
@@ -2605,7 +2607,7 @@ function gizmoFeed() {
   whisper(`${it.name}. ${it.rarity}! It tastes like ${it.taste}. I grew ${it.power} days on that.`, 7);
   if (it.mythic) { // The Adios: Aeon turns electric blue, hiccups and sees double for a while, then comes back
     env.adios = ADIOS_FX; env.adiosHic = 3; setTimeout(() => whisper('Whoa. Two of you. Both cute.', 5), 7600);
-    setTimeout(() => toast('✦ The Adios is in your backpack · tap to see it', () => openBag('bar:adios'), 9000), 8000);
+    setTimeout(() => toast('✦ Adios Dream Elixir is in your backpack · tap to see it', () => openBag('bar:adios'), 9000), 8000);
     if (it.regularNew) setTimeout(() => toast('✦ The Regular joined your Beings · tap to meet', () => { if (between.mode === 'out') { toggleGallery(true); galleryShow(VIS.findIndex(v => v.id === 'regular')); } }, 9000), 17500);
   }
   bagBadge();
@@ -2634,7 +2636,7 @@ function bagList() {
   const kinds = all.size, fed = [...all.values()].reduce((a, e) => a + e.n, 0);
   const tile = e => `<button class="bagT r-${e.it.rarity}" data-k="${encodeURIComponent(e.k)}" style="--c:${e.it.color}"><span class="n">×${e.n}</span><span class="o">${e.it.icon}</span><b>${e.it.name}</b><em>${e.it.rarity}</em></button>`;
   const sp = bagSparks;
-  const hero = adios ? `<button class="bagM" data-k="${encodeURIComponent(adios.k)}"><div class="bagMi">${sp}<div class="art">${adiosArt('h')}</div><div><span class="bagTag">MYTHIC · BAR EXCLUSIVE</span><h3>The Adios</h3><p>Found at Bar Adios · Shinjuku, Tokyo</p><p>Tastes like neon rain and a promise you won't keep.</p>
+  const hero = adios ? `<button class="bagM" data-k="${encodeURIComponent(adios.k)}"><div class="bagMi">${sp}<div class="art">${adiosArt('h')}</div><div><span class="bagTag">MYTHIC · BAR EXCLUSIVE</span><h3>Adios Dream Elixir</h3><p>Found at Bar Adios · Shinjuku, Tokyo</p><p>Tastes like neon rain and a promise you won't keep.</p>
       <div class="bagMeta">first found ${bagDate(adios.first)}${adios.n ? ` · fed ×${adios.n}` : ' · not fed yet'}</div></div></div></button>`
     : `<div class="bagM lock"><div class="bagMi"><div class="art">${adiosArt('l')}</div><div><span class="bagTag" style="animation:none;background:#2a3256;color:#9aa6d8">MYTHIC · ???</span><h3>Unknown Mythic</h3><p>Found only at Bar Adios · Shinjuku, Tokyo.</p><p>Look for its signal there.</p></div></div></div>`;
   const reg = mem.regular ? `<button class="bagT r-Mythic" data-being="regular" style="--c:#1ec8ff"><span class="o">🕴️</span><b>The Regular</b><em>Being · met</em></button>` : `<div class="bagT lock"><span class="o">?</span><b>???</b><em style="color:#7d86a8">Being · Shinjuku</em></div>`;
@@ -2652,7 +2654,7 @@ function bagDetail(k) {
       <h3>${it.name}</h3><p>${it.where || 'Decoded from a barcode'}</p><p>Tastes like ${it.taste}.</p>
       <div class="bagMeta">first found ${bagDate(e.first)} · ${e.n ? `fed ×${e.n} · +${it.power} days each` : 'not fed yet'}</div>
       <button class="mbFeed" id="bagShare" style="margin-top:14px;position:relative;z-index:1">↗ share this find</button></div>${it.mythic ? '</div></div>' : ''}`;
-  document.getElementById('bagShare').onclick = () => it.mythic ? shareAeon('I found the Mythic Adios at Bar Adios, Shinjuku 🍸 Find yours:', 'share-adios') : shareAeon(`I found a ${it.rarity} ${it.name} ${it.icon} in Lucid Aeon. Find yours:`, 'share-bag');
+  document.getElementById('bagShare').onclick = () => it.mythic ? shareAeon('I found the Mythic Adios Dream Elixir at Bar Adios, Shinjuku 🍸 Find yours:', 'share-adios') : shareAeon(`I found a ${it.rarity} ${it.name} ${it.icon} in Lucid Aeon. Find yours:`, 'share-bag');
 }
 function openBag(k) {
   if (between.mode !== 'out' || egg.on) return; if (vis.gallery) toggleGallery(false); hud.classList.remove('more-on');
@@ -2711,7 +2713,7 @@ eaEl.addEventListener('click', e => { if (e.target === eaEl) closeEA(); }); addE
 document.getElementById('eaInsta').addEventListener('click', () => track('instagram'));
 document.getElementById('bIntro').onclick = () => { const u = new URL('concepts/intro.html?replay=1', location.href).href; try { (window.top || window).location.href = u; } catch { location.href = u; } };
 document.getElementById('sharePill').onclick = () => shareAeon(); document.getElementById('bShare').onclick = () => shareAeon(); document.getElementById('eaShare').onclick = () => shareAeon();
-document.getElementById('mbShare').onclick = () => { const it = gzItem; if (it?.mythic) return shareAeon('I found the Mythic Adios at Bar Adios, Shinjuku 🍸 Find yours:', 'share-adios'); shareAeon(it ?`I scanned a barcode and decoded a ${it.rarity} ${it.name} ${it.icon} (it tastes like ${it.taste}). Scan yours:` : null, 'share-find'); };
+document.getElementById('mbShare').onclick = () => { const it = gzItem; if (it?.mythic) return shareAeon('I found the Mythic Adios Dream Elixir at Bar Adios, Shinjuku 🍸 Find yours:', 'share-adios'); shareAeon(it ?`I scanned a barcode and decoded a ${it.rarity} ${it.name} ${it.icon} (it tastes like ${it.taste}). Scan yours:` : null, 'share-find'); };
 document.getElementById('eaEmail').addEventListener('keydown', e => e.stopPropagation());
 document.getElementById('eaList').addEventListener('submit', () => { track('waitlist'); mem.waitlist = true; save(); setTimeout(() => { const f = document.getElementById('eaList'); f.classList.add('done'); f.querySelector('.eaListH').textContent = 'You are on the list. Check the new tab to confirm.'; }, 300); }); document.getElementById('eaHome').addEventListener('click', () => track('home'));
 document.getElementById('bHome').onclick = () => { track('home'); open('https://lucidinstinct.com/?utm_source=aeon&utm_medium=entity&utm_campaign=home', '_blank', 'noopener'); };
@@ -3447,6 +3449,13 @@ const VIS_DRAW = {
     if (!L) { // the neon behind: soft pools, a pink tube that sometimes stutters, a cyan bar, the back shelf with its vessels lit from inside, haze drifting through
       glow(-S * .6, -S * .6, S, 322, a * .2); glow(S * .62, -S * .5, S * .85, 188, a * .2); glow(0, CT, S * .9, 260, a * .08);
       const fl = Math.sin(t * .7) > .93 ? .35 + .65 * (Math.sin(t * 61) > 0) : 1;
+      { const y = -S * .94, sc = Math.abs(ec.getTransform().a) || 1, k = Math.round(S * sc / 8) + (document.fonts?.check('700 12px Rajdhani') ? 'r' : ''); let c = vis.barSign; // the sign above him: BAR ADIOS in pink neon, a small BAR over ADIOS (the user's request, 3 Nov 2026)
+        if (!c || c.k !== k) { c = vis.barSign = document.createElement('canvas'); c.k = k; c.width = Math.ceil(S * 1.3 * sc); c.height = Math.ceil(S * .62 * sc); // drawn once per size, then reused: blurred text is costly every frame
+          const g = c.getContext('2d'); g.scale(sc, sc); g.translate(S * .65, S * .34); g.textAlign = 'center'; g.textBaseline = 'middle';
+          for (const [letters, px, ly, al] of [['BAR', S * .11, -S * .165, .9], ['ADIOS', S * .17, 0, 1]]) { const gap = px * .92, x0 = -gap * (letters.length - 1) / 2; g.font = `700 ${px}px Rajdhani, Arial, sans-serif`;
+            g.shadowColor = 'hsla(322,100%,65%,1)'; g.shadowBlur = px * .7; g.fillStyle = `hsla(322,100%,80%,${al * .9})`; for (let i = 0; i < letters.length; i++) g.fillText(letters[i], x0 + i * gap, ly);
+            g.shadowBlur = 0; g.fillStyle = `rgba(255,255,255,${al * .55})`; for (let i = 0; i < letters.length; i++) g.fillText(letters[i], x0 + i * gap, ly); } }
+        ec.save(); ec.globalAlpha = Math.min(1, a * fl); ec.drawImage(c, -S * .65, y - S * .34, S * 1.3, S * .62); ec.restore(); glow(0, y - S * .05, S * .6, 322, a * .12 * fl); }
       ec.beginPath(); ec.arc(-S * .62, -S * .62, S * .24, .3, 5.6); neon(322, 2.4, a * fl); ec.beginPath(); ec.arc(-S * .62, -S * .62, S * .15, 3.5, 8.4); neon(300, 1.4, a * .7 * fl);
       ec.beginPath(); ec.moveTo(S * .34, -S * .76); ec.lineTo(S * .95, -S * .76); neon(188, 2.2, a); ec.beginPath(); ec.moveTo(S * .44, -S * .66); ec.lineTo(S * .85, -S * .66); neon(176, 1.3, a * .75);
       ec.beginPath(); ec.moveTo(-S * 1.05, -S * .08); ec.lineTo(S * 1.05, -S * .08); neon(h + 40, .8, a * .5);
