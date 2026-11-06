@@ -255,6 +255,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 .bagMeta{margin-top:7px;font:600 9.5px/1.4 "JetBrains Mono",monospace;letter-spacing:.05em;color:#7fdcff}
 .bagM .sp{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;box-shadow:0 0 6px #9ff9ff,0 0 12px #1ec8ff;animation:bagTw 2.4s ease-in-out infinite;pointer-events:none}@keyframes bagTw{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:1;transform:scale(1.3)}}
 .bagM.lock{cursor:default}.bagM.lock::before{animation:none;background:linear-gradient(90deg,#1b2140,#2a1a3a)}.bagM.lock .bagMi{background:linear-gradient(160deg,#0b0f1e,#04050b)}.bagM.lock .art{filter:brightness(0) drop-shadow(0 0 1px #4a5a9a) drop-shadow(0 0 8px rgba(80,110,220,.5))}.bagM.lock h3{text-shadow:none;color:#8a93b8}.bagM.lock p{color:#7d86a8}
+.bagM.ak::before{background:conic-gradient(from 0deg,#c7ff16,#f8d838,#7b2cff,#08d858,#c7ff16)}.bagM.ak .bagMi{background:radial-gradient(120% 100% at 18% 35%,rgba(199,255,22,.2),transparent 62%),linear-gradient(160deg,#160a38,#05030f 72%)}.bagM.ak .art{filter:drop-shadow(0 0 14px #c7ff16)}.bagM.ak .bagTag{background:linear-gradient(90deg,#f8d838,#c7ff16,#b48cff,#f8d838);background-size:300% 100%}.bagM.ak h3{text-shadow:0 0 18px rgba(199,255,22,.6)}.bagM.ak p{color:#efffd0}.bagM.ak .bagMeta{color:#c7ff16}.bagM.ak .sp{box-shadow:0 0 6px #f8d838,0 0 12px #c7ff16} /* The Drop: Aaron King's holographic card, lime and violet */
 .bagEmpty{padding:22px 16px;border:1px dashed rgba(255,255,255,.16);border-radius:14px;text-align:center;font:400 15px/1.4 "Cormorant Garamond",Georgia,serif;color:var(--fg2)}
 .bagDet{position:relative;padding:18px 16px 16px;border-radius:20px;text-align:center;background:radial-gradient(110% 70% at 50% 18%,var(--g,rgba(30,200,255,.22)),transparent 70%),rgba(8,8,16,.9);border:1px solid var(--c,#1ec8ff)}
 .bagDet .art{width:120px;height:156px;margin:6px auto 2px;filter:drop-shadow(0 0 16px #1ec8ff)}
@@ -262,6 +263,8 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 .bagDet .rar{display:inline-block;padding:5px 10px 4px;border-radius:3px;font:700 10px/1 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#070707;background:var(--c)}
 @media (prefers-reduced-motion:reduce){.bagM::before,.bagMi::after,.bagTag,.bagM .sp,.dock button.mythic i,.bag.on{animation:none}}
 .mbOrb.art{width:116px;height:150px;margin:8px auto 4px;border-radius:0;background:none;box-shadow:none;filter:drop-shadow(0 0 16px #1ec8ff) drop-shadow(0 0 3px #7ff6ff)}.mbOrb.art svg{width:100%;height:100%;overflow:visible}
+.mbOrb.art.drop{filter:drop-shadow(0 0 16px #c7ff16) drop-shadow(0 0 3px #7b2cff)} /* The Drop's vector art glows lime */
+.mbOrb.art.live{width:min(78vw,250px);height:min(78vw,250px);margin:0 auto 2px;border-radius:0;background:none;box-shadow:none;animation:none;filter:none;position:relative}.mbOrb.art.live svg{display:none}.mbOrb.art.live canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab} /* The Drop, live in 3D */
 .regToast{position:fixed;left:50%;top:calc(max(14px,env(safe-area-inset-top)) + 60px);transform:translateX(-50%);z-index:13;min-height:44px;padding:10px 18px;border:1px solid #ff5fd8;border-radius:999px;background:rgba(8,6,16,.9);color:#fff;font:600 14px/1.2 Rajdhani,Eurostile,Arial,sans-serif;letter-spacing:.06em;box-shadow:0 0 22px rgba(30,200,255,.5),inset 0 0 12px rgba(255,95,216,.25);cursor:pointer}
 .mbCard h3{margin:4px 0 6px;font:300 28px/1.1 "Cormorant Garamond",Georgia,serif;font-style:italic;color:#fff}
 .mbCard p{margin:4px 0;font:400 15px/1.35 "Cormorant Garamond",Georgia,serif;color:var(--fg2)}
@@ -525,7 +528,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     </div>
   </div>
   <div class="hint" id="hint">move · click · hold · drag</div>
-  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.18</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
+  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.19</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
   <button class="morePill" id="dMore" title="More: sound, timeline, listen, veil, frame rate, stats" aria-label="More settings">&#8943;</button>
   <button class="sharePill" id="sharePill" title="Share Aeon with a friend">&#8599; share</button>
   <div class="eaNote">early access demo · limited features</div>
@@ -649,7 +652,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
   const LORE = { 'light travels backwards there': 'そこでは光がうしろ向きに進む', 'it is made entirely of music': 'まるごと音楽でできている', 'time runs in two directions at once': '時間がふた方向に同時に流れる', 'it holds a single atom the size of a galaxy': '銀河ほどの大きさの原子がひとつだけある', 'every thought becomes a star': '考えたことはすべて星になる', 'it dreams that it is this one': '自分がこの宇宙だと夢みている', 'gravity there is a kind of memory': 'そこでは重力が記憶の一種' };
   const BEING = { 'the self-transforming machine elves': '変容しつづける機械の妖精たち', 'the Jester': '道化', 'the Gatekeeper': '門番', 'the Mantis': 'カマキリ', 'the Mother': '母なるもの', 'the Feathered Serpent': '羽毛ある蛇', 'the Oracle': '託宣者', 'the being of light': '光の存在', 'the Net of Being': '存在の網', 'the Parallel Selves': '並行する自分たち', 'the Lucid Loom': 'ルーシッドの織機', 'the Regular': '常連さん', 'the Jester of Vesh': 'ヴェッシュの道化', 'the Machine Elf of Kel-Δ': 'Kel-Δの機械の妖精', 'the Chrysalid Twins': 'さなぎの双子', 'the Mantis Librarian': '司書のカマキリ', 'the Tide': '潮', 'the Watchers': '見つめるものたち', 'the Dreamer': '夢みるもの' };
   const be = s => BEING[s] || BEING[s.charAt(0).toLowerCase() + s.slice(1)] || s;
-  const food = s => { const m = /^(\S+(?:-G)?) (\S+)$/.exec(s); return m && FA[m[1]] && FB[m[2]] ? FA[m[1]] + FB[m[2]] : (s === 'Adios Dream Elixir' || s === 'Adios Elixir' || s === 'The Adios' ? 'アディオス・\u200bドリーム・\u200bエリクサー' : s); };
+  const food = s => { const m = /^(\S+(?:-G)?) (\S+)$/.exec(s); return m && FA[m[1]] && FB[m[2]] ? FA[m[1]] + FB[m[2]] : (s === 'Adios Dream Elixir' || s === 'Adios Elixir' || s === 'The Adios' ? 'アディオス・\u200bドリーム・\u200bエリクサー' : s === 'The Drop' ? 'ザ・ドロップ' : s === 'Residual Bass' ? 'のこりのベース' : s); };
   const nm = s => NAMES[s] || s;
   const dur = s => s.replace(/(\d+) days?/g, '$1日').replace(/(\d+)h\b/g, '$1時間').replace(/(\d+) hours?/g, '$1時間').replace(/(\d+) minutes? and (\d+) seconds?/g, '$1分$2秒').replace(/(\d+) min (\d+) s/g, '$1分$2秒').replace(/([\d.]+) hours/g, '$1時間');
 
@@ -822,6 +825,18 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
   Object.assign(JA, { 'perceiving ': '知覚している次元 ', ' of 12 dimensions': ' / 12', 'heart ': '心拍 ', ' bpm · breath ': ' bpm · 呼吸 ', '/min · ': '/分 · ', ' fps · ': ' fps · ', '× render': '× 描画', 'resonance with you ': 'きみとの共鳴 ', ' days · ': '日 · ', 'fed ': 'あげた回数 ', ' times': '回', 'stage ': '段階 ', 'bond ': '絆 ', 'words it keeps: ': 'おぼえていることば: ', 'next dimension in ': 'つぎの次元まで ', 'brought back: ': '持ち帰ったもの: ' });
   for (const [k, v] of Object.entries(RAR)) JA[k] = v; for (const [k, v] of Object.entries(BOND)) JA[k] = v; for (const [k, v] of Object.entries(STAGE)) JA[k] = v; for (const [k, [n]] of Object.entries(DIM)) JA[k] = JA[k] || n;
 
+  Object.assign(JA, { // The Drop (Aaron King), 6 Nov 2026
+    'OFFICIAL SIGNAL · AARON KING · 130 BPM': '公式シグナル · AARON KING · 130 BPM', 'INCOMING SIGNAL · 130 BPM': 'シグナル受信中 · 130 BPM', 'A signal from Aaron King is waiting for me. Hatch me first.': 'Aaron Kingからのシグナルが待ってる。先にわたしをかえして。',
+    'Two bars. Hold on to me.': 'あと二小節。わたしにつかまって。', 'THE DROP HITS.': 'ドロップがくる。', 'The Parallel Selves: One of you let go. Take the frequency back with you.': 'パラレル・セルブズ: きみのひとりが解き放たれた。この周波数を持ってかえって。',
+    'In every universe, the drop hits.': 'どの宇宙でも、ドロップはくる。', 'One hundred and thirty a minute. My rings can count that.': '一分間に百三十。わたしの輪でかぞえられる。', 'I am not dancing. I am resonating. Loudly.': 'おどってるんじゃない。共鳴してるの。大音量で。',
+    'Which one of me is on the floor? All of them.': 'フロアにいるのはどのわたし? 全員。', 'Hold on to the beat. It knows the way home.': 'ビートにつかまって。帰り道を知ってるから。', 'Every one of me heard that. Take me through, and ask them.': 'わたしの全員が、いまのを聞いた。わたしをくぐって、たずねてみて。',
+    'Which one are you? …oh. This one.': 'きみはどれ? …あ。これだ。', 'I am the drop. Briefly.': 'わたしがドロップ。ほんのすこしだけ。', 'In every universe, one of me is this face.': 'どの宇宙でも、わたしのひとりはこの顔。', 'hh— TCHH. Signal. Sorry. Signal.': 'ザッ— ジジッ。シグナル。ごめん。シグナル。',
+    'That was the drop. It landed in every one of me at once. Which one of you let go?': 'いまのがドロップ。わたしの全員に、いっせいに落ちてきた。解き放たれたのは、きみのどれ?',
+    'Building': 'ビルド中', 'Dancing': 'おどってる', 'MYTHIC · AARON KING': 'ミシック · AARON KING', 'Found on the frequency of Aaron King · 130 BPM': 'Aaron Kingの周波数で発見 · 130 BPM',
+    "You already caught The Drop today · what is left of it on Aaron King's frequency": 'きょうはもうザ・ドロップをつかまえた · Aaron Kingの周波数にのこった、そのかけら', "Found only on Aaron King's frequency · 130 BPM.": 'Aaron Kingの周波数でしか見つからない · 130 BPM。',
+    '✦ The Drop is in your backpack · tap to see it': '✦ ザ・ドロップがバッグに入った · タップして見る', "I caught The Drop, a Mythic found only on Aaron King's frequency 💿 Find yours:": 'Aaron Kingの周波数でしか見つからないミシック、ザ・ドロップをつかまえた 💿 きみも見つけて:' });
+  Object.assign(TASTE, { 'two bars of build and a whole room letting go': '二小節のビルドと、部屋じゅうが解き放たれる瞬間', 'the kick after the kick, still in the floor': 'キックのあとのキック。まだ床にのこっている' });
+  RULES.push([/^Aaron King · 130 BPM · (\d+) of (\d+)$/, (m, a, b) => `Aaron King · 130 BPM · ${a} / ${b}`]);
   for (const k of Object.keys(JA)) { const t = k.trim(); if (t !== k && JA[t] == null) JA[t] = JA[k].trim(); }
   const trOne = s => { if (JA[s] != null) return JA[s]; for (const [re, fn] of RULES) { const m = re.exec(s); if (m) { const r = fn(...m); if (r != null) return r; } } const f = food(s); return f !== s ? f : null; };
   const trCore = s => { const t = trOne(s); if (t != null) return t; const parts = s.split(/(?<=[.!?…])\s+(?=[A-Z0-9…"“*])/); if (parts.length < 2) return null; const out = parts.map(trOne); return out.every(x => x != null) ? out.join('') : null; };
@@ -1462,7 +1477,7 @@ function eggHatch() {
   hintEl.dataset.k = ''; hintEl.textContent = 'move · click · hold · drag';
   if (!eggWanted) { mem.hatched = true; if (PUBLIC && !mem.born) mem.born = Date.now(); save(true); }
   setTimeout(() => { if (egg.greet) { egg.greet(); egg.greet = null; } }, 5200); // its first words come once it is out
-  if (adiosWaiting) { adiosWaiting = false; setTimeout(adiosDrop, 7500); } // a Bar Adios signal that arrived before hatching continues now
+  if (signalWaiting) { const c = signalWaiting; signalWaiting = ''; setTimeout(() => officialDrop(c), 7500); } // an official signal (Bar Adios, Aaron King) that arrived before hatching continues now
   if (!eggWanted && !mem.eaSeen) setTimeout(() => { if (between.mode === 'out' && !document.querySelector('.feed.on')) openEA(); }, 30000); // once: what this demo is, and where to follow
 }
 function eggFling(dt) {
@@ -1698,10 +1713,10 @@ const EYE_CONST = `const float PUP=${EYE_ART.pup},IRIS=${EYE_ART.iris},GAP=${EYE
   // (a smile or a squint), uTilt slants the upper lid like a raised brow
   vec2 lids(vec3 p){float o=1.-uBlink*1.04,c=.12*p.x*p.x,t=p.y+c-(o-uLidT+uTilt*p.x),b=c-p.y-(o-uLidB);
     return vec2(max(smoothstep(-.02,.02,t),smoothstep(-.02,.02,b)),min(abs(t),abs(b)));}`;
-const eyeU = { uTime: { value: 0 }, uDilate: { value: .3 }, uBlink: { value: 0 }, uLidT: { value: 0 }, uLidB: { value: 0 }, uTilt: { value: 0 }, uColB: { value: colB }, uColC: { value: colC }, uColA: { value: colA }, uGlow: { value: 1 }, uHeart: { value: 0 },
+const eyeU = { uTime: { value: 0 }, uX: { value: 0 }, uDilate: { value: .3 }, uBlink: { value: 0 }, uLidT: { value: 0 }, uLidB: { value: 0 }, uTilt: { value: 0 }, uColB: { value: colB }, uColC: { value: colC }, uColA: { value: colA }, uGlow: { value: 1 }, uHeart: { value: 0 },
   uTex: { value: eyeArt }, uC: { value: EYE_ART.c }, uView: { value: riftRT.texture }, uRes: { value: riftRes }, uMul: { value: 1 }, uSkin: { value: 0 }, uNous: { value: 0 } };
 const EYE_F = NOISE + `uniform float uSkin,uNous;float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-uniform float uTime,uDilate,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,uTilt;uniform vec3 uColA,uColB,uColC;uniform sampler2D uTex,uView;uniform vec2 uC,uRes;varying vec3 vL,vN,vV;
+uniform float uTime,uDilate,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,uTilt,uX;uniform vec3 uColA,uColB,uColC;uniform sampler2D uTex,uView;uniform vec2 uC,uRes;varying vec3 vL,vN,vV;
   ${EYE_CONST}
   void main(){vec3 p=normalize(vL),n=normalize(vN),v=normalize(vV);
     float fr=1.-clamp(dot(n,v),0.,1.);
@@ -1783,6 +1798,7 @@ uniform float uTime,uDilate,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,uTilt;uniform v
           if(hit<.5){ z=z/.4+par*.35; dk*=.85; } }
         col=mix(col,deep,hit*NT*smoothstep(1.,.93,length(z0))); }
     }
+    {float xr=length(p.xy);float xm=max(smoothstep(.06,.03,abs(p.x-p.y)*.7071),smoothstep(.06,.03,abs(p.x+p.y)*.7071))*smoothstep(.4,.33,xr)*step(0.,p.z)*uX;col=mix(col,vec3(.02,.015,.005),xm*.96);col+=vec3(.78,1.,.09)*smoothstep(.1,.03,abs(xr-.37))*step(0.,p.z)*uX*.35;} // The Drop: X eyes, like the smiley on the shirt
     vec2 ld=lids(p);
     vec3 lidc=uColA*.35+uColB*pow(fr,2.)*.35;
     col=mix(col,lidc,ld.x);col+=uColC*exp(-ld.y*55.)*.7*smoothstep(.0,.08,uBlink+uLidT+uLidB);
@@ -1814,7 +1830,25 @@ const ringMat = mul => new THREE.ShaderMaterial({ uniforms: { ...ringU, uMul: { 
 const eyeRing = new THREE.Mesh(eyeGeo, ringMat(.5)), eyeRingOver = new THREE.Mesh(eyeGeo, ringMat(1));
 eye.renderOrder = 20; eyeRing.renderOrder = 21; eyeRingOver.renderOrder = 1; // drawn last so the gaze always reads through the glow
 scene.add(eye, eyeRing);
-const eyeScene = new THREE.Scene(); eyeScene.add(eyeOver, eyeRingOver);
+// The Drop: while Aeon dances it wears the headphones from the Aaron King × Lucid Instinct mark (that layer of the artwork, as a sprite over the eye; loaded on first use)
+const cans = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, opacity: 0, depthTest: false, depthWrite: false })); cans.renderOrder = 50; cans.visible = false; scene.add(cans);
+const smileyTex = n => new THREE.TextureLoader().load('assets/smiley/' + n + '.webp', t => { t.colorSpace = THREE.SRGBColorSpace; });
+// The Drop, kept: once it is in the collection the smiley itself floats around Aeon's universe, among the universes, for good (built on first sight, from the artwork's layers)
+const keep = new THREE.Group(); keep.visible = false; scene.add(keep);
+function smileyInto(g, order, depthTest = true) { // the smiley from the artwork's layers, with thickness, built into a group
+  g.built = true; const geo = new THREE.PlaneGeometry(1, 1);
+  const mk = (n, z, color = 0xffffff) => { const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: smileyTex(n), color, transparent: true, depthWrite: false, depthTest, alphaTest: .02, side: THREE.DoubleSide })); m.position.z = z; m.renderOrder = order + g.children.length; g.add(m); return m; };
+  for (let k = 5; k >= 1; k--) mk('mask', -.03 * k, new THREE.Color(0x2a2108).lerp(new THREE.Color(0x07070a), k / 5).getHex()); // thickness
+  g.userData.cans = mk('layer4_grey-headphones-and-name', 0); mk('layer1_yellow-face', .02); mk('layer2_green-instinct', .04); mk('layer3_black-ink', .06);
+}
+const buildKeep = () => smileyInto(keep, 40);
+// The Drop: Aeon's eye glitches out and becomes the smiley for a moment (at the drop, and whenever the floating smiley is tapped)
+const morph = new THREE.Group(); morph.visible = false; // drawn in eyeScene, after the crisp eye, or the eye would cover it
+const MORPH_LINES = ['Which one are you? …oh. This one.', 'I am the drop. Briefly.', 'In every universe, one of me is this face.', 'hh— TCHH. Signal. Sorry. Signal.'];
+function triggerMorph(sec) { env.morph = env.morphMax = sec; env.dropKick = 1; mood.flash = Math.max(mood.flash, .5); chr.bounceV += 6; chr.dbl = .2; gzBuzz(30); audio.bell(1319, .3); setTimeout(() => audio.bell(65, 1), 90); if (Math.random() < .7) whisper(pick(MORPH_LINES), 3); }
+const _kv = new THREE.Vector3();
+function keepHit(e) { if (!keep.visible) return false; _kv.copy(keep.position).project(camera); if (_kv.z > 1) return false; const sx = (_kv.x + 1) / 2 * innerWidth, sy = (1 - _kv.y) / 2 * innerHeight; const d = _kv.copy(camera.position).sub(keep.position).length(); const r = keep.scale.x * .5 / d * innerHeight / (2 * Math.tan(camera.fov * Math.PI / 360)); return Math.hypot(e.clientX - sx, e.clientY - sy) < Math.max(44, r); }
+const eyeScene = new THREE.Scene(); eyeScene.add(eyeOver, eyeRingOver, morph);
 const eyePass = new RenderPass(eyeScene, camera); eyePass.clear = false; composer.insertPass(eyePass, composer.passes.indexOf(bloom) + 1);
 
 /* ---------- D2 filaments ---------- */
@@ -2101,6 +2135,7 @@ canvas.addEventListener('pointerup', e => {
   const held = performance.now() - ptr.downAt; ptr.down = false;
   if (ptr.drag) { ptr.drag = false; return; }
   if (hoverRift && held < 600 && mood.charge <= .18) { stepThrough(hoverRift); mood.charge = 0; return; }
+  if (held < 600 && mood.charge <= .18 && keepHit(e)) { triggerMorph(2.6); track('drop-tap'); return; } // a tap on the floating smiley: the signal jumps into Aeon for a moment
   if (mood.charge > .18) release(); else if (held < 600) touch();
   mood.charge = 0;
 });
@@ -2481,6 +2516,36 @@ const ADIOS_ART = `<svg viewBox="0 0 116 150" aria-hidden="true"><defs>
     <g stroke="#fff9d6" stroke-width="1.3"><line x1="-11" y1="0" x2="11" y2="0"/><line x1="-7.8" y1="-7.8" x2="7.8" y2="7.8"/><line x1="0" y1="-11" x2="0" y2="11"/><line x1="-7.8" y1="7.8" x2="7.8" y2="-7.8"/></g><circle r="2" fill="#fffbe6"/></g>
   <ellipse cx="58" cy="144" rx="30" ry="3" fill="#1ec8ff" opacity=".5"/></svg>`;
 const adiosArt = k => ADIOS_ART.replace(/(id="|url\(#)ad/g, `$1ad${k}`);
+ADIOS.art = adiosArt; ADIOS.flash = 'radial-gradient(circle at 50% 45%,#fff 0 18%,#9ff9ff 38%,#1ec8ff 62%,#0a1a5c)'; ADIOS.tag = 'MYTHIC · BAR EXCLUSIVE'; ADIOS.share = 'I found the Mythic Adios Dream Elixir at Bar Adios, Shinjuku 🍸 Find yours:'; ADIOS.shareTag = 'share-adios';
+/* Aaron King exclusive (app 2 Nov 2026, live 6 Nov 2026): Aaron King's own QR drops The Drop, a Mythic found only on his frequency. Same format as the Adios Dream Elixir:
+   an official lock-on, the slow Mythic reveal with the tease, and the effects happen to Aeon (two bars of build, then it dances at 130 BPM), never to the player.
+   Once per device per local day; a repeat gets Residual Bass, so a second scan is never a dead end. Nothing is sold, unlocked or promised by the scan. */
+const DROP_CODE = 'ak:drop', DROP_FX = 92, DROP_BPM = 130, DROP_BEAT = 60 / DROP_BPM, DROP_BUILD = 8; // ~200 beats of dancing; one beat = 461.5 ms; eight counts of build before the drop
+const DROP_QR = /^(https?:\/\/)?(www\.)?(partners\.lucidinstinct\.com\/q\/(aaron-king-001|aaron-king-frequency|ak)|entity\.lucidinstinct\.com\/?\?(.*&)?item=drop)\b/i; // Aaron King's QR (the 001 experience, the Frequency, the short alias, the entity link), scanned with the Gizmo itself
+const DROP_ART = `<svg viewBox="0 0 116 150" aria-hidden="true"><defs>
+<radialGradient id="dkF" cx="42%" cy="35%" r="70%"><stop offset="0" stop-color="#ffe97a"/><stop offset=".55" stop-color="#f8d838"/><stop offset="1" stop-color="#b8930f"/></radialGradient>
+<radialGradient id="dkH" cx="50%" cy="50%" r="50%"><stop offset=".62" stop-color="#c7ff16" stop-opacity="0"/><stop offset="1" stop-color="#c7ff16" stop-opacity=".4"/></radialGradient>
+<linearGradient id="dkM" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2bff7a"/><stop offset="1" stop-color="#08d858"/></linearGradient>
+<linearGradient id="dkC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f4fa"/><stop offset=".5" stop-color="#9a9ab0"/><stop offset="1" stop-color="#e8e8f2"/></linearGradient>
+</defs>
+<circle cx="58" cy="78" r="56" fill="url(#dkH)"/>
+<path d="M20 86 C20 38 96 38 96 86" fill="none" stroke="#2a2a38" stroke-width="7" stroke-linecap="round"/><path d="M20 86 C20 38 96 38 96 86" fill="none" stroke="url(#dkC)" stroke-width="4.5" stroke-linecap="round"/>
+<path d="M28 60 C36 48 80 48 88 60" fill="none" stroke="#2a2a38" stroke-width="1.2" opacity=".5"/>
+<circle cx="58" cy="80" r="37" fill="url(#dkF)"/>
+<path d="M33 104q-1 12 2 20q3-2 2-20z M48 112q-1 14 2 22q4-3 2-22z M80 104q0 12 3 20q3-3 1-20z" fill="#f8d838"/>
+<path d="M26 92Q58 128 90 92Q74 106 58 106Q42 106 26 92z" fill="url(#dkM)"/>
+<path d="M44 106q-2 16 1 28q4-4 2-28z M60 108q-2 14 1 24q4-5 2-24z M72 104q-1 12 2 20q3-3 1-20z" fill="#08d858"/>
+<g stroke="#1a1208" stroke-width="4" stroke-linecap="round"><path d="M38 68l12 12M50 68L38 80"/><path d="M66 68l12 12M78 68L66 80"/></g>
+<g stroke="#2a2a38" stroke-width="2"><ellipse cx="19" cy="88" rx="9" ry="15" fill="url(#dkC)"/><ellipse cx="97" cy="88" rx="9" ry="15" fill="url(#dkC)"/></g>
+<ellipse cx="19" cy="88" rx="4" ry="9" fill="#2a2a38" opacity=".7"/><ellipse cx="97" cy="88" rx="4" ry="9" fill="#2a2a38" opacity=".7"/>
+<path d="M14 28l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#c7ff16"/><path d="M103 44l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z" fill="#fff"/>
+<text x="58" y="144" text-anchor="middle" font-size="7" letter-spacing="2.5" fill="#c7ff16" font-family="JetBrains Mono,monospace">THE DROP · 130 BPM</text>
+</svg>`; // the collab mark from the shirt (the dripping smiley, X eyes, headphones), drawn as the game's own vector
+const dropArt = k => DROP_ART.replace(/(id="|url\(#)dk/g, `$1dk${k}`);
+const DROP = { code: DROP_CODE, sticker: 'ak:drop', bar: true, mythic: true, live: true, name: 'The Drop', icon: '💿', taste: 'two bars of build and a whole room letting go', rarity: 'Mythic', color: '#c7ff16', power: 6,
+  where: 'Found on the frequency of Aaron King · 130 BPM', art: dropArt, flash: 'radial-gradient(circle at 50% 45%,#fff 0 16%,#c7ff16 36%,#7b2cff 64%,#12062e)', tag: 'MYTHIC · AARON KING', share: "I caught The Drop, a Mythic found only on Aaron King's frequency 💿 Find yours:", shareTag: 'share-drop' };
+const RESIDUAL = { code: 'ak:residual', sticker: 'ak:residual', bar: true, name: 'Residual Bass', icon: '♪', taste: 'the kick after the kick, still in the floor', rarity: 'Common', color: '#b48cff', power: .4, where: 'You already caught The Drop today · what is left of it on Aaron King\'s frequency' };
+const localDay = () => { try { return new Intl.DateTimeFormat('en-CA').format(new Date()); } catch { return new Date().toISOString().slice(0, 10); } }; // the device's own day: a set can be anywhere in the world
 const tokyoNight = () => { try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tokyo' }).format(new Date(Date.now() - 6 * 36e5)); } catch { return new Date(Date.now() - 6 * 36e5).toISOString().slice(0, 10); } };
 function adiosItem() { // the real thing once a night; otherwise a snack, so a second scan is never a dead end
   if (mem.adiosNight === tokyoNight()) return { ...BAR_SNACK };
@@ -2488,15 +2553,157 @@ function adiosItem() { // the real thing once a night; otherwise a snack, so a s
   if (!mem.collection.some(c => c.id === 'adios')) mem.collection.push({ id: 'adios', name: 'Adios Dream Elixir', first: Date.now() });
   save(true); return { ...ADIOS };
 }
-let adiosWaiting = false;
-function adiosDrop() { // the bar's QR: no camera, the Gizmo opens straight into an official lock-on
-  if (egg.on) { adiosWaiting = true; whisper('A signal from Bar Adios is waiting for me. Hatch me first.', 6); return; }
-  if (between.mode !== 'out') { setTimeout(adiosDrop, 2000); return; }
-  if (vis.gallery) toggleGallery(false); closeBag();
-  gzRun++; feedEl.classList.remove('on'); mbEl.className = 'mb'; gzEl.classList.remove('got', 'lock', 'implode'); gzEl.classList.add('on'); gzBusy = false; audio.resume(); track('item-adios');
-  document.getElementById('gzLock').textContent = '∞ SEEK'; gzSay('INCOMING TRANSMISSION'); [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => audio.bell(f, .14), i * 110));
-  const run = gzRun; setTimeout(() => { if (run === gzRun) gzGot(ADIOS_CODE); }, 1300);
+function dropItem() { // The Drop once a day on this device; otherwise what is left of it, so a second scan is never a dead end
+  if (mem.dropDay === localDay()) return { ...RESIDUAL };
+  mem.dropDay = localDay(); mem.collection = mem.collection || [];
+  if (!mem.collection.some(c => c.id === 'drop')) mem.collection.push({ id: 'drop', name: 'The Drop', first: Date.now() });
+  save(true); return { ...DROP };
 }
+// the signed signals the Gizmo recognises: the lock-on label, where the item comes from, and the line while the egg is still on
+const OFFICIAL = {
+  [ADIOS_CODE]: { label: 'OFFICIAL SIGNAL · BAR ADIOS · SHINJUKU', item: adiosItem, waiting: 'A signal from Bar Adios is waiting for me. Hatch me first.', track: 'item-adios', say: 'INCOMING TRANSMISSION' },
+  [DROP_CODE]: { label: 'OFFICIAL SIGNAL · AARON KING · 130 BPM', item: dropItem, waiting: 'A signal from Aaron King is waiting for me. Hatch me first.', track: 'item-drop', say: 'INCOMING SIGNAL · 130 BPM' },
+};
+let signalWaiting = '';
+function officialDrop(code) { // a signed QR arriving as a link: no camera, the Gizmo opens straight into an official lock-on
+  const o = OFFICIAL[code]; if (!o) return;
+  if (egg.on) { signalWaiting = code; whisper(o.waiting, 6); return; }
+  if (between.mode !== 'out') { setTimeout(() => officialDrop(code), 2000); return; }
+  if (vis.gallery) toggleGallery(false); closeBag(); stopDrop();
+  gzRun++; feedEl.classList.remove('on'); mbEl.className = 'mb'; gzEl.classList.remove('got', 'lock', 'implode'); gzEl.classList.add('on'); gzBusy = false; audio.resume(); track(o.track);
+  document.getElementById('gzLock').textContent = '∞ SEEK'; gzSay(o.say); [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => audio.bell(f, .14), i * 110));
+  const run = gzRun; setTimeout(() => { if (run === gzRun) gzGot(code); }, 1300);
+}
+const adiosDrop = () => officialDrop(ADIOS_CODE);
+/* The Drop's live reveal (ported from the app's drop.js, 6 Nov 2026): the Aaron King × Lucid Instinct smiley as a real-time 3D object inside the reveal card.
+   Twelve extrusion slices for thickness, the four colour layers at true depth, VU-meter eyes and an equaliser inside the INSTINCT letters, seven speaker rings,
+   a particle swarm, headphones that bounce on the kick, and a still hold that opens the head onto the Flower of Life, Metatron's Cube and a tesseract.
+   The beat is the item's own clock (130 BPM): nothing plays, so the kick is synthesised. Drag to orbit; hold to open. Textures in assets/smiley/. */
+const { startDrop, stopDrop } = (() => {
+  const ASSET = 'assets/smiley/';
+  const S = 3.2, SLICES = 12, BANDS = 22, SEG = 9;
+  const LAYERS = ['layer4_grey-headphones-and-name', 'layer1_yellow-face', 'layer2_green-instinct', 'layer3_black-ink'];
+  let live = null; // the one running instance
+  const img = n => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = ASSET + n + '.png'; });
+  const loader = new THREE.TextureLoader();
+  const tex = n => new Promise((res, rej) => loader.load(ASSET + n + '.webp', t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; res(t); }, undefined, rej));
+  // VU eyes + INSTINCT equaliser, drawn into a 2D canvas of size Z and used as a texture
+  async function overlay(Z) {
+    const canvas = () => { const c = document.createElement('canvas'); c.width = c.height = Z; return [c, c.getContext('2d', { willReadFrequently: true })]; };
+    const [eyesIm, ringIm, instIm] = await Promise.all(['eyes-mask', 'eyes-ring', 'instinct-mask'].map(img));
+    const [eyes, ex] = canvas(); ex.drawImage(eyesIm, 0, 0, Z, Z);
+    const [inst, ix] = canvas(); ix.drawImage(instIm, 0, 0, Z, Z);
+    const [ring, rx] = canvas(); rx.drawImage(ringIm, 0, 0, Z, Z); rx.globalCompositeOperation = 'source-in'; rx.fillStyle = '#c7ff16'; rx.fillRect(0, 0, Z, Z);
+    const [instDim, dx] = canvas(); dx.drawImage(inst, 0, 0); dx.globalCompositeOperation = 'source-in'; dx.fillStyle = '#04160b'; dx.fillRect(0, 0, Z, Z);
+    const [tmp, tx] = canvas();
+    const ed = ex.getImageData(0, 0, Z, Z).data, id = ix.getImageData(0, 0, Z, Z).data;
+    const eyeBox = [[Z, Z, 0, 0], [Z, Z, 0, 0]];
+    for (let y = 0; y < Z; y++) for (let x = 0; x < Z; x++) if (ed[(y * Z + x) * 4 + 3] > 127) { const b = eyeBox[x < Z * .54 ? 0 : 1]; b[0] = Math.min(b[0], x); b[1] = Math.min(b[1], y); b[2] = Math.max(b[2], x); b[3] = Math.max(b[3], y); }
+    let x0 = Z, x1 = 0; const top = new Int16Array(Z).fill(Z), bot = new Int16Array(Z).fill(-1);
+    for (let x = 0; x < Z; x++) for (let y = 0; y < Z; y++) if (id[(y * Z + x) * 4 + 3] > 60) { top[x] = Math.min(top[x], y); bot[x] = y; x0 = Math.min(x0, x); x1 = Math.max(x1, x); }
+    const cols = Array.from({ length: BANDS }, (_, j) => { const a = Math.round(x0 + ((x1 - x0 + 1) * j) / BANDS), b = Math.round(x0 + ((x1 - x0 + 1) * (j + 1)) / BANDS); let t = Z, u = -1; for (let x = a; x < b; x++) if (bot[x] >= 0) { t = Math.min(t, top[x]); u = Math.max(u, bot[x]); } return { a, w: b - a, t, u }; }).filter(c => c.u > c.t);
+    const peaks = new Float32Array(cols.length), eyeLvl = [0, 0];
+    return (x, s) => {
+      x.clearRect(0, 0, Z, Z); const level = Math.max(s.kick, s.charge);
+      tx.globalCompositeOperation = 'source-over'; tx.clearRect(0, 0, Z, Z);
+      eyeBox.forEach(([bx0, by0, bx1, by1], e) => {
+        const target = Math.max(level, s.bands[e ? Math.floor(BANDS * .55) : 1] * .9); eyeLvl[e] = target > eyeLvl[e] ? target : eyeLvl[e] - Math.min(eyeLvl[e], .03);
+        const h = by1 - by0, seg = h / SEG, lit = Math.round(eyeLvl[e] * SEG);
+        for (let i = 0; i < SEG; i++) { const y = by1 - (i + 1) * seg; tx.fillStyle = i < lit ? (i >= SEG - 2 ? '#f8d838' : '#c7ff16') : 'rgba(248,248,248,0.07)'; tx.fillRect(bx0, y + seg * .14, bx1 - bx0 + 1, seg * .72); }
+      });
+      tx.globalCompositeOperation = 'destination-in'; tx.drawImage(eyes, 0, 0);
+      x.globalAlpha = .85; x.drawImage(tmp, 0, 0); x.globalAlpha = Math.min(1, .25 + level * .9); x.drawImage(ring, 0, 0);
+      tx.globalCompositeOperation = 'source-over'; tx.clearRect(0, 0, Z, Z);
+      cols.forEach((c, j) => { const v = Math.max(s.bands[j] ?? 0, s.charge * .9); peaks[j] = v > peaks[j] ? v : Math.max(0, peaks[j] - .012); const h = c.u - c.t, y = c.u - h * v, gap = c.w > 4 ? 1 : 0;
+        const g = tx.createLinearGradient(0, c.u, 0, c.t); g.addColorStop(0, '#08d858'); g.addColorStop(.6, '#c7ff16'); g.addColorStop(1, '#f8d838'); tx.fillStyle = g; tx.fillRect(c.a + gap, y, c.w - gap * 2, c.u - y + 1);
+        tx.fillStyle = '#f8f8f8'; tx.fillRect(c.a + gap, c.u - h * peaks[j] - 1.5, c.w - gap * 2, 2); });
+      tx.globalCompositeOperation = 'destination-in'; tx.drawImage(inst, 0, 0);
+      x.globalAlpha = .72; x.drawImage(instDim, 0, 0); x.globalAlpha = 1; x.drawImage(tmp, 0, 0);
+    };
+  }
+  async function build(canvas, opts) {
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); renderer.setClearColor(0x000000, 0); renderer.outputColorSpace = THREE.SRGBColorSpace;
+    const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(32, 1, .1, 100); cam.position.set(0, 0, 8.2);
+    const [mask, ...layerTex] = await Promise.all([tex('mask'), ...LAYERS.map(tex)]);
+    const draw = await overlay(512);
+    const rig = new THREE.Group(), head = new THREE.Group(); scene.add(rig); rig.add(head);
+    const geo = new THREE.PlaneGeometry(S, S);
+    const mat = (map, color = 0xffffff) => new THREE.MeshBasicMaterial({ map, color, transparent: true, depthWrite: false, alphaTest: .02, side: THREE.DoubleSide });
+    const slices = []; for (let k = SLICES; k >= 1; k--) { const shade = new THREE.Color(0x2a2108).lerp(new THREE.Color(0x07070a), k / SLICES); const m = new THREE.Mesh(geo, mat(mask, shade.getHex())); m.position.z = -.022 * k; m.renderOrder = SLICES - k; head.add(m); slices.push(m); }
+    const depths = [0, .025, .05, .075];
+    const layers = layerTex.map((t, i) => { const m = new THREE.Mesh(geo, mat(t)); m.position.z = depths[i]; m.renderOrder = 20 + i; head.add(m); return m; });
+    const ov = document.createElement('canvas'); ov.width = ov.height = 512; const ovx = ov.getContext('2d'); const ovTex = new THREE.CanvasTexture(ov); ovTex.colorSpace = THREE.SRGBColorSpace;
+    const over = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: ovTex, transparent: true, depthWrite: false })); over.position.z = .1; over.renderOrder = 30; head.add(over);
+    const gc = document.createElement('canvas'); gc.width = gc.height = 256; const gx = gc.getContext('2d'); const gg = gx.createRadialGradient(128, 128, 10, 128, 128, 128); gg.addColorStop(0, 'rgba(199,255,22,0.55)'); gg.addColorStop(.45, 'rgba(123,44,255,0.28)'); gg.addColorStop(1, 'rgba(0,0,0,0)'); gx.fillStyle = gg; gx.fillRect(0, 0, 256, 256);
+    const glow = new THREE.Mesh(new THREE.PlaneGeometry(7.5, 7.5), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(gc), transparent: true, depthWrite: false, opacity: .3 })); glow.position.z = -.9; // normal blending: the card shows through the transparent canvas glow.renderOrder = -10; rig.add(glow);
+    const rings = Array.from({ length: 7 }, (_, i) => { const m = new THREE.Mesh(new THREE.RingGeometry(1, 1.012, 96), new THREE.MeshBasicMaterial({ color: i % 2 ? 0x00d65e : 0xffd633, transparent: true, opacity: .4, depthWrite: false, blending: THREE.AdditiveBlending })); m.position.z = -.7; m.renderOrder = -5; rig.add(m); return m; });
+    const N = opts.particles, pos = new Float32Array(N * 3), base = new Float32Array(N * 3), col = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) { const r = 2 + Math.random() * 2.2, a = Math.random() * Math.PI * 2, z = (Math.random() - .5) * 2.4; base[i * 3] = Math.cos(a) * r; base[i * 3 + 1] = Math.sin(a) * r; base[i * 3 + 2] = z - .6; col.set(Math.random() < .6 ? [.78, 1, .09] : [.48, .17, 1], i * 3); }
+    pos.set(base); const pgeo = new THREE.BufferGeometry(); pgeo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); pgeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    const swarm = new THREE.Points(pgeo, new THREE.PointsMaterial({ size: .035, vertexColors: true, transparent: true, opacity: .75, depthWrite: false, blending: THREE.AdditiveBlending })); rig.add(swarm);
+    // the inner core: Flower of Life, Metatron's Cube, a tesseract (one per bar while the head is held open)
+    const inner = new THREE.Group(); head.add(inner); inner.position.z = .04;
+    const lineMat = c => new THREE.LineBasicMaterial({ color: c, transparent: true, opacity: 0, depthWrite: false });
+    const fp = [], R = .32, centres = [[0, 0]];
+    for (let ring = 1; ring <= 2; ring++) for (let k = 0; k < 6 * ring; k++) { const side = Math.floor(k / ring), off = k % ring, a0 = side * Math.PI / 3, a1 = (side + 1) * Math.PI / 3; centres.push([(Math.cos(a0) + (Math.cos(a1) - Math.cos(a0)) * off / ring) * ring * R, (Math.sin(a0) + (Math.sin(a1) - Math.sin(a0)) * off / ring) * ring * R]); }
+    for (const [cx, cy] of centres) for (let s = 0; s < 48; s++) { const a = s / 48 * Math.PI * 2, b = (s + 1) / 48 * Math.PI * 2; fp.push(cx + Math.cos(a) * R, cy + Math.sin(a) * R, 0, cx + Math.cos(b) * R, cy + Math.sin(b) * R, 0); }
+    const flower = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(fp, 3)), lineMat(0xf8f8f8));
+    const mc = [[0, 0]]; for (const d of [.55, 1.1]) for (let k = 0; k < 6; k++) mc.push([Math.cos(k * Math.PI / 3 + Math.PI / 6) * d, Math.sin(k * Math.PI / 3 + Math.PI / 6) * d]);
+    const mp = []; for (let i = 0; i < 13; i++) for (let j = i + 1; j < 13; j++) mp.push(mc[i][0], mc[i][1], 0, mc[j][0], mc[j][1], 0);
+    const metatron = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(mp, 3)), lineMat(0xc7ff16));
+    const TV = []; for (let i = 0; i < 16; i++) TV.push([i & 1 ? 1 : -1, i & 2 ? 1 : -1, i & 4 ? 1 : -1, i & 8 ? 1 : -1]);
+    const TE = []; for (let i = 0; i < 16; i++) for (let j = i + 1; j < 16; j++) { const d = i ^ j; if ((d & (d - 1)) === 0) TE.push([i, j]); }
+    const tp = new Float32Array(TE.length * 6); const tess = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(tp, 3)), lineMat(0x7b2cff));
+    inner.add(flower, metatron, tess);
+    let lost = false; canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); lost = true; }); canvas.addEventListener('webglcontextrestored', () => { lost = false; });
+    function resize() { const w = canvas.clientWidth || 230, h = canvas.clientHeight || 230; renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); const visH = 2 * cam.position.z * Math.tan(cam.fov * Math.PI / 360); rig.scale.setScalar(Math.min(visH * cam.aspect * .92, visH * .92) / S); }
+    resize();
+    const st = { t: 0, kick: 0, charge: 0, inner: 0, rotX: 0, rotY: 0, bands: new Float32Array(BANDS), hold: false, burst: -9 };
+    function frame(dt) {
+      if (lost) return; st.t += dt; const bp = (st.t / DROP_BEAT) % 1, beat = Math.floor(st.t / DROP_BEAT);
+      // the kick, synthesised on the item's own clock: hard on the bar, lighter on the beat, with a fast decay
+      st.kick = Math.max(st.kick - dt * 3.2, 0); if (beat !== st.lastBeat) { st.lastBeat = beat; st.kick = beat % 4 === 0 ? 1 : .62; }
+      for (let i = 0; i < BANDS; i++) { const f = i / BANDS; st.bands[i] = Math.max(0, Math.min(1, st.kick * (1.05 - f * .55) * (.65 + .35 * Math.sin(st.t * (2.1 + f * 5) + i * 1.7)))); }
+      st.inner += ((st.hold ? 1 : 0) - st.inner) * (1 - Math.pow(.002, dt));
+      head.rotation.y = st.rotY + Math.sin(st.t * 1.4) * .12 * (1 - st.inner); head.rotation.x = st.rotX + Math.sin(st.t * .9) * .05;
+      head.scale.setScalar(1 + st.kick * .03);
+      const ex = st.inner; layers.forEach((m, i) => { m.position.z = depths[i] + ex * (i - 1.2) * .55; m.material.opacity = 1 - ex * .55; }); slices.forEach(m => (m.material.opacity = 1 - ex));
+      layers[0].position.y = st.kick * .06; layers[0].scale.setScalar(1 + st.kick * .015); // the headphones bounce on the kick
+      draw(ovx, st); ovTex.needsUpdate = true; over.position.z = .1 + ex * 1.2;
+      glow.material.opacity = .22 + st.kick * .5;
+      rings.forEach((m, i) => { const ph = (bp + i / 7) % 1; m.scale.setScalar(1.75 + ph * 1.6); m.material.opacity = (1 - ph) * (.25 + st.kick * .6); });
+      const b = Math.exp(-(st.t - st.burst) * 2.2), arr = pgeo.attributes.position.array; for (let i = 0; i < N; i++) { const k = 1 + b * 1.6 + st.kick * .04; arr[i * 3] = base[i * 3] * k; arr[i * 3 + 1] = base[i * 3 + 1] * k; } pgeo.attributes.position.needsUpdate = true; swarm.rotation.z += dt * (.08 + st.kick * .4);
+      const which = Math.floor(st.t / (DROP_BEAT * 4)) % 3; [flower, metatron, tess].forEach((l, i) => (l.material.opacity = ex * (i === which ? 1 : .15))); inner.scale.setScalar(.6 + ex * .8); inner.rotation.z = st.t * .3;
+      if (ex > .01) { const a = st.t * .9, c = st.t * .55; TE.forEach(([i, j], n) => [i, j].forEach((q, e) => { let [x, y, z, w] = TV[q]; let tmp = x * Math.cos(a) - w * Math.sin(a); w = x * Math.sin(a) + w * Math.cos(a); x = tmp; tmp = y * Math.cos(c) - w * Math.sin(c); w = y * Math.sin(c) + w * Math.cos(c); y = tmp; const k4 = .42 / (2.6 - w * .6); tp.set([x * k4, y * k4, z * k4], n * 6 + e * 3); })); tess.geometry.attributes.position.needsUpdate = true; }
+      renderer.render(scene, cam);
+    }
+    return { st, frame, resize, burst() { st.burst = st.t; }, dispose() { renderer.dispose(); renderer.forceContextLoss?.(); pgeo.dispose(); geo.dispose(); [mask, ...layerTex, ovTex].forEach(t => t.dispose()); } };
+  }
+  async function startDrop(host, particles = 700) { // starts the live smiley inside host (the reveal card's orb); returns when the first frame is up
+    stopDrop(); host.classList.add('live'); host.querySelector('canvas')?.remove();
+    const canvas = document.createElement('canvas'); canvas.setAttribute('aria-label', 'The Drop: the Aaron King × Lucid Instinct smiley, live. Drag to turn it, hold to open it.'); host.appendChild(canvas);
+    const me = { host, canvas, core: null, raf: 0, last: performance.now(), dead: false };
+    live = me;
+    try { me.core = await build(canvas, { particles }); } catch (e) { console.warn('drop: live smiley unavailable', e); host.classList.remove('live'); canvas.remove(); return null; } // the vector art stays
+    if (me.dead) { me.core.dispose(); return null; }
+    // orbit by drag; hold still to split the head open
+    let drag = null, holdT = 0;
+    const down = e => { drag = { x: e.clientX, y: e.clientY, rx: me.core.st.rotX, ry: me.core.st.rotY, moved: false }; holdT = performance.now(); canvas.setPointerCapture?.(e.pointerId); };
+    const move = e => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (Math.hypot(dx, dy) > 6) drag.moved = true; if (drag.moved) { me.core.st.rotY = drag.ry + dx * .008; me.core.st.rotX = Math.max(-.6, Math.min(.6, drag.rx + dy * .006)); me.core.st.hold = false; } };
+    const up = () => { drag = null; me.core.st.hold = false; };
+    canvas.addEventListener('pointerdown', down); canvas.addEventListener('pointermove', move); canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up); canvas.addEventListener('contextmenu', e => e.preventDefault());
+    const loop = now => { if (me.dead) return; const dt = Math.min(.05, (now - me.last) / 1000); me.last = now;
+      if (drag && !drag.moved && now - holdT > 420) me.core.st.hold = true; // a still hold opens it
+      const spring = .08; if (!drag) { me.core.st.rotX *= 1 - spring; me.core.st.rotY *= 1 - spring; } // it springs home when let go
+      me.core.frame(dt); me.raf = requestAnimationFrame(loop); };
+    me.core.resize(); me.raf = requestAnimationFrame(loop);
+    return me.core;
+  }
+  function stopDrop() { if (!live) return; const me = live; live = null; me.dead = true; cancelAnimationFrame(me.raf); me.core?.dispose(); me.host.classList.remove('live'); if (me.canvas.parentNode === me.host) me.host.removeChild(me.canvas); }
+  window.dropLive = () => live; // for inspection
+  return { startDrop, stopDrop };
+})();
 const ADIOS_A = new THREE.Color('#04205e'), ADIOS_B = new THREE.Color('#1ec8ff'), ADIOS_C = new THREE.Color('#9ff9ff');
 const ADIOS_HIC = ['hic— in two universes at once.', 'hic— a blue one.', 'hic— sorry. Neon.', 'hic— …both of me apologise.'];
 const adiosK = () => env.adios > 0 ? smooth(Math.min((ADIOS_FX - env.adios) / 2.5, env.adios / 8)) : 0; // eases in over 2.5 s, out over the last 8 s
@@ -2505,7 +2712,7 @@ const gzLoad = () => window.Html5Qrcode ? Promise.resolve() : new Promise((ok, n
 const gzSay = (t, cur = true) => { gzRead.innerHTML = t + (cur ? '<span class="cur">_</span>' : ''); };
 async function gzStop() { const s = gzScanner; gzScanner = null; gzEl.classList.remove('live'); gzTorchOn = false; if (s) { try { await s.stop(); } catch {} try { s.clear(); } catch {} } }
 async function openGizmo() {
-  if (egg.on) return; closeBag(); gzRun++; gzDenied = 0; gzRead.classList.remove('bar'); feedEl.classList.remove('on'); mbEl.className = 'mb'; gzEl.classList.remove('got', 'lock', 'implode'); document.getElementById('gzLock').textContent = '∞ SEEK'; gzEl.classList.add('on'); gzBusy = false; audio.resume();
+  if (egg.on) return; closeBag(); stopDrop(); gzRun++; gzDenied = 0; gzRead.classList.remove('bar'); feedEl.classList.remove('on'); mbEl.className = 'mb'; gzEl.classList.remove('got', 'lock', 'implode'); document.getElementById('gzLock').textContent = '∞ SEEK'; gzEl.classList.add('on'); gzBusy = false; audio.resume();
   [660, 880, 1320].forEach((f, i) => setTimeout(() => audio.bell(f, .12), i * 90)); gzSay('BOOTING'); track('gizmo');
   gzStartCam();
 }
@@ -2546,31 +2753,32 @@ document.getElementById('gzCPrev').onclick = () => gzSetConcept(gzConcept - 1); 
   let h = ''; for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) h += `<line x1="${pts[i][0].toFixed(1)}" y1="${pts[i][1].toFixed(1)}" x2="${pts[j][0].toFixed(1)}" y2="${pts[j][1].toFixed(1)}"/>`;
   pts.forEach(([x, y]) => h += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="20"/>`); document.getElementById('gzMeta').innerHTML = h; }
 setInterval(() => { if (!gzEl.classList.contains('on')) return; document.getElementById('gzF').textContent = (6 + Math.random() * 3).toFixed(2); document.getElementById('gzQ').textContent = (.9 + Math.random() * .099).toFixed(3); }, 180);
-async function closeGizmo() { gzRun++; await gzStop(); gzEl.classList.remove('on'); mbEl.className = 'mb'; }
+async function closeGizmo() { gzRun++; stopDrop(); await gzStop(); gzEl.classList.remove('on'); mbEl.className = 'mb'; }
 function gzGot(code) {
   code = String(code).trim(); if (gzBusy || !code) return; gzBusy = true; const run = gzRun;
   if (/^(https?:\/\/)?(www\.)?(lucidinstinct\.com\/qr\/adios|entity\.lucidinstinct\.com\/?\?(.*&)?item=adios)\b/i.test(code)) code = ADIOS_CODE; // the bar's own QR, scanned with the Gizmo itself
+  else if (DROP_QR.test(code)) code = DROP_CODE; // Aaron King's QR
   if (/^(https?:\/\/)?(www\.)?(lucidinstinct\.com\/qr\/skin|entity\.lucidinstinct\.com\/?\?(.*&)?skin=instinct)\b/i.test(code)) { gzBusy = false; closeGizmo(); unlockSkin(); return; } // a Lucid Instinct skin code
-  const bar = code === ADIOS_CODE; gzRead.classList.toggle('bar', bar); // the official signal is long: it may take two lines
+  const official = OFFICIAL[code], bar = !!official; gzRead.classList.toggle('bar', bar); // an official signal is long: it may take two lines
   gzEl.classList.add('got', 'lock'); document.getElementById('gzLock').textContent = '∞ LOCK';
   [784, 988, 1175, 1568].forEach((f, i) => setTimeout(() => audio.bell(f, .35), i * 45)); [1, 2, 3, 4, 5, 6].forEach(i => setTimeout(() => audio.bell(400 + i * 260, .06), 420 + i * 40)); gzBuzz([18, 30, 18, 30, 70]);
-  const shown = bar ? 'OFFICIAL SIGNAL · BAR ADIOS · SHINJUKU' : code.slice(0, 24).replace(/[&<>"']/g, ch => '&#' + ch.charCodeAt(0) + ';'); // a QR can hold any text: never let it become markup
+  const shown = bar ? official.label : code.slice(0, 24).replace(/[&<>"']/g, ch => '&#' + ch.charCodeAt(0) + ';'); // a QR can hold any text: never let it become markup
   let n = 0; const typeIt = () => { n++; gzSay(`◉ ${shown.slice(0, n)}`, n < shown.length); if (n < shown.length) setTimeout(typeIt, 28); else setTimeout(() => gzSay('SIGNAL ACQUIRED ✓', false), bar ? 900 : 160); }; typeIt();
   setTimeout(() => { if (run !== gzRun) return; gzEl.classList.add('implode'); audio.bell(98, .8); }, bar ? 1900 : 900);
-  gzItem = bar ? adiosItem() : foodFor(code); const again = !bar && mem.fed.some(f => f.sticker === 'scan:' + code); if (again) gzItem.power = +(gzItem.power / 2).toFixed(1);
+  gzItem = bar ? official.item() : foodFor(code); const again = !bar && mem.fed.some(f => f.sticker === 'scan:' + code); if (again) gzItem.power = +(gzItem.power / 2).toFixed(1);
   // a real product name, if Open Food Facts knows the barcode (only the digits are sent)
   if (/^\d{8,14}$/.test(code)) { const ac = new AbortController(); setTimeout(() => ac.abort(), 3200);
     fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=product_name,brands`, { signal: ac.signal }).then(r => r.json()).then(j => { const pn = j?.product?.product_name; if (pn) gzItem.from = `${pn}${j.product.brands ? ' · ' + j.product.brands.split(',')[0] : ''}`; }).catch(() => {}); }
   setTimeout(async () => { if (run !== gzRun) return; await gzStop(); gzEl.classList.remove('lock', 'implode'); if (run === gzRun) mysteryBox(again); }, bar ? 2300 : 1250);
 }
 function mysteryBox(again) {
-  const it = gzItem, cube = document.getElementById('mbCube'), run = gzRun; mbEl.style.setProperty('--rc', it.color + '88'); mbEl.style.setProperty('--rc2', it.color);
+  stopDrop(); const it = gzItem, cube = document.getElementById('mbCube'), run = gzRun; mbEl.style.setProperty('--rc', it.color + '88'); mbEl.style.setProperty('--rc2', it.color);
   document.getElementById('mbStatus').textContent = 'DECODING MATTER…'; mbEl.className = 'mb on'; mbEl.style.setProperty('--k', 0);
   // suspense: the box shivers harder and harder while the ticks climb
   setTimeout(() => { if (run === gzRun) mbEl.classList.add('charge'); }, 500);
   const orbit = document.getElementById('mbOrbit'), tier = document.getElementById('mbTier');
   const pool = [...FOOD_ICON].sort(() => Math.random() - .5).filter(x => x !== it.icon).slice(0, it.bar ? 10 : 9); pool.splice(Math.floor(Math.random() * 10), 0, it.icon);
-  orbit.innerHTML = pool.map(ic => `<span style="--c:${ic === it.icon && it.mythic ? '#1ec8ff' : RARITY[Math.floor(Math.random() * RARITY.length)][2]}">${ic}</span>`).join(''); const sil = [...orbit.children];
+  orbit.innerHTML = pool.map(ic => `<span style="--c:${ic === it.icon && it.mythic ? it.color : RARITY[Math.floor(Math.random() * RARITY.length)][2]}">${ic}</span>`).join(''); const sil = [...orbit.children];
   tier.className = 'mbTier'; tier.textContent = '?'; delete tier.dataset.tease; let ang = 0, lastT = performance.now(), nextTier = 0, ti = 0;
   const t0 = performance.now(), dur = it.mythic ? 6200 : 3800; let tick = 0; // a Mythic takes its time
   const step = () => { if (run !== gzRun) return; const now = performance.now(), k = Math.min(1, (now - t0) / dur), dt = (now - lastT) / 1000; lastT = now; mbEl.style.setProperty('--k', (k * k * 4).toFixed(2));
@@ -2587,16 +2795,17 @@ function mysteryBox(again) {
     if (k < 1) requestAnimationFrame(step); else burst(); };
   setTimeout(() => requestAnimationFrame(step), 500);
   const burst = () => {
-    const fl = document.createElement('div'); fl.className = 'mbFlash'; if (it.mythic) fl.style.background = 'radial-gradient(circle at 50% 45%,#fff 0 18%,#9ff9ff 38%,#1ec8ff 62%,#0a1a5c)'; document.body.appendChild(fl); setTimeout(() => fl.remove(), 800);
+    const fl = document.createElement('div'); fl.className = 'mbFlash'; if (it.mythic && it.flash) fl.style.background = it.flash; document.body.appendChild(fl); setTimeout(() => fl.remove(), 800);
     mbEl.classList.remove('charge'); mbEl.classList.add('open'); sil.forEach(el => { el.style.transform = 'translate(-50%,-50%) scale(0)'; el.style.opacity = 0; }); gzBuzz([30, 40, 90]);
     [523, 659, 784, 1047, 1319].forEach((f, i) => setTimeout(() => audio.bell(f, .5), i * 70)); if (it.power >= 3) setTimeout(() => audio.giggle?.(), 500);
-    const orb = document.getElementById('mbOrb'); orb.className = it.mythic ? 'mbOrb art' : 'mbOrb'; if (it.mythic) orb.innerHTML = adiosArt('m'); else orb.textContent = it.icon;
+    const orb = document.getElementById('mbOrb'); orb.className = it.mythic && it.art ? 'mbOrb art' + (it.live ? ' drop' : '') : 'mbOrb'; if (it.mythic && it.art) orb.innerHTML = it.art('m'); else orb.textContent = it.icon;
+    if (it.live) void startDrop(orb, innerWidth < 500 ? 600 : 1000); // The Drop: the smiley itself, live in 3D (the vector art stays underneath until the textures arrive)
     document.getElementById('mbRar').textContent = it.rarity; document.getElementById('mbName').textContent = it.name;
     document.getElementById('mbFrom').textContent = it.where || (it.from ? `decoded from: ${it.from}` : `barcode ${it.code}`);
     document.getElementById('mbTaste').textContent = `Tastes like ${it.taste}.`;
     document.getElementById('mbPow').textContent = `+${it.power} days of growth${again ? ' · scanned before, half strength' : ''}`;
     setTimeout(() => document.getElementById('mbFeed').focus(), 900); track('scan-' + it.rarity.toLowerCase()); try { window.aeonEv?.('item_revealed', { name: it.name, rarity: it.rarity, power: it.power, code: String(it.code || '').slice(0, 30), sticker: it.sticker || '', repeat: !!it.again, from: String(it.from || '').slice(0, 60) }); } catch {}
-    if (it.mythic && !mem.regular) { mem.regular = Date.now(); save(true); track('being-regular'); setTimeout(() => whisper('Someone at the bar nods at you…', 5), 1800); gzItem.regularNew = true; } // The Regular is unlocked for good
+    if (it.code === ADIOS_CODE && !mem.regular) { mem.regular = Date.now(); save(true); track('being-regular'); setTimeout(() => whisper('Someone at the bar nods at you…', 5), 1800); gzItem.regularNew = true; } // The Regular is unlocked for good
   };
 }
 function gizmoFeed() {
@@ -2605,7 +2814,10 @@ function gizmoFeed() {
   mood.flash = .8; mood.burst = 1; mood.fold = 1.3; chr.giggle = 2; chr.bounceV += 7; wave(new THREE.Vector3(), 5, colC); wave(new THREE.Vector3(), 3, colB);
   audio.resume(); audio.bell(392, .6); audio.bell(523, .5); setTimeout(() => audio.giggle?.(), 300);
   whisper(`${it.name}. ${it.rarity}! It tastes like ${it.taste}. I grew ${it.power} days on that.`, 7);
-  if (it.mythic) { // The Adios: Aeon turns electric blue, hiccups and sees double for a while, then comes back
+  if (it.code === DROP_CODE) { // The Drop: two bars of build, then Aeon dances at 130 BPM for a while (the beat, the kicks, the lines and the Parallel Selves are in the frame)
+    env.drop = DROP_FX; env.dropT = 0; env.dropBeat = -1; env.dropKick = 0; track('fx-drop');
+    setTimeout(() => toast('✦ The Drop is in your backpack · tap to see it', () => openBag(DROP.sticker), 9000), 8000);
+  } else if (it.code === ADIOS_CODE) { // The Adios: Aeon turns electric blue, hiccups and sees double for a while, then comes back
     env.adios = ADIOS_FX; env.adiosHic = 3; setTimeout(() => whisper('Whoa. Two of you. Both cute.', 5), 7600);
     setTimeout(() => toast('✦ Adios Dream Elixir is in your backpack · tap to see it', () => openBag('bar:adios'), 9000), 8000);
     if (it.regularNew) setTimeout(() => toast('✦ The Regular joined your Beings · tap to meet', () => { if (between.mode === 'out') { toggleGallery(true); galleryShow(VIS.findIndex(v => v.id === 'regular')); } }, 9000), 17500);
@@ -2619,9 +2831,10 @@ const RANK = { Mythic: 4, Legendary: 3, Epic: 2, Rare: 1, Common: 0 };
 const bagDate = t => new Date(t).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 function bagItems() {
   const map = new Map();
-  for (const f of mem.fed || []) { const k = f.sticker; const it = k === ADIOS.sticker ? ADIOS : k === BAR_SNACK.sticker ? BAR_SNACK : k && k.startsWith('scan:') ? foodFor(k.slice(5)) : null; if (!it) continue; // words fed by hand are not objects
+  for (const f of mem.fed || []) { const k = f.sticker; const it = k === ADIOS.sticker ? ADIOS : k === BAR_SNACK.sticker ? BAR_SNACK : k === DROP.sticker ? DROP : k === RESIDUAL.sticker ? RESIDUAL : k && k.startsWith('scan:') ? foodFor(k.slice(5)) : null; if (!it) continue; // words fed by hand are not objects
     const e = map.get(k) || map.set(k, { k, it, n: 0, first: f.at, last: f.at }).get(k); e.n++; e.first = Math.min(e.first, f.at); e.last = Math.max(e.last, f.at); }
   const c = (mem.collection || []).find(x => x.id === 'adios'); if (c && !map.has(ADIOS.sticker)) map.set(ADIOS.sticker, { k: ADIOS.sticker, it: ADIOS, n: 0, first: c.first, last: c.first }); // found but not yet fed
+  const cd = (mem.collection || []).find(x => x.id === 'drop'); if (cd && !map.has(DROP.sticker)) map.set(DROP.sticker, { k: DROP.sticker, it: DROP, n: 0, first: cd.first, last: cd.first });
   return map;
 }
 function bagBadge() { const items = [...bagItems().values()], fresh = items.filter(e => e.last > (mem.bagSeen || 0)); dBag.classList.toggle('new', fresh.length > 0); dBag.classList.toggle('mythic', fresh.some(e => e.it.mythic)); }
@@ -2639,10 +2852,14 @@ function bagList() {
   const hero = adios ? `<button class="bagM" data-k="${encodeURIComponent(adios.k)}"><div class="bagMi">${sp}<div class="art">${adiosArt('h')}</div><div><span class="bagTag">MYTHIC · BAR EXCLUSIVE</span><h3>Adios Dream Elixir</h3><p>Found at Bar Adios · Shinjuku, Tokyo</p><p>Tastes like neon rain and a promise you won't keep.</p>
       <div class="bagMeta">first found ${bagDate(adios.first)}${adios.n ? ` · fed ×${adios.n}` : ' · not fed yet'}</div></div></div></button>`
     : `<div class="bagM lock"><div class="bagMi"><div class="art">${adiosArt('l')}</div><div><span class="bagTag" style="animation:none;background:#2a3256;color:#9aa6d8">MYTHIC · ???</span><h3>Unknown Mythic</h3><p>Found only at Bar Adios · Shinjuku, Tokyo.</p><p>Look for its signal there.</p></div></div></div>`;
+  const drop = all.get(DROP.sticker), dropHero = drop ? `<button class="bagM ak" data-k="${encodeURIComponent(drop.k)}"><div class="bagMi">${sp}<div class="art">${dropArt('h')}</div><div><span class="bagTag">MYTHIC · AARON KING</span><h3>The Drop</h3><p>Found on the frequency of Aaron King · 130 BPM</p><p>Tastes like two bars of build and a whole room letting go.</p>
+      <div class="bagMeta">first found ${bagDate(drop.first)}${drop.n ? ` · fed ×${drop.n}` : ' · not fed yet'}</div></div></div></button>`
+    : `<div class="bagM lock"><div class="bagMi"><div class="art">${dropArt('l')}</div><div><span class="bagTag" style="animation:none;background:#2a3256;color:#9aa6d8">MYTHIC · ???</span><h3>Unknown Mythic</h3><p>Found only on Aaron King's frequency · 130 BPM.</p><p>Look for its signal there.</p></div></div></div>`; // Aaron King's set, shown like the Bar Adios one
   const reg = mem.regular ? `<button class="bagT r-Mythic" data-being="regular" style="--c:#1ec8ff"><span class="o">🕴️</span><b>The Regular</b><em>Being · met</em></button>` : `<div class="bagT lock"><span class="o">?</span><b>???</b><em style="color:#7d86a8">Being · Shinjuku</em></div>`;
   const relics = (mem.relics || []).map(r => `<div class="bagT r-Rare" style="--c:#ffe0a0;cursor:default"><span class="o">◇</span><b>${String(r.name).replace(/[&<>"']/g, ch => '&#' + ch.charCodeAt(0) + ';')}</b><em>keepsake</em></div>`).join('');
   bagIn.innerHTML = `<div class="bagHd"><div><h2>BACKPACK</h2><small>${kinds} find${kinds === 1 ? '' : 's'} · fed ${fed} time${fed === 1 ? '' : 's'}</small></div><button class="bagX" id="bagX" aria-label="Close backpack">✕</button></div>
     <div class="bagSec">Bar Adios · Shinjuku · ${(adios ? 1 : 0) + (mem.regular ? 1 : 0)} of 2</div>${hero}<div class="bagGrid" style="margin-top:10px">${reg}</div>
+    <div class="bagSec">Aaron King · 130 BPM · ${drop ? 1 : 0} of 1</div>${dropHero}
     <div class="bagSec">Aeon's eye · skins</div><div class="bagGrid">${skinTiles()}</div>
     <div class="bagSec">Foods</div>${rest.length ? `<div class="bagGrid">${rest.map(tile).join('')}</div>` : `<div class="bagEmpty">Nothing here yet. Scan any barcode and feed what you find.</div>`}
     ${relics ? `<div class="bagSec">From the journey</div><div class="bagGrid">${relics}</div>` : ''}`;
@@ -2650,11 +2867,11 @@ function bagList() {
 function bagDetail(k) {
   const e = bagItems().get(k); if (!e) return bagList(); const it = e.it;
   bagIn.innerHTML = `<div class="bagHd"><button class="bagBack" id="bagBack">‹ BACK</button><button class="bagX" id="bagX" aria-label="Close backpack">✕</button></div>
-    ${it.mythic ? `<div class="bagM" style="cursor:default"><div class="bagMi" style="display:block;padding:0">${bagSparks}` : ''}<div class="bagDet" style="--c:${it.color};--g:${it.color}44${it.mythic ? ';border:0;background:none' : ''}">${it.mythic ? `<div class="art">${adiosArt('d')}</div><span class="bagTag">MYTHIC · BAR EXCLUSIVE</span>` : `<div class="o">${it.icon}</div><span class="rar">${it.rarity}</span>`}
+    ${it.mythic ? `<div class="bagM${it.code === DROP_CODE ? ' ak' : ''}" style="cursor:default"><div class="bagMi" style="display:block;padding:0">${bagSparks}` : ''}<div class="bagDet" style="--c:${it.color};--g:${it.color}44${it.mythic ? ';border:0;background:none' : ''}">${it.mythic ? `<div class="art">${it.art('d')}</div><span class="bagTag">${it.tag}</span>` : `<div class="o">${it.icon}</div><span class="rar">${it.rarity}</span>`}
       <h3>${it.name}</h3><p>${it.where || 'Decoded from a barcode'}</p><p>Tastes like ${it.taste}.</p>
       <div class="bagMeta">first found ${bagDate(e.first)} · ${e.n ? `fed ×${e.n} · +${it.power} days each` : 'not fed yet'}</div>
       <button class="mbFeed" id="bagShare" style="margin-top:14px;position:relative;z-index:1">↗ share this find</button></div>${it.mythic ? '</div></div>' : ''}`;
-  document.getElementById('bagShare').onclick = () => it.mythic ? shareAeon('I found the Mythic Adios Dream Elixir at Bar Adios, Shinjuku 🍸 Find yours:', 'share-adios') : shareAeon(`I found a ${it.rarity} ${it.name} ${it.icon} in Lucid Aeon. Find yours:`, 'share-bag');
+  document.getElementById('bagShare').onclick = () => it.mythic ? shareAeon(it.share, it.shareTag) : shareAeon(`I found a ${it.rarity} ${it.name} ${it.icon} in Lucid Aeon. Find yours:`, 'share-bag');
 }
 function openBag(k) {
   if (between.mode !== 'out' || egg.on) return; if (vis.gallery) toggleGallery(false); hud.classList.remove('more-on');
@@ -2673,7 +2890,7 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && bagEl.classList.con
 bagBadge();
 document.getElementById('gzOff').onclick = closeGizmo; document.getElementById('mbFeed').onclick = gizmoFeed; document.getElementById('mbAgain').onclick = () => { mbEl.className = 'mb'; openGizmo(); };
 document.getElementById('gzKey').onclick = () => { const t = document.getElementById('gzType'); t.classList.toggle('on'); if (t.classList.contains('on')) document.getElementById('gzIn').focus(); };
-const gzManual = () => { const v = document.getElementById('gzIn').value.replace(/\s/g, ''); if (v.length >= 4 && !/^bar:/i.test(v)) gzGot(v); }; // bar items come only from the bar's signal
+const gzManual = () => { const v = document.getElementById('gzIn').value.replace(/\s/g, ''); if (v.length >= 4 && !/^(bar|ak):/i.test(v)) gzGot(v); }; // official items come only from their own signals
 document.getElementById('gzGo').onclick = gzManual; document.getElementById('gzIn').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') gzManual(); });
 addEventListener('keydown', e => { if (e.key === 'Escape' && gzEl.classList.contains('on')) closeGizmo(); });
 document.getElementById('feedGizmo').onclick = openGizmo; document.getElementById('bWord').onclick = () => openFeed(null);
@@ -2691,9 +2908,10 @@ function setSkin(k, quiet) { // a flash, and the eye is different on the other s
 function unlockSkin() { const fresh = !mem.skins.instinct; mem.skins.instinct = mem.skins.instinct || Date.now(); save(true); if (egg.on) { mem.skin = 'instinct'; eyeU.uSkin.value = 1; save(true); return; }
   setTimeout(() => { setSkin('instinct', true); whisper(fresh ? 'A Lucid Instinct signal… my eye is changing. Keep it, or switch back, in your bag.' : 'The Lucid Instinct eye, again.', 6); if (fresh) setTimeout(() => toast('✦ New skin: the Lucid Instinct eye · tap to see it', () => openBag(), 8000), 6500); }, 900); }
 if (params.get('skin') === 'instinct') { try { const u = new URL(location.href); u.searchParams.delete('skin'); history.replaceState(history.state, '', u.pathname + u.search + u.hash); } catch {} setTimeout(unlockSkin, 1600); }
-if (params.get('item') === 'adios') { // the bar's QR; the address is cleaned so a reload does not drop it again
+if (params.get('item') === 'adios' || params.get('item') === 'drop') { // an official QR or link (Bar Adios, Aaron King); the address is cleaned so a reload does not drop it again (UTM tags stay)
+  const code = params.get('item') === 'drop' ? DROP_CODE : ADIOS_CODE;
   try { const u = new URL(location.href); u.searchParams.delete('item'); history.replaceState(history.state, '', u.pathname + u.search + u.hash); } catch {}
-  setTimeout(adiosDrop, 1500); }
+  setTimeout(() => officialDrop(code), 1500); }
 { const r = document.getElementById('bBright'), v = document.getElementById('bBrightV'); r.value = Math.round(BRIGHT.value * 100); v.textContent = r.value + '%';
   r.addEventListener('input', () => { BRIGHT.value = r.value / 100; v.textContent = r.value + '%'; try { localStorage.setItem('gizmo.bright', String(BRIGHT.value)); } catch {} }); r.addEventListener('keydown', e => e.stopPropagation()); }
 /* share: the phone's own share sheet where there is one (iPhone, Android), otherwise the link is copied */
@@ -2713,7 +2931,7 @@ eaEl.addEventListener('click', e => { if (e.target === eaEl) closeEA(); }); addE
 document.getElementById('eaInsta').addEventListener('click', () => track('instagram'));
 document.getElementById('bIntro').onclick = () => { const u = new URL('concepts/intro.html?replay=1', location.href).href; try { (window.top || window).location.href = u; } catch { location.href = u; } };
 document.getElementById('sharePill').onclick = () => shareAeon(); document.getElementById('bShare').onclick = () => shareAeon(); document.getElementById('eaShare').onclick = () => shareAeon();
-document.getElementById('mbShare').onclick = () => { const it = gzItem; if (it?.mythic) return shareAeon('I found the Mythic Adios Dream Elixir at Bar Adios, Shinjuku 🍸 Find yours:', 'share-adios'); shareAeon(it ?`I scanned a barcode and decoded a ${it.rarity} ${it.name} ${it.icon} (it tastes like ${it.taste}). Scan yours:` : null, 'share-find'); };
+document.getElementById('mbShare').onclick = () => { const it = gzItem; if (it?.mythic) return shareAeon(it.share, it.shareTag); shareAeon(it ?`I scanned a barcode and decoded a ${it.rarity} ${it.name} ${it.icon} (it tastes like ${it.taste}). Scan yours:` : null, 'share-find'); };
 document.getElementById('eaEmail').addEventListener('keydown', e => e.stopPropagation());
 document.getElementById('eaList').addEventListener('submit', () => { track('waitlist'); mem.waitlist = true; save(); setTimeout(() => { const f = document.getElementById('eaList'); f.classList.add('done'); f.querySelector('.eaListH').textContent = 'You are on the list. Check the new tab to confirm.'; }, 300); }); document.getElementById('eaHome').addEventListener('click', () => track('home'));
 document.getElementById('bHome').onclick = () => { track('home'); open('https://lucidinstinct.com/?utm_source=aeon&utm_medium=entity&utm_campaign=home', '_blank', 'noopener'); };
@@ -3522,14 +3740,15 @@ function visFrame(dt) {
   const B = between, inRoom = (B.mode === 'in' && B.phase === 3) || vis.gallery;
   if (vis.gallery && !vis.cur) galleryShow(vis.gi + 1);
   if (inRoom && !vis.gallery && !vis.cur && (vis.next -= dt) < 0) { // manifest one that has not visited lately
-    const recent = vis.log.slice(-4); const pool = VIS.filter(v => !recent.includes(v.id) && (!v.bar || (mem.regular && Math.random() < .25))); vis.cur = pick(pool.length ? pool : VIS.filter(v => !v.bar)); // the Regular: only once found at the bar, and rarely vis.t = 0; vis.said = 0; vis.log.push(vis.cur.id); vis.next = 18 + Math.random() * 8;
+    const recent = vis.log.slice(-4); const pool = VIS.filter(v => !recent.includes(v.id) && (!v.bar || (mem.regular && Math.random() < .25))); vis.cur = vis.selvesNext && VIS.find(v => v.id === 'parallel') || pick(pool.length ? pool : VIS.filter(v => !v.bar)); vis.fromDrop = !!vis.selvesNext; vis.selvesNext = false; // after The Drop, the Parallel Selves come first // the Regular: only once found at the bar, and rarely vis.t = 0; vis.said = 0; vis.log.push(vis.cur.id); vis.next = 18 + Math.random() * 8;
     if (B.ent) { B.ent.state = 'leaving'; B.ent.t = 0; } B.entNext = Math.max(B.entNext, 16); audio.voice('watchers'); }
   if (!vis.cur) { if (entsEl.classList.contains('on')) { entsEl.classList.remove('on'); } return; }
   const V = vis.cur; vis.t += dt; const life = vis.gallery ? 1e9 : 14, env = Math.min(1, vis.t / 3.5) * Math.min(1, (life - vis.t) / 3) * (inRoom ? 1 : 0);
   vis.k = lerp(vis.k, env, Math.min(1, dt * 2));
   const locked = visLocked(V); vis.locked = locked;
+  if (V.id === 'parallel' && !vis.gallery && !vis.dealt && bondLv() >= 3 && !mem.collection?.some(c => c.id === 'drop')) { vis.dealt = true; setTimeout(() => { whisper('The Parallel Selves: One of you let go. Take the frequency back with you.', 6); officialDrop(DROP_CODE); }, 9000); } // the second door: at the Companion bond the Parallel Selves tune Aeon to the frequency themselves; no shirt, no scan, no purchase
   if (vis.said === 0 && vis.t > 3.5 && locked) { vis.said = 2; whisper('??? · Found only in Shinjuku. Someone at Bar Adios is keeping a seat warm.', 7); audio.voice('watchers'); }
-  else if (vis.said === 0 && vis.t > 3.5) { vis.said = 1; whisper(`${V.name[0].toUpperCase() + V.name.slice(1)}${vis.gallery ? ` (${vis.gi + 1} of ${VIS.length}, arrows to change)` : ''} says: ${pick(V.says)}`, 7); B.msg = { who: V.name, text: V.mantra }; audio.voice(V.id === 'jester' ? 'jester' : V.id === 'elves' ? 'elf' : V.id === 'mantis' ? 'mantis' : 'twins'); }
+  else if (vis.said === 0 && vis.t > 3.5) { vis.said = 1; whisper(`${V.name[0].toUpperCase() + V.name.slice(1)}${vis.gallery ? ` (${vis.gi + 1} of ${VIS.length}, arrows to change)` : ''} says: ${vis.fromDrop && V.id === 'parallel' ? 'That was the drop. It landed in every one of me at once. Which one of you let go?' : pick(V.says)}`, 7); B.msg = { who: V.name, text: V.mantra }; audio.voice(V.id === 'jester' ? 'jester' : V.id === 'elves' ? 'elf' : V.id === 'mantis' ? 'mantis' : 'twins'); }
   else if (vis.said === 1 && vis.t > 10.5) { vis.said = 2; whisper(`“${V.mantra}”`, 5); audio.giggle && V.id === 'jester' && audio.giggle(); }
   if (vis.t > life || (!inRoom && vis.k < .02)) { vis.cur = null; vis.k = 0; return; }
   entsEl.classList.add('on'); const W = innerWidth, H = innerHeight;
@@ -3750,7 +3969,11 @@ function stepThrough(r) {
 
 /* ---------- resize ---------- */
 // the environment: it lives in a window on a desk, in a browser, in your dashboard, in a room. All of this is sensed locally; nothing is sent anywhere.
-const env = { sx: window.screenX || 0, sy: window.screenY || 0, moving: 0, moved: 0, moveSaid: -1e9, hiddenAt: 0, focus: document.hasFocus(), waiting: 0,
+// The Drop (Aaron King exclusive): ink, violet and lime; eight counts of build, then a kick on every beat at 130 BPM, a stronger one on the bar, a line now and then
+const DROP_A = new THREE.Color('#12062e'), DROP_B = new THREE.Color('#7b2cff'), DROP_C = new THREE.Color('#c7ff16');
+const DROP_LINES = ['In every universe, the drop hits.', 'One hundred and thirty a minute. My rings can count that.', 'I am not dancing. I am resonating. Loudly.', 'Which one of me is on the floor? All of them.', 'Hold on to the beat. It knows the way home.'];
+const dropK = () => env.drop > 0 ? smooth(Math.min((DROP_FX - env.drop) / 1.5, env.drop / 8)) : 0; // in over 1.5 s, out over the last 8 s
+const env = { drop: 0, dropT: 0, dropBeat: -1, dropKick: 0, morph: 0, morphMax: 1, sx: window.screenX || 0, sy: window.screenY || 0, moving: 0, moved: 0, moveSaid: -1e9, hiddenAt: 0, focus: document.hasFocus(), waiting: 0,
   squeeze: 0, squeezeSaid: -1e9, pop: 0, popPhase: 0, keyT: [], lastKey: -1e9, buf: '', typing: 0, typeRate: 0, burst: 0, midSaid: -1e9, forceSleep: false,
   bc: null, other: null, otherDir: null, otherSaid: false, jealous: false, bcAt: 0, dash: { tab: '', xp: null, done: null }, xpSpin: 0,
   mic: null, micLvl: 0, micLow: 0, onset: 0, quiet: 0, online: navigator.onLine !== false, lowPower: false, charging: null, powerSaid: false,
@@ -4068,6 +4291,7 @@ function frame(now) {
   if (fpsCap && now - clock.last < 1000 / fpsCap - 1.5) return; // the cap: skipped frames accumulate into the next dt, so its clock keeps true time
   const raw = now - clock.last, dt = Math.min(.05, raw / 1000); clock.last = now; env.raw = raw;
   adapt(raw);
+  if (env.drop > 0) env.drop = Math.max(0, env.drop - dt);
   if (env.adios > 0) env.adios = Math.max(0, env.adios - dt); finalPass.uniforms.uGhost.value = bFinal.uniforms.uGhost.value = adiosK(); // The Adios: double vision, in the journey too
   const speedK = reduced ? .45 : 1;
   clock.t += dt * speedK; const t = clock.t;
@@ -4143,12 +4367,36 @@ function frame(now) {
 
   envFrame(dt, t, now, idle, doze);
   lifeFrame(dt, t, now, idle, g, intro);
+  /* The Drop, kept: the smiley drifts round Aeon on a slow tilted orbit, bobs with its heart, and kicks with it while it dances */
+  { const has = !egg.on && between.mode === 'out' && !!mem.collection?.some(c => c.id === 'drop'); if (has && !keep.built) buildKeep(); keep.visible = has && !!keep.built;
+    if (keep.visible) { const a = t * .09 + 1.7, rad = R * 2.6; keep.position.set(Math.cos(a) * rad, R * .55 + Math.sin(t * .45) * R * .3 + Math.sin(a * 2) * R * .2, Math.sin(a) * rad * .7);
+      keep.scale.setScalar(R * .95 * (1 + env.dropKick * .08 + mood.heart * .02)); keep.lookAt(camera.position); keep.rotation.z = Math.sin(t * .6) * .09;
+      keep.userData.cans.position.y = (env.drop > 0 ? env.dropKick : mood.heart * .6) * .05; } }
+  /* The Drop: the morph. The eye tears, jumps and flickers, is wholly the smiley for a beat or two, then glitches back */
+  { if (env.morph > 0) { env.morph = Math.max(0, env.morph - dt); if (!morph.built) smileyInto(morph, 60, false); }
+    const m = env.morph > 0 && morph.built ? smooth(Math.min(1, (env.morphMax - env.morph) / .3, env.morph / .7)) : 0, tear = (1 - m) * (env.morph > 0 ? 1 : 0); // in over .3 s, out over the last .7 s; the tearing is worst at the edges
+    morph.visible = m > .01;
+    if (morph.visible) { const sc = eye.scale.x * 3.4 * (1 + env.dropKick * .05); morph.scale.setScalar(sc); morph.position.copy(eye.position).addScaledVector(eyeDir, eye.scale.x * .95); morph.position.y += eye.scale.x * .1;
+      morph.position.x += (Math.random() - .5) * eye.scale.x * .5 * tear; morph.position.y += (Math.random() - .5) * eye.scale.x * .3 * tear; morph.lookAt(camera.position); morph.rotation.z = (Math.random() - .5) * .25 * tear;
+      const slip = Math.random() < .12 + tear * .5; morph.children.forEach((c, i) => { c.material.opacity = slip && i > 4 ? (Math.random() < .5 ? .2 : 1) : m; c.position.x = slip ? (Math.random() - .5) * .08 * (i - 5) : 0; }); morph.userData.cans.position.y = env.dropKick * .05;
+      finalPass.uniforms.uAb.value = .0025 + (tear * .018 + m * .004) * (Math.random() < .35 ? 2.2 : 1); chr.dbl = Math.max(chr.dbl, .18 * tear); mood.blink = Math.max(mood.blink, tear > .5 && Math.random() < .3 ? 1 : 0); }
+    else finalPass.uniforms.uAb.value = .0025; }
 
   /* palette */
   paletteAt(g, mood);
   { const k = adiosK(); if (k > 0) { colA.lerp(ADIOS_A, k * .85); colB.lerp(ADIOS_B, k * .9); colC.lerp(ADIOS_C, k * .85); // electric blue, then a smooth return
     if (!taffy.on) { taffy.twT = Math.sin(t * 1.3) * .22 * k; taffy.sT = Math.sin(t * .8) * .05 * k; } // a gentle wobble, through the taffy pass
     if ((env.adiosHic -= dt) < 0 && k > .5) { env.adiosHic = 4 + Math.random() * 5; chr.bounceV += 5; mood.blink = 1; chr.dbl = .15; audio.bell(1568, .08); if (Math.random() < .4) whisper(pick(ADIOS_HIC), 2); } } }
+  { const k = dropK(); if (env.drop > 0) { env.dropT += dt; const beat = Math.floor(env.dropT / DROP_BEAT); // The Drop: the count, the drop, then the floor
+    if (beat !== env.dropBeat) { env.dropBeat = beat;
+      if (beat < DROP_BUILD) { chr.bounceV += 1.5 + beat * .7; mood.dilate = Math.min(1, mood.dilate + .06); audio.bell(196 * Math.pow(2, beat / 12), .08); if (beat === 0) { env.forceSleep = false; wakeUp(); whisper('Two bars. Hold on to me.', 3); } }
+      else if (beat === DROP_BUILD) { mood.flash = 1; mood.burst = 1; mood.fold = 1.5; chr.bounceV += 16; chr.giggle = 3; env.dropKick = 1; wave(new THREE.Vector3(), 7, DROP_C); wave(new THREE.Vector3(), 4, DROP_B);
+        audio.bell(110, 1.8); [1319, 1760, 2093, 2637].forEach((f, i) => setTimeout(() => audio.bell(f, .7), i * 60)); gzBuzz([60, 30, 120]); whisper('THE DROP HITS.', 3); vis.selvesNext = true; env.morph = env.morphMax = 3.6; // and for two bars Aeon is the smiley
+        const fl = document.createElement('div'); fl.className = 'mbFlash'; fl.style.background = DROP.flash; document.body.appendChild(fl); setTimeout(() => fl.remove(), 800); }
+      else { const bar = beat % 4 === 0; chr.bounceV += bar ? 4.5 : 2.2; env.dropKick = bar ? 1 : .55; if (bar) audio.bell(110, .35); if (beat % 32 === 20) whisper(pick(DROP_LINES), 3); if (beat === DROP_BUILD + 40) whisper('Every one of me heard that. Take me through, and ask them.', 5); } }
+    env.dropKick = Math.max(0, env.dropKick - dt * 4); idleSince = performance.now(); // nobody sleeps through a drop
+    if (k > 0) { colA.lerp(DROP_A, k * .85); colB.lerp(DROP_B, k * .9); colC.lerp(DROP_C, k * .85);
+      if (!taffy.on) { taffy.twT = Math.sin(env.dropT / DROP_BEAT * Math.PI) * .1 * k; taffy.sT = env.dropKick * .07 * k; } } } }
   sky.material.uniforms.uA.value.copy(colA); sky.material.uniforms.uB.value.copy(colB);
 
   /* camera */
@@ -4258,7 +4506,7 @@ function frame(now) {
   chr.lidT = lerp(chr.lidT, lt, ek); chr.lidB = lerp(chr.lidB, lb, ek); chr.tilt = lerp(chr.tilt, tl, ek);
   eyeU.uLidT.value = chr.lidT; eyeU.uLidB.value = chr.lidB; eyeU.uTilt.value = chr.tilt;
   { const h = Math.min(dt, .05); chr.bounceV += (-chr.bounce * 140 - chr.bounceV * 8) * h; chr.bounce += chr.bounceV * h; } // a springy squish when touched
-  const cl = life.omega > .9 && mood.label === 'Calm' ? 'Omega · sovereign of the simulation' : env.pop > 0 && env.popPhase === 0 ? 'Squashed' : env.pop > 0 && env.popPhase === 1 ? 'Annoyed' : life.hide > 0 ? 'Hiding' : life.seek > 0 ? 'Searching' : env.moving > 0 ? 'Carried' : env.sneeze > 0 ? 'Sneezing' : env.mic && env.micLvl > .25 ? 'Listening' : env.jealous ? 'Jealous' : env.quiet > .5 ? 'Alone' : env.lowPower ? 'Conserving' : env.riftFear > .3 ? 'Wary' : env.squeeze > .5 ? 'Cramped' : env.moonFull > .9 && night > .3 ? 'Restless' : chr.grumpy > 0 ? 'Sulking' : chr.yawn > 0 ? 'Yawning' : chr.dizzy > 0 ? 'Dizzy' : chr.giggle > .9 ? 'Giggling' : chr.stare > 2 ? 'Staring contest' : away > 1 && away < 30 ? 'Missing you' : chr.bored ? 'Unimpressed' : null;
+  const cl = life.omega > .9 && mood.label === 'Calm' ? 'Omega · sovereign of the simulation' : env.pop > 0 && env.popPhase === 0 ? 'Squashed' : env.pop > 0 && env.popPhase === 1 ? 'Annoyed' : life.hide > 0 ? 'Hiding' : life.seek > 0 ? 'Searching' : env.moving > 0 ? 'Carried' : env.drop > 0 && dropK() > .3 ? (env.dropT < DROP_BEAT * DROP_BUILD ? 'Building' : 'Dancing') : env.sneeze > 0 ? 'Sneezing' : env.mic && env.micLvl > .25 ? 'Listening' : env.jealous ? 'Jealous' : env.quiet > .5 ? 'Alone' : env.lowPower ? 'Conserving' : env.riftFear > .3 ? 'Wary' : env.squeeze > .5 ? 'Cramped' : env.moonFull > .9 && night > .3 ? 'Restless' : chr.grumpy > 0 ? 'Sulking' : chr.yawn > 0 ? 'Yawning' : chr.dizzy > 0 ? 'Dizzy' : chr.giggle > .9 ? 'Giggling' : chr.stare > 2 ? 'Staring contest' : away > 1 && away < 30 ? 'Missing you' : chr.bored ? 'Unimpressed' : null;
   if (cl && mood.sleep < .6 && mood.charge < .2) mood.label = cl;
   const eR = R * .56 * (1 + chr.bounce * .05 + mood.startle * .1 + life.omega * .35); // the Lucid Instinct eye is its heart, large enough for its lettering to be read
   // its whole body leans toward you, further the better it knows you; it leans back when cross, recoils when startled, slumps asleep
@@ -4271,6 +4519,8 @@ function frame(now) {
   eye.scale.setScalar(eR); eye.position.copy(eyeDir).multiplyScalar(R * .2).add(chr.lean);
   eye.lookAt(v3.copy(eye.position).add(eyeDir));
   for (const m of [eyeOver, eyeRing, eyeRingOver]) { m.position.copy(eye.position); m.quaternion.copy(eye.quaternion); m.scale.copy(eye.scale); }
+  { const k = env.dropT > DROP_BEAT * DROP_BUILD ? dropK() : 0; eyeU.uX.value = k; cans.visible = k > .01; // The Drop: X eyes and the headphones from the drop until the beat fades
+    if (cans.visible) { if (!cans.material.map) { cans.material.map = smileyTex('layer4_grey-headphones-and-name'); cans.material.needsUpdate = true; } const s = eR * 3.1; cans.material.opacity = k; cans.scale.set(s, s, 1); cans.position.copy(eye.position).addScaledVector(eyeDir, eR * .4); cans.position.y += eR * .34 + env.dropKick * eR * .1; } }
   eyeRing.scale.multiplyScalar(RING_SCALE); eyeRingOver.scale.multiplyScalar(RING_SCALE);
   eyeU.uTime.value = t; eyeU.uBlink.value = clamp(mood.blink); eyeU.uNous.value = smooth((g - 520) / 40); // Nous: the eye becomes its mind chr.near = lerp(chr.near, hoverCore && ptr.on ? 1 : 0, Math.min(1, dt * 3));
   eyeU.uDilate.value = clamp(mood.dilate + mood.breath * .05 + mood.heart * .04 + chr.near * .18 + bond() * .08 + env.micLvl * .25 - env.moving * .2 - env.riftFear * .25 + (chr.yawn > 1.3 ? .3 : 0) - mood.flash * .4 - chr.grumpy / 8 * .2); eyeU.uGlow.value = intro * (1 - mood.sleep * .5) * (1 + mood.heart * .12) * (life.hide > 0 ? .18 : 1); eyeU.uHeart.value = mood.heart;
@@ -4511,7 +4761,7 @@ function glance() {
   let sum = 0, white = 0, bright = 0; for (let i = 0; i < px.length; i += 16) { const l = (px[i] * .299 + px[i + 1] * .587 + px[i + 2] * .114); sum += l; if (l > 245) white++; if (l > 200) bright++; }
   const n = px.length / 16; return { mean: +(sum / n).toFixed(1), whitePct: +(white / n * 100).toFixed(2), brightPct: +(bright / n * 100).toFixed(2), gov: +(env.gov || 1).toFixed(2), bgov: +(between.gov || 1).toFixed(2) };
 }
-window.aeon = { egg, eggTap, bench, frame, glance, bTemporal, betweenAdapt, bAdapt, visCache, VIS_DRAW, pupilSeen, renderRiftView, setFpsCap, get fpsCap() { return fpsCap; }, clock, eye, eyeDir, vis, VIS, bScene, bComposer, bulk, BRAIN, relics, life, hideGlow, teachWord, env, feedKey, veilDraw, chr, bondLv, bondXP, bondUp, eyeU, eyeRing, mood, L, lapse, between, rifts, openRift, riftRT, riftRes, renderer, composer, camera, bulkU, BRANES, bBloom, bFinal, bCam, ptr, tendrilRib, polyRib, tFl, tReach, tGrow, view, get tFeedK() { return tFeedK; }, perf, adapt, universes, mem, get night() { return night; }, get growth() { return growthDays(); } }; // for inspection from the console
+window.aeon = { egg, eggTap, bench, keep, morph, cans, keepHit, triggerMorph, officialDrop, frame, glance, bTemporal, betweenAdapt, bAdapt, visCache, VIS_DRAW, pupilSeen, renderRiftView, setFpsCap, get fpsCap() { return fpsCap; }, clock, eye, eyeDir, vis, VIS, bScene, bComposer, bulk, BRAIN, relics, life, hideGlow, teachWord, env, feedKey, veilDraw, chr, bondLv, bondXP, bondUp, eyeU, eyeRing, mood, L, lapse, between, rifts, openRift, riftRT, riftRes, renderer, composer, camera, bulkU, BRANES, bBloom, bFinal, bCam, ptr, tendrilRib, polyRib, tFl, tReach, tGrow, view, get tFeedK() { return tFeedK; }, perf, adapt, universes, mem, get night() { return night; }, get growth() { return growthDays(); } }; // for inspection from the console
 addEventListener('beforeunload', () => save(true));
 </script>
 <!-- the Lucid Instinct eye artwork (white lettering on black), embedded so it works from file:// and inside the dashboard -->
