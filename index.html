@@ -528,7 +528,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     </div>
   </div>
   <div class="hint" id="hint">move · click · hold · drag</div>
-  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.19</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
+  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.20</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
   <button class="morePill" id="dMore" title="More: sound, timeline, listen, veil, frame rate, stats" aria-label="More settings">&#8943;</button>
   <button class="sharePill" id="sharePill" title="Share Aeon with a friend">&#8599; share</button>
   <div class="eaNote">early access demo · limited features</div>
@@ -4370,14 +4370,14 @@ function frame(now) {
   /* The Drop, kept: the smiley drifts round Aeon on a slow tilted orbit, bobs with its heart, and kicks with it while it dances */
   { const has = !egg.on && between.mode === 'out' && !!mem.collection?.some(c => c.id === 'drop'); if (has && !keep.built) buildKeep(); keep.visible = has && !!keep.built;
     if (keep.visible) { const a = t * .09 + 1.7, rad = R * 2.6; keep.position.set(Math.cos(a) * rad, R * .55 + Math.sin(t * .45) * R * .3 + Math.sin(a * 2) * R * .2, Math.sin(a) * rad * .7);
-      keep.scale.setScalar(R * .95 * (1 + env.dropKick * .08 + mood.heart * .02)); keep.lookAt(camera.position); keep.rotation.z = Math.sin(t * .6) * .09;
+      keep.scale.setScalar(R * .95 * (1 + env.dropKick * .08 + mood.heart * .02)); keep.lookAt(camera.position); keep.rotateZ(Math.sin(t * .6) * .09); /* a roll after lookAt; setting rotation.z could flip it upside down */
       keep.userData.cans.position.y = (env.drop > 0 ? env.dropKick : mood.heart * .6) * .05; } }
   /* The Drop: the morph. The eye tears, jumps and flickers, is wholly the smiley for a beat or two, then glitches back */
   { if (env.morph > 0) { env.morph = Math.max(0, env.morph - dt); if (!morph.built) smileyInto(morph, 60, false); }
     const m = env.morph > 0 && morph.built ? smooth(Math.min(1, (env.morphMax - env.morph) / .3, env.morph / .7)) : 0, tear = (1 - m) * (env.morph > 0 ? 1 : 0); // in over .3 s, out over the last .7 s; the tearing is worst at the edges
     morph.visible = m > .01;
     if (morph.visible) { const sc = eye.scale.x * 3.4 * (1 + env.dropKick * .05); morph.scale.setScalar(sc); morph.position.copy(eye.position).addScaledVector(eyeDir, eye.scale.x * .95); morph.position.y += eye.scale.x * .1;
-      morph.position.x += (Math.random() - .5) * eye.scale.x * .5 * tear; morph.position.y += (Math.random() - .5) * eye.scale.x * .3 * tear; morph.lookAt(camera.position); morph.rotation.z = (Math.random() - .5) * .25 * tear;
+      morph.position.x += (Math.random() - .5) * eye.scale.x * .5 * tear; morph.position.y += (Math.random() - .5) * eye.scale.x * .3 * tear; morph.lookAt(camera.position); morph.rotateZ((Math.random() - .5) * .25 * tear);
       const slip = Math.random() < .12 + tear * .5; morph.children.forEach((c, i) => { c.material.opacity = slip && i > 4 ? (Math.random() < .5 ? .2 : 1) : m; c.position.x = slip ? (Math.random() - .5) * .08 * (i - 5) : 0; }); morph.userData.cans.position.y = env.dropKick * .05;
       finalPass.uniforms.uAb.value = .0025 + (tear * .018 + m * .004) * (Math.random() < .35 ? 2.2 : 1); chr.dbl = Math.max(chr.dbl, .18 * tear); mood.blink = Math.max(mood.blink, tear > .5 && Math.random() < .3 ? 1 : 0); }
     else finalPass.uniforms.uAb.value = .0025; }
