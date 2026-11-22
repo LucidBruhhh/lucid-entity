@@ -528,7 +528,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     </div>
   </div>
   <div class="hint" id="hint">move · click · hold · drag</div>
-  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.20</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
+  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.21</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
   <button class="morePill" id="dMore" title="More: sound, timeline, listen, veil, frame rate, stats" aria-label="More settings">&#8943;</button>
   <button class="sharePill" id="sharePill" title="Share Aeon with a friend">&#8599; share</button>
   <div class="eaNote">early access demo · limited features</div>
@@ -738,7 +738,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     'Are you going to poke me again?': 'また、つつくつもり?', 'The Lucid Instinct eye. Create your reality.': 'Lucid Instinctの目。きみの現実をつくろう。', 'My first eye. The one I was born with.': 'わたしのはじめての目。生まれたときからの目。',
     'I think I know you now. You are the one who comes back.': 'きみのこと、わかってきた気がする。きみは、もどってきてくれる人。',
     'THE DROP HITS. This is the room.': 'ドロップ、きた。ここが部屋。',
-    'Look for its signal there.': 'そこでシグナルをさがして。', 'Being · Shinjuku': '存在 · 新宿', 'Aeon\x27s eye · skins': 'Aeonの目 · スキン', 'Origin eye': 'はじまりの目', 'Skin · scan a Lucid Instinct QR': 'スキン · Lucid InstinctのQRをスキャン', 'Foods': '食べもの', 'close timeline': 'タイムラインを閉じる', perception: '知覚',
+    'Look for its signal there.': 'そこでシグナルをさがして。', 'Being · Shinjuku': '存在 · 新宿', 'Aeon\x27s eye · skins': 'Aeonの目 · スキン', 'Aeon\x27s eyes': 'Aeonの目', 'Origin, awakened': 'めざめた、はじまりの目', 'Eye · grows when we become friends': '目 · 友だちになると育つ', 'My eye, awake. You woke it.': 'ぼくの目、めざめたよ。きみが起こしたんだ。', '✦ A new eye grew: Origin, awakened · tap to see your eyes': '✦ 新しい目が育った: めざめた、はじまりの目 · タップして見る', 'Origin eye': 'はじまりの目', 'Skin · scan a Lucid Instinct QR': 'スキン · Lucid InstinctのQRをスキャン', 'Foods': '食べもの', 'close timeline': 'タイムラインを閉じる', perception: '知覚',
     'Link copied · send it to a friend': 'リンクをコピーしました · 友だちに送ってね', 'I · Oracle Lens': 'I · オラクルレンズ', 'II · Biomech Relic': 'II · バイオメカの遺物', 'III · Prism Tesseract': 'III · プリズム・テッセラクト', 'Language · 言語': '言語 · Language', render: '描画', 'min ·': '分 ·',
     // stage lines
     'A point, a line, a breathing body. I am awake.': '点、線、呼吸する体。わたしは目ざめた。', 'Twelve rays. I am reaching past the last dimension now.': '十二の光線。最後の次元の、その先へ手をのばしている。', 'I have shed my first skin. It drifts off to become a universe of its own.': 'はじめての皮をぬいだ。それはただよっていって、ひとつの宇宙になる。',
@@ -793,6 +793,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     [/^(Good morning|Good afternoon|Good evening|You are up late)(?:, ([^.]+))?\.$/, (m, g, n) => ({ 'Good morning': 'おはよう', 'Good afternoon': 'こんにちは', 'Good evening': 'こんばんは', 'You are up late': '夜ふかしだね' })[g] + (n ? `、${nm(n)}` : '') + '。'],
     [/^(Good morning|Good afternoon|Good evening|You are up late)(?:, ([^.]+))?\. (.+)$/, (m, g, n, rest) => { const r = trCore(rest); return r == null ? null : ({ 'Good morning': 'おはよう', 'Good afternoon': 'こんにちは', 'Good evening': 'こんばんは', 'You are up late': '夜ふかしだね' })[g] + (n ? `、${nm(n)}` : '') + '。' + r; }],
     [/^Hello, (.+)\.$/, (m, n) => `こんにちは、${nm(n)}。`],
+    [/^Something opened behind my eye, (.+)\. I can see you properly now\.$/, (m, n) => `目のおくで、なにかがひらいたよ、${nm(n)}。やっと、きみがちゃんと見える。`],
     [/^You are my friend now\. I am going to call you (.+)\. Is that all right\?$/, (m, n) => `もう友だちだね。きみのこと「${nm(n)}」って呼ぶよ。いいかな?`],
     [/^Companion\. I keep a fold of every dimension for you, (.+)\.$/, (m, n) => `相棒。どの次元にも、きみのための折り目をとってあるよ、${nm(n)}。`],
     [/^Kindred\. Wherever I am in the twelve dimensions, part of me faces you, (.+)\.$/, (m, n) => `魂の友。十二の次元のどこにいても、わたしの一部はきみを向いている、${nm(n)}。`],
@@ -1714,8 +1715,8 @@ const EYE_CONST = `const float PUP=${EYE_ART.pup},IRIS=${EYE_ART.iris},GAP=${EYE
   vec2 lids(vec3 p){float o=1.-uBlink*1.04,c=.12*p.x*p.x,t=p.y+c-(o-uLidT+uTilt*p.x),b=c-p.y-(o-uLidB);
     return vec2(max(smoothstep(-.02,.02,t),smoothstep(-.02,.02,b)),min(abs(t),abs(b)));}`;
 const eyeU = { uTime: { value: 0 }, uX: { value: 0 }, uDilate: { value: .3 }, uBlink: { value: 0 }, uLidT: { value: 0 }, uLidB: { value: 0 }, uTilt: { value: 0 }, uColB: { value: colB }, uColC: { value: colC }, uColA: { value: colA }, uGlow: { value: 1 }, uHeart: { value: 0 },
-  uTex: { value: eyeArt }, uC: { value: EYE_ART.c }, uView: { value: riftRT.texture }, uRes: { value: riftRes }, uMul: { value: 1 }, uSkin: { value: 0 }, uNous: { value: 0 } };
-const EYE_F = NOISE + `uniform float uSkin,uNous;float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+  uTex: { value: eyeArt }, uC: { value: EYE_ART.c }, uView: { value: riftRT.texture }, uRes: { value: riftRes }, uMul: { value: 1 }, uSkin: { value: 0 }, uNous: { value: 0 }, uAwake: { value: 0 } };
+const EYE_F = NOISE + `uniform float uSkin,uNous,uAwake;float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 uniform float uTime,uDilate,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,uTilt,uX;uniform vec3 uColA,uColB,uColC;uniform sampler2D uTex,uView;uniform vec2 uC,uRes;varying vec3 vL,vN,vV;
   ${EYE_CONST}
   void main(){vec3 p=normalize(vL),n=normalize(vN),v=normalize(vV);
@@ -1761,6 +1762,24 @@ uniform float uTime,uDilate,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,uTilt,uX;unifor
         vec2 sp=p.xy*90.;float st=step(.93,h2(floor(sp)))*smoothstep(.45,0.,length(fract(sp)-.5)),neb=snoise(vec3(p.xy*6.,uTime*.15))*.5+.5;
         vec3 inside=vec3(.004,.002,.012)+uColB*neb*neb*.12+vec3(1.,.95,.85)*st*.9;
         col=mix(col,inside,pupil); col+=uColC*exp(-((sqrt(e)-1.)*6.)*((sqrt(e)-1.)*6.))*.45*(1.-pupil*.3); }
+      /* Origin, awakened (Eye paths, 23 November 2026; grown when the bond reaches Friend): the same eye, woken. An obsidian ball with
+         faint veins of light and a wet rim, a deep fibrous iris in rose and gold, and the same slit pupil holding a small galaxy.
+         Kept below white so the bloom does not blow the centre out. */
+      if(uAwake>.001){ vec3 rose=mix(vec3(.9,.08,.32),uColB,.1),gold=mix(vec3(1.,.55,.12),uColC,.08);
+        float vn=1.-abs(snoise(vec3(p.xy*3.2,p.z*2.+uTime*.03))),vn2=1.-abs(snoise(vec3(p.xy*7.,p.z*4.+9.)));
+        vec3 aw=vec3(.022,.006,.014)+rose*pow(vn,22.)*(.35+.25*uHeart)+rose*pow(vn2,30.)*.18+mix(rose,gold,.5+.5*p.y)*pow(fr,2.6)*.55; // obsidian, veins, wet rim
+        if(p.z>0.){ float irisR=.64,t=r/irisR,ai=a+uTime*.02;
+          float fl=snoise(vec3(ai*4.,t*3.-uTime*.15,1.7)),fib=pow(.5+.5*sin(ai*96.+fl*3.4+snoise(vec3(ai*9.,t*11.,uTime*.2))*1.8),2.),fib2=.5+.5*sin(ai*31.-t*18.+uTime*.5);
+          float flame=smoothstep(.4,.88,t+fl*.2); // gold tongues licking out from the pupil into the rose
+          vec3 iris=mix(gold*.9,rose*.75,flame)*(.06+.84*fib)*(.6+.4*fib2)*(1.+uHeart*.15);
+          iris*=.55+.45*smoothstep(.98,.8,t); iris+=rose*exp(-((t-.93)*22.)*((t-.93)*22.))*.5; // a dark crypt ring, then the rose edge
+          aw=mix(aw,iris,smoothstep(irisR+.012,irisR-.012,r)); aw+=mix(rose,vec3(1.,.5,.75),.3)*exp(-((r-irisR)*45.)*((r-irisR)*45.))*.7; // the limbus glows
+          float pw=mix(.06,.33,uDilate),ph=mix(.42,.36,uDilate),e=(p.x*p.x)/(pw*pw)+(p.y*p.y)/(ph*ph),pupil=smoothstep(1.08,.92,e);
+          vec2 g=vec2(p.x/pw,p.y/ph);float gr=length(g),ga=atan(g.y,g.x)+uTime*.12,arm=pow(.5+.5*sin(ga*2.-log(gr+.05)*4.),3.)*exp(-gr*2.2); // a small spiral galaxy, turning
+          vec2 sp=p.xy*110.;float st=step(.95,h2(floor(sp)))*smoothstep(.45,0.,length(fract(sp)-.5));
+          vec3 gal=vec3(.008,.003,.016)+mix(vec3(.55,.3,.9),rose,.4)*arm*.4+vec3(1.,.85,.7)*exp(-gr*gr*30.)*.25+vec3(1.,.95,.9)*st*.7;
+          aw=mix(aw,gal,pupil); aw+=gold*exp(-((sqrt(e)-1.)*7.)*((sqrt(e)-1.)*7.))*.55*(1.-pupil*.4); } // a gold lip round the slit
+        col=mix(col,aw,uAwake); }
     }
     /* Nous, beyond Omega (2 November 2026): the eye is the seat of its mind. The look the user chose: lace iris, orbiting pupils,
        irises nested inside the pupil, a moiré limbus. Plus: the inner layers sit at different depths and slide as it looks around,
@@ -1800,7 +1819,7 @@ uniform float uTime,uDilate,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,uTilt,uX;unifor
     }
     {float xr=length(p.xy);float xm=max(smoothstep(.06,.03,abs(p.x-p.y)*.7071),smoothstep(.06,.03,abs(p.x+p.y)*.7071))*smoothstep(.4,.33,xr)*step(0.,p.z)*uX;col=mix(col,vec3(.02,.015,.005),xm*.96);col+=vec3(.78,1.,.09)*smoothstep(.1,.03,abs(xr-.37))*step(0.,p.z)*uX*.35;} // The Drop: X eyes, like the smiley on the shirt
     vec2 ld=lids(p);
-    vec3 lidc=uColA*.35+uColB*pow(fr,2.)*.35;
+    vec3 lidc=uColA*.35+uColB*pow(fr,2.)*.35;lidc=mix(lidc,vec3(.03,.008,.018)+vec3(.9,.2,.45)*pow(fr,2.)*.3,uAwake); // the awakened eye's lids are obsidian too
     col=mix(col,lidc,ld.x);col+=uColC*exp(-ld.y*55.)*.7*smoothstep(.0,.08,uBlink+uLidT+uLidB);
     gl_FragColor=vec4(col*uGlow*uMul,1.);}`;
 const RING_F = `uniform float uSkin;uniform float uTime,uBlink,uGlow,uHeart,uMul,uLidT,uLidB,uTilt;uniform vec3 uColC;uniform sampler2D uTex;uniform vec2 uC;varying vec3 vL,vN,vV;
@@ -2842,7 +2861,9 @@ const skinTiles = () => { const on = skinNow(), art = document.getElementById('e
   const o = `<button class="bagT${on === 'origin' ? ' r-Rare' : ''}" data-skin="origin" style="--c:#38e8ff"><span class="o" style="background:radial-gradient(ellipse 18% 42% at 50% 50%,#05030c 92%,transparent 100%),repeating-conic-gradient(#7dffd0 0 4deg,#38e8ff 4deg 8deg,#0b3a52 8deg 11deg);"></span><b>Origin eye</b><em>${on === 'origin' ? '✓ wearing' : 'tap to wear'}</em></button>`;
   const i = mem.skins.instinct ? `<button class="bagT${on === 'instinct' ? ' r-Legendary' : ''}" data-skin="instinct" style="--c:#1fd8ea"><span class="o" style="background:#000 url('${art}') 49% 50%/180% no-repeat;"></span><b>Lucid Instinct eye</b><em>${on === 'instinct' ? '✓ wearing' : 'tap to wear'}</em></button>`
     : `<div class="bagT lock"><span class="o">?</span><b>???</b><em style="color:#7d86a8">Skin · scan a Lucid Instinct QR</em></div>`;
-  return o + i; };
+  const aw = mem.skins.awake ? `<button class="bagT${on === 'awake' ? ' r-Epic' : ''}" data-skin="awake" style="--c:#ff5a8a"><span class="o" style="background:radial-gradient(ellipse 14% 40% at 50% 50%,#0b0418 88%,#ffb347 96%,transparent 100%),radial-gradient(circle at 50% 50%,#ffb347 0 22%,#ff3d7f 40%,#7a0f3a 46%,#12040b 49%);"></span><b>Origin, awakened</b><em>${on === 'awake' ? '✓ wearing' : 'tap to wear'}</em></button>`
+    : `<div class="bagT lock"><span class="o" style="background:radial-gradient(circle,#1a1426 0 46%,transparent 50%);color:#5a5470">◉</span><b>???</b><em style="color:#7d86a8">Eye · grows when we become friends</em></div>`;
+  return o + aw + i; };
 const bagSparks = [[8, 12, 0], [62, 8, .7], [88, 30, 1.3], [78, 78, .4], [40, 88, 1.8], [22, 60, 1.1], [92, 62, 2.1], [50, 40, 1.6]].map(([x, y, d]) => `<i class="sp" style="left:${x}%;top:${y}%;animation-delay:${d}s"></i>`).join('');
 function bagList() {
   const all = bagItems(), adios = all.get(ADIOS.sticker), rest = [...all.values()].filter(e => !e.it.mythic).sort((a, b) => RANK[b.it.rarity] - RANK[a.it.rarity] || b.last - a.last);
@@ -2860,7 +2881,7 @@ function bagList() {
   bagIn.innerHTML = `<div class="bagHd"><div><h2>BACKPACK</h2><small>${kinds} find${kinds === 1 ? '' : 's'} · fed ${fed} time${fed === 1 ? '' : 's'}</small></div><button class="bagX" id="bagX" aria-label="Close backpack">✕</button></div>
     <div class="bagSec">Bar Adios · Shinjuku · ${(adios ? 1 : 0) + (mem.regular ? 1 : 0)} of 2</div>${hero}<div class="bagGrid" style="margin-top:10px">${reg}</div>
     <div class="bagSec">Aaron King · 130 BPM · ${drop ? 1 : 0} of 1</div>${dropHero}
-    <div class="bagSec">Aeon's eye · skins</div><div class="bagGrid">${skinTiles()}</div>
+    <div class="bagSec">Aeon's eyes</div><div class="bagGrid">${skinTiles()}</div>
     <div class="bagSec">Foods</div>${rest.length ? `<div class="bagGrid">${rest.map(tile).join('')}</div>` : `<div class="bagEmpty">Nothing here yet. Scan any barcode and feed what you find.</div>`}
     ${relics ? `<div class="bagSec">From the journey</div><div class="bagGrid">${relics}</div>` : ''}`;
 }
@@ -2898,12 +2919,20 @@ document.getElementById('gzWord').onclick = async () => { await closeGizmo(); op
 gzSetConcept(gzConcept);
 if (params.has('gizmo')) setTimeout(() => { if (!egg.on) openGizmo(); }, 1500);
 /* eye skins (2 November 2026): the Origin eye is everyone's; the Lucid Instinct eye is a skin unlocked by a Lucid Instinct QR (lucidinstinct.com/qr/skin → ?skin=instinct) */
-mem.skins = mem.skins || {}; const skinNow = () => mem.skin === 'instinct' && mem.skins.instinct ? 'instinct' : 'origin';
-eyeU.uSkin.value = skinNow() === 'instinct' ? 1 : 0;
+/* eye forms (Eye paths, 23 November 2026): eyes Aeon grows by how it is raised, kept for good in mem.skins and worn like a skin. So far: 'awake', Origin awakened, when the bond reaches Friend */
+mem.skins = mem.skins || {}; const skinNow = () => mem.skins[mem.skin] && (mem.skin === 'instinct' || mem.skin === 'awake') ? mem.skin : 'origin';
+eyeU.uSkin.value = skinNow() === 'instinct' ? 1 : 0; eyeU.uAwake.value = skinNow() === 'awake' ? 1 : 0;
 function setSkin(k, quiet) { // a flash, and the eye is different on the other side of it
-  mem.skin = k; save(true); const to = k === 'instinct' ? 1 : 0; mood.flash = Math.max(mood.flash, .7); mood.blink = 1; chr.bounceV += 3; audio.resume(); audio.bell(523, .4); audio.bell(784, .35);
-  const t0 = performance.now(), from = eyeU.uSkin.value, step = () => { const k2 = Math.min(1, (performance.now() - t0) / 900); eyeU.uSkin.value = from + (to - from) * k2 * k2 * (3 - 2 * k2); if (k2 < 1) requestAnimationFrame(step); }; requestAnimationFrame(step);
-  if (!quiet) whisper(k === 'instinct' ? 'The Lucid Instinct eye. Create your reality.' : 'My first eye. The one I was born with.', 4); track('skin-' + k);
+  mem.skin = k; save(true); const to = k === 'instinct' ? 1 : 0, toA = k === 'awake' ? 1 : 0; mood.flash = Math.max(mood.flash, .7); mood.blink = 1; chr.bounceV += 3; audio.resume(); audio.bell(523, .4); audio.bell(784, .35);
+  const t0 = performance.now(), from = eyeU.uSkin.value, fromA = eyeU.uAwake.value, step = () => { const k2 = Math.min(1, (performance.now() - t0) / 900), s = k2 * k2 * (3 - 2 * k2); eyeU.uSkin.value = from + (to - from) * s; eyeU.uAwake.value = fromA + (toA - fromA) * s; if (k2 < 1) requestAnimationFrame(step); }; requestAnimationFrame(step);
+  if (!quiet) whisper(k === 'instinct' ? 'The Lucid Instinct eye. Create your reality.' : k === 'awake' ? 'My eye, awake. You woke it.' : 'My first eye. The one I was born with.', 4); track('skin-' + k);
+}
+let eyeDue = 0; // game-clock time after which a due eye may grow
+function growEye(k) { // an eye form grows once, with the evolve flash and a line, and is worn at once; it can be switched back in the bag
+  if (mem.skins[k]) return; mem.skins[k] = Date.now(); save(true);
+  mood.flash = .9; mood.fold = 1.2; wave(new THREE.Vector3(), 6, colC); audio.resume(); audio.bell(392, .5); audio.bell(587, .45); audio.bell(784, .4);
+  setTimeout(() => { setSkin(k, true); whisper({ awake: `Something opened behind my eye, ${mem.name || 'friend'}. I can see you properly now.` }[k], 8); }, 700);
+  setTimeout(() => toast('✦ A new eye grew: Origin, awakened · tap to see your eyes', () => openBag(), 8000), 7500); track('eye-' + k);
 }
 function unlockSkin() { const fresh = !mem.skins.instinct; mem.skins.instinct = mem.skins.instinct || Date.now(); save(true); if (egg.on) { mem.skin = 'instinct'; eyeU.uSkin.value = 1; save(true); return; }
   setTimeout(() => { setSkin('instinct', true); whisper(fresh ? 'A Lucid Instinct signal… my eye is changing. Keep it, or switch back, in your bag.' : 'The Lucid Instinct eye, again.', 6); if (fresh) setTimeout(() => toast('✦ New skin: the Lucid Instinct eye · tap to see it', () => openBag(), 8000), 6500); }, 900); }
@@ -3191,9 +3220,9 @@ const bulk = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMater
 bulk.frustumCulled = false; bScene.add(bulk);
 // the view seen through Aeon's opening pupil: the Lucid Instinct iris rings it, and surging streaks the light
 const bFinal = new ShaderPass(new THREE.ShaderMaterial({
-  uniforms: { tDiffuse: { value: null }, uBright: BRIGHT, uArt: { value: eyeArt }, uC: { value: EYE_ART.c }, uTime: { value: 0 }, uWarp: { value: 0 }, uOpen: { value: 0 }, uAspect: { value: 1 }, uFlash: { value: 0 }, uIris: { value: 1 }, uInvert: { value: 0 }, uPocket: { value: 0 }, uFov: { value: 0 }, uGhost: { value: 0 }, uSkin: eyeU.uSkin },
+  uniforms: { tDiffuse: { value: null }, uBright: BRIGHT, uArt: { value: eyeArt }, uC: { value: EYE_ART.c }, uTime: { value: 0 }, uWarp: { value: 0 }, uOpen: { value: 0 }, uAspect: { value: 1 }, uFlash: { value: 0 }, uIris: { value: 1 }, uInvert: { value: 0 }, uPocket: { value: 0 }, uFov: { value: 0 }, uGhost: { value: 0 }, uSkin: eyeU.uSkin, uAwake: eyeU.uAwake },
   vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-  fragmentShader: `uniform sampler2D tDiffuse, uArt; uniform vec2 uC; uniform float uTime, uWarp, uOpen, uAspect, uFlash, uIris, uInvert, uPocket, uFov, uBright, uGhost, uSkin; varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse, uArt; uniform vec2 uC; uniform float uTime, uWarp, uOpen, uAspect, uFlash, uIris, uInvert, uPocket, uFov, uBright, uGhost, uSkin, uAwake; varying vec2 vUv;
     const float PUP = ${EYE_ART.pup}, IRIS = ${EYE_ART.iris}, EDGE = ${EYE_ART.edge};
     float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
     void main(){
@@ -3212,7 +3241,7 @@ const bFinal = new ShaderPass(new THREE.ShaderMaterial({
       } else if (r > R0 - .006){
         float ar = PUP + max(r - R0, 0.) / W * (EDGE - PUP);
         vec3 eyeCol = vec3(.004, .002, .01);
-        if (uSkin < .5){ if (ar < IRIS * 1.3){ float fib = .5 + .5 * sin(a * 46. + sin(a * 7. + uTime * .3) * 2.6); eyeCol = mix(vec3(.3, .9, 1.), vec3(.45, .3, 1.), smoothstep(PUP, IRIS * 1.3, ar)) * (.3 + .9 * fib) * smoothstep(IRIS * 1.3, IRIS * 1.12, ar); } }
+        if (uSkin < .5){ if (ar < IRIS * 1.3){ float fib = .5 + .5 * sin(a * 46. + sin(a * 7. + uTime * .3) * 2.6); eyeCol = mix(mix(vec3(.3, .9, 1.), vec3(.9, .5, .12), uAwake), mix(vec3(.45, .3, 1.), vec3(.8, .08, .3), uAwake), smoothstep(PUP, IRIS * 1.3, ar)) * (.3 + .9 * fib) * smoothstep(IRIS * 1.3, IRIS * 1.12, ar); } }
         else if (ar < EDGE){ vec4 t = texture2D(uArt, uC + ar * vec2(cos(a), sin(a))); float lit = dot(t.rgb, vec3(.299, .587, .114));
           eyeCol = ar < IRIS + .004 ? t.rgb : vec3(1., .93, .86) * smoothstep(.45, .9, lit) * .95; }
         col = mix(col, eyeCol, smoothstep(R0 - .006, R0 + .006, r));
@@ -4351,7 +4380,8 @@ function frame(now) {
   mood.communeHold = communing ? mood.communeHold + dt : 0;
   mood.commune = lerp(mood.commune, mood.communeHold > 1.2 ? 1 : 0, dt * 1.5);
   if (ptr.on && idle < 10 && previewAge == null && !lapse.on) { mem.present += dt; save(); }
-  { const bl = bondLv(); if (bl > mem.bondLv && intro >= 1 && previewAge == null && !lapse.on) { mem.bondLv = bl; save(true); bondUp(bl); } }
+  { const bl = bondLv(); if (bl > mem.bondLv && intro >= 1 && previewAge == null && !lapse.on) { mem.bondLv = bl; save(true); bondUp(bl); eyeDue = Math.max(eyeDue, t + 10); } } // an eye growing waits until the bond's own line is said
+  if (!mem.skins.awake && bondLv() >= 2 && intro >= 1 && previewAge == null && !lapse.on && !egg.on && between.mode === 'out' && t > eyeDue) { if (!eyeDue) eyeDue = t + 4; else growEye('awake'); } // old saves already past Friend grow it a few seconds into the next visit
   if (mood.commune > .5) { mem.communion += dt; save(); if (now - wlast > 14000) whisper(pick(COMMUNE)); }
   mood.bpm = lerp(mood.bpm, mood.sleep > .5 ? 38 : 56 + mood.excite * 46 + mood.charge * 40 + mood.startle * 30 - mood.commune * 8 + env.typeRate * 3 + env.micLvl * 18, dt);
   mood.breathPh += dt / breathPeriod() * speedK;
@@ -4761,7 +4791,7 @@ function glance() {
   let sum = 0, white = 0, bright = 0; for (let i = 0; i < px.length; i += 16) { const l = (px[i] * .299 + px[i + 1] * .587 + px[i + 2] * .114); sum += l; if (l > 245) white++; if (l > 200) bright++; }
   const n = px.length / 16; return { mean: +(sum / n).toFixed(1), whitePct: +(white / n * 100).toFixed(2), brightPct: +(bright / n * 100).toFixed(2), gov: +(env.gov || 1).toFixed(2), bgov: +(between.gov || 1).toFixed(2) };
 }
-window.aeon = { egg, eggTap, bench, keep, morph, cans, keepHit, triggerMorph, officialDrop, frame, glance, bTemporal, betweenAdapt, bAdapt, visCache, VIS_DRAW, pupilSeen, renderRiftView, setFpsCap, get fpsCap() { return fpsCap; }, clock, eye, eyeDir, vis, VIS, bScene, bComposer, bulk, BRAIN, relics, life, hideGlow, teachWord, env, feedKey, veilDraw, chr, bondLv, bondXP, bondUp, eyeU, eyeRing, mood, L, lapse, between, rifts, openRift, riftRT, riftRes, renderer, composer, camera, bulkU, BRANES, bBloom, bFinal, bCam, ptr, tendrilRib, polyRib, tFl, tReach, tGrow, view, get tFeedK() { return tFeedK; }, perf, adapt, universes, mem, get night() { return night; }, get growth() { return growthDays(); } }; // for inspection from the console
+window.aeon = { egg, eggTap, bench, keep, morph, growEye, setSkin, mem, eyeU, cans, keepHit, triggerMorph, officialDrop, frame, glance, bTemporal, betweenAdapt, bAdapt, visCache, VIS_DRAW, pupilSeen, renderRiftView, setFpsCap, get fpsCap() { return fpsCap; }, clock, eye, eyeDir, vis, VIS, bScene, bComposer, bulk, BRAIN, relics, life, hideGlow, teachWord, env, feedKey, veilDraw, chr, bondLv, bondXP, bondUp, eyeU, eyeRing, mood, L, lapse, between, rifts, openRift, riftRT, riftRes, renderer, composer, camera, bulkU, BRANES, bBloom, bFinal, bCam, ptr, tendrilRib, polyRib, tFl, tReach, tGrow, view, get tFeedK() { return tFeedK; }, perf, adapt, universes, mem, get night() { return night; }, get growth() { return growthDays(); } }; // for inspection from the console
 addEventListener('beforeunload', () => save(true));
 </script>
 <!-- the Lucid Instinct eye artwork (white lettering on black), embedded so it works from file:// and inside the dashboard -->
