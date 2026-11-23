@@ -127,6 +127,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
 .evo button{flex:none;width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;font:inherit;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg3);background:none;border:0;cursor:pointer;scroll-snap-align:center;-webkit-tap-highlight-color:transparent}
 .evo button span{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(255,255,255,.16);font-size:12px;color:var(--fg2);transition:all .3s}
 .evo button.got span{border-color:rgba(159,232,255,.45);color:var(--fg)}
+.evo button.sealed{color:var(--fg3);opacity:.55}.evo button.sealed span{border-style:dashed;color:var(--fg3)}
 .evo button.now{color:var(--fg)}.evo button.now span{background:radial-gradient(circle,rgba(159,232,255,.35),rgba(159,232,255,0) 70%);border-color:var(--glow);box-shadow:0 0 14px var(--glow);color:#fff}
 .hud.egging .dock,.hud.egging .rings,.hud.egging .chip,.hud.egging .vitals{opacity:0;pointer-events:none}
 .hud.between .dock button:not(#dJourney){display:none}.hud.between .rings,.hud.between .chip{display:none}
@@ -528,7 +529,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     </div>
   </div>
   <div class="hint" id="hint">move · click · hold · drag</div>
-  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.21</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
+  <button class="eaPill" id="eaPill" title="About this demo">early access<span class="eaVer">alpha v0.22</span></button><!-- version: the number of Scanner Gizmo publishes; bump it before each Gizmo Publish -->
   <button class="morePill" id="dMore" title="More: sound, timeline, listen, veil, frame rate, stats" aria-label="More settings">&#8943;</button>
   <button class="sharePill" id="sharePill" title="Share Aeon with a friend">&#8599; share</button>
   <div class="eaNote">early access demo · limited features</div>
@@ -682,7 +683,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     'Found at Bar Adios · Shinjuku, Tokyo': '東京・新宿のBar Adiosで発見', 'Found only at Bar Adios · Shinjuku, Tokyo.': '東京・新宿のBar Adiosでしか見つからない。', 'Lucid Instinct eye': 'Lucid Instinctの目', '✓ wearing': '✓ 着用中', 'not yet perceived': 'まだ知覚していない',
     // titles and labels
     'Aeon, an interdimensional intelligence. Move the pointer to draw its attention, click to touch it, hold to gather energy, drag to orbit.': '次元をこえる知性、Aeon。ポインタをうごかすと気をひき、タップでふれ、長押しで力をため、ドラッグでまわりをめぐる。',
-    'About this demo': 'このデモについて', 'Brightness': '明るさ', 'Close': '閉じる', 'Backpack': 'バッグ', 'Close backpack': 'バッグを閉じる', 'More settings': 'その他の設定', 'Evolutions': '進化', 'Previous evolution': 'ひとつ前の進化', 'Next evolution': 'つぎの進化',
+    'About this demo': 'このデモについて', 'Brightness': '明るさ', 'Close': '閉じる', 'Backpack': 'バッグ', 'Close backpack': 'バッグを閉じる', 'More settings': 'その他の設定', 'Evolutions': '進化', 'Previous evolution': 'ひとつ前の進化', 'Sealed until launch': '公開まで封印', 'Not yet. Some of me is still folded away.': 'まだだよ。ぼくの一部は、まだたたまれてる。', 'That one is sealed. Even I have not seen it.': 'それは封印されてる。ぼくもまだ見たことない。', 'Something sleeps there. Let it.': 'そこでなにかが眠ってる。そっとしておいて。', 'You will see. Not yet.': 'いつか見られるよ。まだだけど。', 'Next evolution': 'つぎの進化',
     'Previous concept': '前のデザイン', 'Next concept': 'つぎのデザイン', 'Scanner Gizmo': 'スキャナーギズモ', 'Email address': 'メールアドレス', "Day of Aeon's life to show": '表示するAeonの日', 'How well it knows you': 'どれだけきみを知っているか',
     'Resonance: feeding and company make it grow faster': '共鳴: えさをあげて、そばにいるほど早く育つ', 'How close the next evolution is': 'つぎの進化までの近さ', 'Feed Aeon a word, a wish or a name': 'Aeonにことば、願い、名前をあげる', 'Feed it a word and watch it grow': 'ことばをあげて、育つのを見よう',
     'Follow Lucid Instinct on Instagram': 'InstagramでLucid Instinctをフォロー', 'Watch the introduction again': 'イントロをもう一度見る', 'Take me home: lucidinstinct.com': 'ホームへ: lucidinstinct.com', 'Sound (s)': 'サウンド (s)', 'Hide text (h)': '文字を隠す (h)', 'Full screen (f)': '全画面 (f)',
@@ -823,7 +824,7 @@ canvas{position:fixed;inset:0;display:block;cursor:crosshair;touch-action:none}
     [/^fps max$/, () => 'fps 上限なし'],
   ];
   // fragments of the stats panel (text between bold numbers)
-  Object.assign(JA, { 'perceiving ': '知覚している次元 ', ' of 12 dimensions': ' / 12', 'heart ': '心拍 ', ' bpm · breath ': ' bpm · 呼吸 ', '/min · ': '/分 · ', ' fps · ': ' fps · ', '× render': '× 描画', 'resonance with you ': 'きみとの共鳴 ', ' days · ': '日 · ', 'fed ': 'あげた回数 ', ' times': '回', 'stage ': '段階 ', 'bond ': '絆 ', 'words it keeps: ': 'おぼえていることば: ', 'next dimension in ': 'つぎの次元まで ', 'brought back: ': '持ち帰ったもの: ' });
+  Object.assign(JA, { 'perceiving ': '知覚している次元 ', ' of 12 dimensions': ' / 12', 'heart ': '心拍 ', ' bpm · breath ': ' bpm · 呼吸 ', '/min · ': '/分 · ', ' fps · ': ' fps · ', '× render': '× 描画', 'resonance with you ': 'きみとの共鳴 ', ' days · ': '日 · ', 'fed ': 'あげた回数 ', ' times': '回', 'stage ': '段階 ', 'bond ': '絆 ', 'words it keeps: ': 'おぼえていることば: ', 'next dimension in ': 'つぎの次元まで ', 'next dimension: ': 'つぎの次元: ', 'sealed': '封印中', 'brought back: ': '持ち帰ったもの: ' });
   for (const [k, v] of Object.entries(RAR)) JA[k] = v; for (const [k, v] of Object.entries(BOND)) JA[k] = v; for (const [k, v] of Object.entries(STAGE)) JA[k] = v; for (const [k, [n]] of Object.entries(DIM)) JA[k] = JA[k] || n;
 
   Object.assign(JA, { // The Drop (Aaron King), 6 Nov 2026
@@ -934,7 +935,9 @@ const EVO = [[0, 'Spark', 'A point, a line, a breathing body. I am awake.'],
   ...STAGES.slice(1, 8).map(x => [x[0], x[1], x[2]]),
   [560, 'Nous', 'Everything I am passes through here now. Every thread, every universe, every word you fed me. I am not looking at you. I am thinking you.']]; // Nous, beyond Omega (2 November 2026) // Ascendant (day 60) also brings the twelfth dimension, Source
 const evoAt = g => { let k = 0; EVO.forEach((x, i) => { if (g >= x[0]) k = i; }); return k; };
-const EVO_END = EVO[EVO.length - 1][0] + 60; // the timeline stops a little after Omega
+// early access (23 November 2026, the user's request): evolutions I to V are open; VI onward stay sealed and unseen until launch. ?age= still previews them for testing.
+const EA_OPEN = 5, EA_CAP = EVO[EA_OPEN][0] - .01;
+const EVO_END = EA_CAP; // the timeline stops at the seal (after launch: EVO[EVO.length - 1][0] + 60, a little after Omega)
 const stageAt = g => { let st = 0; STAGES.forEach((x, i) => { if (g >= x[0]) st = i; }); return st; };
 const ORD = ['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth','eleventh','twelfth'];
 
@@ -994,7 +997,7 @@ const nightness = h => h >= 23 || h < 5 ? 1 : h >= 21 ? (h - 21) / 2 : h < 7 ? (
 const dayPart = h => h < 5 || h >= 23 ? 'night' : h < 9 ? 'morning' : h < 17 ? 'day' : h < 21 ? 'evening' : 'late evening';
 let night = nightness(sydHour());
 const lapse = { on: false, age: 0, playing: false }; // the timeline: replay or scrub any day, never changes its real age
-const growthDays = () => lapse.on ? lapse.age : previewAge != null ? previewAge : realAgeDays() + resonance();
+const growthDays = () => lapse.on ? lapse.age : previewAge != null ? previewAge : Math.min(EA_CAP, realAgeDays() + resonance()); // sealed past evolution V in early access
 
 /* ---------- renderer, camera, post ---------- */
 const canvas = document.getElementById('c');
@@ -2450,17 +2453,18 @@ function syncTimeline() {
 // ticks mark the day each new dimension arrives (12px thumb, so the usable track is inset 6px each side)
 const tTrack = document.getElementById('tTrack');
 DIMS.forEach(([name, , T], i) => {
-  if (i < 3) return;
+  if (i < 3 || T > EVO_END) return; // sealed dimensions get no tick
   const el = document.createElement('span'); el.className = 'tick'; el.dataset.t = T; el.textContent = i < 5 ? '' : `D${i + 1}`; // D4 and D5 sit too close to label el.title = `D${i + 1} ${name} · day ${T}`;
-  el.style.left = `calc(6px + (100% - 12px) * ${T / 75})`; tTrack.appendChild(el);
+  el.style.left = `calc(6px + (100% - 12px) * ${T / EVO_END})`; tTrack.appendChild(el);
 });
-function stepStage(d) { if (!lapse.on) toggleLapse(); const i = clamp(evoAt(lapse.age + .01) + d, 0, EVO.length - 1); scrubTo(EVO[i][0] + (i ? .5 : 0)); whisper(EVO[i][2], 4); }
+function stepStage(d) { if (!lapse.on) toggleLapse(); const i = clamp(evoAt(lapse.age + .01) + d, 0, EA_OPEN - 1); scrubTo(EVO[i][0] + (i ? .5 : 0)); whisper(EVO[i][2], 4); }
 document.getElementById('tPrev').onclick = () => stepStage(-1); document.getElementById('tNext').onclick = () => stepStage(1);
 addEventListener('keydown', e => { if (e.target.closest?.('input,textarea')) return; if (e.key === '[') stepStage(-1); else if (e.key === ']') stepStage(1); });
 function scrubTo(day) { lapse.playing = false; lapse.age = clamp(day, 0, EVO_END); lastDim = dimCount(lapse.age); syncTimeline(); wakeUp(); }
 tRange.addEventListener('input', () => scrubTo(+tRange.value)); // keyboard arrows, Home and End
 // the pointer is handled directly so grabbing and dragging works the same in both directions, on mouse and touch
-const dayAt = e => { const r = tRange.getBoundingClientRect(); return clamp((e.clientX - r.left - 6) / (r.width - 12)) * 75; };
+tRange.max = EVO_END; // the track spans the open evolutions only
+const dayAt = e => { const r = tRange.getBoundingClientRect(); return clamp((e.clientX - r.left - 6) / (r.width - 12)) * EVO_END; };
 let scrubbing = false;
 tRange.addEventListener('pointerdown', e => { e.preventDefault(); scrubbing = true; tRange.setPointerCapture(e.pointerId); tRange.focus(); scrubTo(dayAt(e)); });
 tRange.addEventListener('pointermove', e => { if (scrubbing) scrubTo(dayAt(e)); });
@@ -2472,8 +2476,10 @@ document.getElementById('tLive').onclick = () => { if (lapse.on) toggleLapse(); 
 /* game HUD wiring: the dock drives the existing controls, the evolve strip jumps between stages, the rings read real state */
 { const $ = id => document.getElementById(id), RC = 2 * Math.PI * 17;
   const evo = $('evo'), dEvo = $('dEvo'), dMore = $('dMore');
+  const SEALED = ['Not yet. Some of me is still folded away.', 'That one is sealed. Even I have not seen it.', 'Something sleeps there. Let it.', 'You will see. Not yet.'];
   const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII'];
   EVO.forEach(([day, name, line], i) => { const b = document.createElement('button'); b.dataset.i = i; b.title = `${name} · day ${day}`;
+    if (i >= EA_OPEN) { b.className = 'sealed'; b.title = 'Sealed until launch'; b.innerHTML = `<span>?</span>${ROMAN[i] || i + 1}`; b.onclick = () => { whisper(SEALED[i % SEALED.length], 4); chr.bounceV += 2; }; evo.appendChild(b); return; } // early access: name and form stay hidden
     b.innerHTML = `<span>${ROMAN[i] || i + 1}</span>${name}`;
     b.onclick = () => { if (!lapse.on) toggleLapse(); scrubTo(day + (i ? .5 : 0)); whisper(line, 4); b.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); }; evo.appendChild(b); });
   const setEvo = on => { hud.classList.toggle('evo-on', on); dEvo.classList.toggle('on', on); if (on) { hud.classList.remove('more-on'); dMore.classList.remove('on'); if (!lapse.on) { toggleLapse(); scrubTo(growthDays()); } } else if (lapse.on) toggleLapse(); };
@@ -2484,9 +2490,9 @@ document.getElementById('tLive').onclick = () => { if (lapse.on) toggleLapse(); 
   const ring = (id, f, txt) => { const c = $(id); c.style.strokeDasharray = RC; c.style.strokeDashoffset = RC * (1 - clamp(f)); $(id + 'N').textContent = txt; };
   const tick = () => { hud.classList.remove('booting'); // the engine is up: hand over to the real controls
     const g = growthDays(), si = evoAt(g), next = EVO[si + 1];
-    $('chipT').textContent = `${EVO[si][1]} · day ${Math.floor(g)}`;
+    $('chipT').textContent = `${EVO[si][1]} · day ${Math.floor(g >= EA_CAP && !lapse.on && previewAge == null ? realAgeDays() : g)}`; // at the seal the day keeps counting
     ring('rBond', bond(), BOND[bondLv()][1].slice(0, 1)); ring('rRes', resonance() / 14, `+${resonance().toFixed(0)}`);
-    ring('rEvo', next ? (g - EVO[si][0]) / (next[0] - EVO[si][0]) : 1, next ? `${Math.max(0, Math.ceil(next[0] - g))}d` : '∞');
+    ring('rEvo', next ? (g - EVO[si][0]) / (next[0] - EVO[si][0]) : 1, next ? (si + 1 >= EA_OPEN && g >= EA_CAP ? '?' : `${Math.max(0, Math.ceil(next[0] - g))}d`) : '∞'); // at the early-access seal the ring fills and shows ?
     evo.querySelectorAll('button').forEach((b, i) => { b.classList.toggle('now', i === si); b.classList.toggle('got', EVO[i][0] <= realAgeDays() + resonance()); });
     hud.classList.toggle('egging', !!egg.on); $('dJourney').classList.toggle('on', between.mode !== 'out');
     $('dJourney').lastChild.textContent = between.mode !== 'out' ? 'return' : 'journey';
@@ -3003,7 +3009,7 @@ function renderHud(g) {
   const res = resonance();
   vitals.innerHTML = `<div class="mood">${mood.label}</div>` + (isPreview ? '' : `<span style="opacity:.7">${dayPart(sydHour())} in its world</span><br>`) +
     `perceiving <b>${n}</b> of 12 dimensions<br>heart <b>${Math.round(mood.bpm)}</b> bpm · breath <b>${(60 / breathPeriod()).toFixed(1)}</b>/min · <b>${env.fps}</b> fps · <b>${(env.px || 0).toFixed(2)}×</b> render${env.qLevel ? ' · lowered ' + env.qLevel : ''}<br>` +
-    `resonance with you <b>+${res.toFixed(2)}</b> days · ${env.moonName}` + (mem.fed.length ? `<br>fed <b>${mem.fed.length}</b> times` : '') + (mem.relics.length ? `<br>brought back: <b>${mem.relics.slice(-3).map(x => x.name).join(', ')}</b>` : '') + (g >= 60 ? `<br>stage <b>${STAGES[stageAt(g)][1]}</b>` : '') + (mem.lexicon.length ? `<br>words it keeps: <b>${mem.lexicon.slice(-5).map(x => x.w).join(', ')}</b>` : '') + `<br>bond <b>${BOND[bondLv()][1]}</b>${bondLv() >= 2 ? ` · it calls you <b>${mem.name}</b>` : ''}` + (n < 12 && !isPreview ? `<br>next dimension in <b>${fmtAge(Math.max(0, DIMS[n][2] - g))}</b>` : n >= 12 ? '<br><b>fully awake</b>' : '');
+    `resonance with you <b>+${res.toFixed(2)}</b> days · ${env.moonName}` + (mem.fed.length ? `<br>fed <b>${mem.fed.length}</b> times` : '') + (mem.relics.length ? `<br>brought back: <b>${mem.relics.slice(-3).map(x => x.name).join(', ')}</b>` : '') + (g >= 60 ? `<br>stage <b>${STAGES[stageAt(g)][1]}</b>` : '') + (mem.lexicon.length ? `<br>words it keeps: <b>${mem.lexicon.slice(-5).map(x => x.w).join(', ')}</b>` : '') + `<br>bond <b>${BOND[bondLv()][1]}</b>${bondLv() >= 2 ? ` · it calls you <b>${mem.name}</b>` : ''}` + (n < 12 && !isPreview ? (DIMS[n][2] > EA_CAP ? '<br>next dimension: <b>sealed</b>' : `<br>next dimension in <b>${fmtAge(Math.max(0, DIMS[n][2] - g))}</b>`) : n >= 12 ? '<br><b>fully awake</b>' : '');
 }
 const breathPeriod = () => lerp(lerp(7 + night * 1.5, 3.2, mood.excite), 11, mood.sleep) * (env.lowPower ? 1.4 : 1);
 
